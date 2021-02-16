@@ -728,12 +728,7 @@
       [:> (c/c :tab)
        {:id "hegic"
         :large true
-        :title "Hegic"}]
-      [:> (c/c :tab)
-       {:id "synthetix"
-        :large true
-        :title "Synthetix [WIP]"
-        :disabled true}]]
+        :title "Hegic"}]]
      [:br]
      [my-hegic-options]
      [new-hegex]

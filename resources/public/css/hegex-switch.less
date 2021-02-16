@@ -1,0 +1,43 @@
+.switch {
+	cursor: pointer;
+	display: block;
+	margin-bottom: 12px;
+	padding-left: 100px;
+	font-size: 19px;
+	position: relative;
+	user-select: none;
+	.control {
+		border-radius: 25px;
+		height: 50px;
+		background-color: gray;
+		left: 0;
+		top: 0;
+		position: absolute;
+		transition: background-color 0.17s ease-in;
+		width: 100px;
+		&:after {
+			border-radius: 24px;
+			left: 5px;
+			position: absolute;
+			top: 5px;
+			content: "";
+			background: white;
+			height: 40px;
+			transition: left 0.15s ease-in;
+			width: 40px;
+		}
+	}
+	input {
+		cursor: pointer;
+		position: absolute;
+		height: 0;
+		opacity: 0;
+		width: 0;
+		&:checked~.control {
+			background-color: pink;
+			after {
+				left: 55px;
+			}
+		}
+	}
+}

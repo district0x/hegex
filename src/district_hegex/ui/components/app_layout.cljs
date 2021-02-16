@@ -24,12 +24,17 @@
     [clojure.string :as str]
    [reagent.core :as r]))
 
+(defn- logo []
+  [:div.hegexlogo
+   [:h1 {:style {:color "#48aff0"}} "HEG" ]
+   [:h1.special "EX"]])
 
 (defn header [active-page-name]
   (let [acc-raw (subscribe [::account-subs/active-account])
         acc-short (some-> @acc-raw (subs 0 10) (str "..."))]
     [:header#globalHeader
-     [:div.container [:div.hegexlogo [:h1 {:style {:color "#48aff0"}} "HEG" ] [:h1.special "EX"]]
+     [:div.container
+      [logo]
      [:nav.toplinks]
      [:div.dnt-wrap
       [:div.total-dnt]
@@ -37,13 +42,7 @@
        {:intent "success"
         :large true
         :minimal true}
-       acc-short]
-
-      #_     [nav/a {:route [:route/home {}]}
-
-              #_[:div.select-menu
-                 [:div.select-choice.cta-btn.my-account-btn
-                  [:div.select-text "My Account"]]]]]]]))
+       acc-short]]]]))
 
 (defn footer []
   [:footer#globalFooter
