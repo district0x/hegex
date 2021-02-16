@@ -26,11 +26,11 @@
 
 
 (defn- logo []
-  [:div.box.c
+  [:div.header-logo
    [:img.hegexlogo {:src "/images/hegexLogo.png"}]])
 
 (defn- night-mode []
-  [:div.container
+  [:div.nightmode
    [:label.switch
     [:input {:type "checkbox"}]
     [:div]]])
@@ -39,11 +39,11 @@
   (let [acc-raw (subscribe [::account-subs/active-account])
         acc-short (some-> @acc-raw (subs 0 10) (str "..."))]
     [:header#globalHeader
-     [:div.wrapper
+     [:div.header-space
       [logo]
-      [:div.box.d
-       [night-mode]
-       [:h4 "About"]]
+      [night-mode]
+      [:h4 "About"]
+      [:h1 "+"]
      #_[:div.dnt-wrap
       [:div.total-dnt]
       [:> (c/c :tag)
