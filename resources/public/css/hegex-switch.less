@@ -1,43 +1,45 @@
+@height1: 1.2em;
+
+.container {
+	bottom: 0;
+	height: 40px;
+	left: 0;
+	margin: auto;
+	position: absolute;
+	right: 0;
+	text-align: center;
+	top: 0;
+}
 .switch {
-	cursor: pointer;
-	display: block;
-	margin-bottom: 12px;
-	padding-left: 100px;
-	font-size: 19px;
-	position: relative;
-	user-select: none;
-	.control {
-		border-radius: 25px;
-		height: 50px;
-		background-color: gray;
-		left: 0;
-		top: 0;
+	background: darkgray;
+	border-radius: 1em;
+	display: flex;
+	align-items: center;
+	font-size: 20px;
+	height: @height1;
+	width: 2.4em;
+	input {
+		opacity: 0;
 		position: absolute;
-		transition: background-color 0.17s ease-in;
-		width: 100px;
-		&:after {
-			border-radius: 24px;
-			left: 5px;
-			position: absolute;
-			top: 5px;
-			content: "";
-			background: white;
-			height: 40px;
-			transition: left 0.15s ease-in;
-			width: 40px;
+		&:checked+div {
+			-moz-transform: translate3d(100%, 0, 0);
+			-webkit-transform: translate3d(100%, 0, 0);
+			transform: translate3d(100%, 0, 0);
+            background: #333333;
+		}
+		&:checked+.switch {
+            background: red;
 		}
 	}
-	input {
-		cursor: pointer;
-		position: absolute;
-		height: 0;
-		opacity: 0;
-		width: 0;
-		&:checked~.control {
-			background-color: pink;
-			after {
-				left: 55px;
-			}
-		}
+	div {
+		-moz-transition: all 300ms;
+		-webkit-transition: all 300ms;
+		background: #ffffff;
+		border-radius: 1em;
+		box-shadow: 0 0.1em 0.3em rgba(0,0,0,0.3);
+		height: 1em;
+		transition: all 300ms;
+		margin-left: 5px;
+		width: 1em;
 	}
 }

@@ -24,10 +24,17 @@
     [clojure.string :as str]
    [reagent.core :as r]))
 
+
 (defn- logo []
   [:div.hegexlogo
    [:h1 {:style {:color "#48aff0"}} "HEG" ]
    [:h1.special "EX"]])
+
+(defn- night-mode []
+  [:div {:className "container"}
+   [:label {:className "switch"}
+    [:input {:type "checkbox"}]
+    [:div]]])
 
 (defn header [active-page-name]
   (let [acc-raw (subscribe [::account-subs/active-account])
@@ -35,6 +42,7 @@
     [:header#globalHeader
      [:div.container
       [logo]
+      [night-mode]
      [:nav.toplinks]
      [:div.dnt-wrap
       [:div.total-dnt]
