@@ -79,7 +79,7 @@
                org.clojure/core.async
                district0x/async-helpers]
   :repositories [["public-github" {:url "git://github.com"}]]
-  :plugins [[deraen/lein-less4clj "0.7.0-SNAPSHOT"]
+  :plugins [[deraen/lein-less4clj "0.7.4"]
             [cider/cider-nrepl "0.25.2"]
             [lein-auto "0.1.2"]
             [lein-cljsbuild "1.1.7"]
