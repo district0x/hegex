@@ -5,11 +5,10 @@
    [district-hegex.ui.home.events :as home-events]
    [district-hegex.ui.home.subs :as home-subs]
    [district-hegex.ui.subs :as dr-subs]
-    [oops.core :refer [oget oset! ocall oapply ocall! oapply!
-                       gget
-                       oget+ oset!+ ocall+ oapply+ ocall!+ oapply!+]]
+   [oops.core :refer [oget oset! ocall oapply ocall! oapply! gget
+                      oget+ oset!+ ocall+ oapply+ ocall!+ oapply!+]]
    [cljs-bean.core :refer [bean ->clj ->js]]
-    [district.ui.web3-accounts.subs :as account-subs]
+   [district.ui.web3-accounts.subs :as account-subs]
    [district.ui.component.active-account-balance :refer [active-account-balance]]
    [district.ui.component.form.input :as inputs :refer [text-input*]]
    [district.ui.router.events]
@@ -23,7 +22,6 @@
    [district.ui.router.subs :as router-subs]
    [district.ui.router.utils :as router-utils]
    [re-frame.core :refer [subscribe dispatch]]
-    [clojure.string :as str]
    [reagent.core :as r]))
 
 
@@ -41,21 +39,12 @@
 
 ;;TODO clear up whether active account belong under "+"
 (defn header [active-page-name]
-  (let [acc-raw (subscribe [::account-subs/active-account])
-        #_acc-short #_(some-> @acc-raw (subs 0 10) (str "..."))]
-    [:header#globalHeader
-     [:div.header-space
-      [logo]
-      [night-mode]
-      [:h4 "About"]
-      [:h1 "+"]
-     #_[:div.dnt-wrap
-      [:div.total-dnt]
-      [:> (c/c :tag)
-       {:intent "success"
-        :large true
-        :minimal true}
-       acc-short]]]]))
+  [:header#globalHeader
+   [:div.header-space
+    [logo]
+    [night-mode]
+    [:h4 "About"]
+    [:h1 "+"]]])
 
 (defn footer []
   [:footer#globalFooter
@@ -102,25 +91,10 @@
         [:li [:a {:href "https://github.com/district0x"
                   :target :_blank}
               [:span.icon-github]]]]]]]]])
-#_(def hegex-theme
-  {:fontSizes  [12 14 16 24 32 48 64],
-   :backgroundColor 'green',
-    :colors  {:primary "hotpink", :gray "#f6f6ff"},
-    :buttons
-       {:primary  {:color "white", :bg "primary"},
-        :outline
-           {:color "primary",
-            :bg "transparent",
-            :boxShadow "inset 0 0 0 2px"}}})
-(def hg-theme
-   {:colors  {:background "black", :primary "tomato"},
-    :space  [0 6 12 24 48],
-    :fontSizes  [14 16 18 20 24],
-    :radii  {:default 12}})
 
 (defn app-layout [& children]
-  [:div {:className "bp3-dark" 
-         :id (case :route/home
+  (let [dark? @(subscribe [::home-subs/dark-mode?])]
+    [:div (cond-> {:id (case :route/home
                     :route/about "page-about"
                     :route/detail "page-details"
                     :route/home "page-registry"
@@ -129,9 +103,9 @@
                     :route/my-account "page-my-account"
                     :route/terms "page-terms"
                     :route/not-found "not-found")}
-        [header :route/home]
-        (into [:div#page-content]
-              children)
-        [footer]])
+            dark? (assoc :className "bp3-dark dark-overlay") )
+    [header :route/home]
+    (into [:div#page-content]
+          children)
+    [footer]]))
 
-#_(keys (bean styled))
