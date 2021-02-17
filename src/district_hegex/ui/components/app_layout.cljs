@@ -2,6 +2,8 @@
   (:require
    [district-hegex.ui.components.nav :as nav]
    [react-dom :as rdom]
+   [district-hegex.ui.home.events :as home-events]
+   [district-hegex.ui.home.subs :as home-subs]
    [district-hegex.ui.subs :as dr-subs]
     [oops.core :refer [oget oset! ocall oapply ocall! oapply!
                        gget
@@ -32,8 +34,8 @@
 (defn- night-mode []
   [:div.nightmode
    [:label.switch
-    [:input {:on-click #(js/alert "xxx")
-             :checked false
+    [:input {:on-click #(dispatch [::home-events/toggle-dark-mode])
+             :checked @(subscribe [::home-subs/dark-mode?])
              :type "checkbox"}]
     [:div]]])
 
