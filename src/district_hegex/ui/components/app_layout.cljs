@@ -32,12 +32,15 @@
 (defn- night-mode []
   [:div.nightmode
    [:label.switch
-    [:input {:type "checkbox"}]
+    [:input {:on-click #(js/alert "xxx")
+             :checked false
+             :type "checkbox"}]
     [:div]]])
 
+;;TODO clear up whether active account belong under "+"
 (defn header [active-page-name]
   (let [acc-raw (subscribe [::account-subs/active-account])
-        acc-short (some-> @acc-raw (subs 0 10) (str "..."))]
+        #_acc-short #_(some-> @acc-raw (subs 0 10) (str "..."))]
     [:header#globalHeader
      [:div.header-space
       [logo]
@@ -54,9 +57,6 @@
 
 (defn footer []
   [:footer#globalFooter
-   #_[:div.bg-wrap
-    [:div.background.sized
-     [:img {:src "/images/blobbg-bot@2x.png"}]]]
    [:div.container
     [:br]
     [:br]
