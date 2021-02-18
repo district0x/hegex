@@ -96,11 +96,14 @@
                          :header "Total Cost"
                          :attrs  (fn [data] {:style {:text-align "left"}})
                          :key    :premium}
+                        ;;NOTE a bit cryptic model, P&L is fetched later via (price+-strike(+-premium*price))
+                        ;;NOTE P&L with premium is inaccurate since we _can't_ fetch historical price for premium
                         {:path   [:p&l]
                          :header "P&L"
                          :attrs  (fn [data] {:style {:text-align "left"}})
                          :key    :p&l}
-                        {:path   [:holding-period]
+                        ;;NOTE requires parse-log info
+                        #_{:path   [:holding-period]
                          :header "Holding Period"
                          :attrs  (fn [data] {:style {:text-align "left"}})
                          :key    :holding-period}
@@ -214,6 +217,11 @@
   [:> (c/c :tag)
    (str "NFT#" id)])
 
+(defn- p&l [[paid strike amount]]
+  (let [current-price @(subscribe [::external-subs/eth-price])]
+    [:div
+     current-price]))
+
 (defn- cell-fn
 "Return the cell hiccup form for rendering.
  - render-info the specific column from :column-model
@@ -221,14 +229,14 @@
  - row-num the row number
  - col-num the column number in model coordinates"
 [render-info row row-num col-num]
-(let [{:keys [format attrs]
+(let [{:keys [format attrs key]
        :or   {format identity
               attrs (fn [_] {})}} render-info
       data    (cell-data row render-info)
       content (format data)
       attrs   (attrs data)
       total-cols (count columns)]
-  (println "row is" row)
+  (println "attrs are" data)
   [:div
     (merge-with merge attrs  {:style {:padding "10px"
                                             :display "flex"
@@ -236,7 +244,9 @@
                                             :min-height "47px"
                                             :position "relative"}})
    #_(even? row-num) #_(assoc-in [:style :background-color] "#212c35")
-   content
+   (case key
+     :p&l [p&l data]
+     content)
    #_(case col-num
      ;;NOTE
      ;;moved below the table

@@ -177,30 +177,34 @@
                       locked-amount premium expiration
                       option-type] id]
   (println "hegicinfo" option-type)
-  {:state         (bn/number state)
-   ;;data redundancy for ease of access by views
-   :hegic-id      id
-   :holder        holder
-   :strike        (some->> strike
+  (let [amount-hr (some->> amount
                            bn/number
-                           (*  0.00000001)
-                           (gstring/format "%.2f"))
-   :amount        (some->> amount
-                           bn/number
-                           (*  0.001)
-                           (gstring/format "%.3f"))
-   :locked-amount (bn/number locked-amount)
-   :premium       (some->> premium
-                           bn/number
-                           (*  0.00000001)
-                           (gstring/format "%.3f"))
-   :expiration    (tf/unparse simple-date-format
-                              (web3-utils/web3-time->local-date-time expiration))
-   :asset         :eth
-   :option-type   (case (bn/number option-type)
-                    1 :put
-                    2 :call
-                    :invalid)})
+                           (*  0.001))]
+    {:state         (bn/number state)
+    ;;data redundancy for ease of access by views
+    :hegic-id      id
+    :holder        holder
+    :strike        (some->> strike
+                            bn/number
+                            (*  0.00000001)
+                            (gstring/format "%.2f"))
+    :amount        (gstring/format "%.3f" amount-hr)
+    :locked-amount (bn/number locked-amount)
+    :premium       (some->> premium
+                            bn/number
+                            (*  0.00000001)
+                            (gstring/format "%.3f"))
+    :expiration    (tf/unparse simple-date-format
+                               (web3-utils/web3-time->local-date-time expiration))
+    :asset         :eth
+    ;;NOTE a bit cryptic model, P&L is fetched later via (price+-strike(+-premium*price))
+    ;;NOTE P&L with premium is inaccurate since we _can't_ fetch historical price for premium
+     :p&l           (mapv (fn [v] (some->> v bn/number (*  0.00000001)))
+                          [premium strike amount-hr])
+    :option-type   (case (bn/number option-type)
+                     1 :put
+                     2 :call
+                     :invalid)}))
 
 (re-frame/reg-event-fx
   ::hegic-option-success
