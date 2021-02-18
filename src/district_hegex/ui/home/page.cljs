@@ -3,6 +3,7 @@
   (:require
    [clojure.string :as cs]
    [district.ui.web3-account-balances.subs :as account-balances-subs]
+   [district-hegex.ui.external.subs :as external-subs]
    [district-hegex.ui.weth.subs :as weth-subs]
    [district-hegex.ui.weth.events :as weth-events]
    [district.ui.web3-tx-id.subs :as tx-id-subs]
@@ -95,6 +96,14 @@
                          :header "Total Cost"
                          :attrs  (fn [data] {:style {:text-align "left"}})
                          :key    :premium}
+                        {:path   [:p&l]
+                         :header "P&L"
+                         :attrs  (fn [data] {:style {:text-align "left"}})
+                         :key    :p&l}
+                        {:path   [:holding-period]
+                         :header "Holding Period"
+                         :attrs  (fn [data] {:style {:text-align "left"}})
+                         :key    :holding-period}
                         {:path   [:expiration]
                          :header "Expires On"
                          :attrs  (fn [data] {:style {:text-align "left"}})
@@ -221,12 +230,12 @@
       total-cols (count columns)]
   (println "row is" row)
   [:div
-   (cond-> (merge-with merge attrs  {:style {:padding "10px"
-                                             :display "flex"
-                                             :align-items "center"
-                                             :min-height "47px"
-                                             :position "relative"}})
-     (even? row-num) (assoc-in [:style :background-color] "#212c35"))
+    (merge-with merge attrs  {:style {:padding "10px"
+                                            :display "flex"
+                                            :align-items "center"
+                                            :min-height "47px"
+                                            :position "relative"}})
+   #_(even? row-num) #_(assoc-in [:style :background-color] "#212c35")
    content
    #_(case col-num
      ;;NOTE
