@@ -75,7 +75,7 @@
 (def ^:private columns [{:path   [:option-type]
                          :header "Option Type"
                          :attrs  (fn [data] {:style {:text-align     "left"
-                                                    :text-transform "uppercase"}})
+                                                    :text-transform "capitalize"}})
                          :key    :option-type}
                         {:path   [:asset]
                          :header "Currency"
@@ -88,6 +88,7 @@
                          :key    :amount}
                         {:path   [:strike]
                          :header "Strike Price"
+                         :format (fn [v] (str "$" v))
                          :attrs  (fn [data] {:style {:text-align "left"}})
                          :key    :strike}
                         {:path   [:premium]
@@ -98,15 +99,15 @@
                          :header "Expires On"
                          :attrs  (fn [data] {:style {:text-align "left"}})
                          :key    :expiration}
-                        #_{:path   [:hegex-id]
+                        #_{:path   [:actions]
                          :header "Actions"
                          :attrs  (fn [data] {:style {:text-align     "left"
                                                     :text-transform "uppercase"}})
                          :key    :actions}
                         {:path   [:hegex-id]
                          :header "NFT"
-                         :attrs  (fn [data] {:style {:text-align     "left"
-                                                    :text-transform "uppercase"}})
+                         :format (fn [v] (if (pos? (count (str v))) (str "Yes, #" v) "No"))
+                         :attrs  (fn [data] {:style {:text-align     "left"}})
                          :key    :hegex-id}])
 
 

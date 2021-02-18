@@ -2,6 +2,7 @@
   (:require
    [bignumber.core :as bn]
    [goog.string :as gstring]
+   [district-hegex.ui.external.events :as external-events]
    [district-hegex.ui.weth.events :as weth-events]
    stacked-snackbars
    [cljs-time.format :as tf]
@@ -41,6 +42,7 @@
     [re-frame.core :as re-frame :refer [dispatch reg-event-fx]]))
 
 (def interceptors [re-frame/trim-v])
+(def ^:private simple-date-format (tf/formatter "MM/dd/YY"))
 
 ;;should be moved away, determined based on netID at compile time
 (def ^:private erc721-0x-proxy "0xe654aac058bfbf9f83fcaee7793311dd82f6ddb4")
@@ -73,6 +75,7 @@
                        [::my-hegex-options-count]
                        ;;here belongs approved-for-exchange? query
                        [::approved-for-exchange?]
+                       [::external-events/fetch-asset-prices]
                        [::weth-events/weth-balance]
                        [::weth-events/exchange-approved?]
                        [::weth-events/staking-approved?])
@@ -181,20 +184,18 @@
    :strike        (some->> strike
                            bn/number
                            (*  0.00000001)
-                           (gstring/format "%.2f")
-                           (str "$"))
+                           (gstring/format "%.2f"))
    :amount        (some->> amount
                            bn/number
                            (*  0.001)
-                           (gstring/format "%.3f")
-                           (str "kWei "))
+                           (gstring/format "%.3f"))
    :locked-amount (bn/number locked-amount)
    :premium       (some->> premium
                            bn/number
                            (*  0.00000001)
-                           (gstring/format "%.3f")
-                           (str "Ξ"))
-   :expiration    (tf/unparse (tf/formatters :mysql) (web3-utils/web3-time->local-date-time expiration))
+                           (gstring/format "%.3f"))
+   :expiration    (tf/unparse simple-date-format
+                              (web3-utils/web3-time->local-date-time expiration))
    :asset         :eth
    :option-type   (case (bn/number option-type)
                     1 :put
@@ -503,13 +504,12 @@
   ::exercise!
   interceptors
   (fn [{:keys [db]} [hegex-id]]
-    (println "dbg wrapping option with id.." id)
     {:dispatch [::tx-events/send-tx
                 {:instance (contract-queries/instance db :optionchef)
                  :fn :exerciseHegic
                  :args [hegex-id]
                  :tx-opts {:from (account-queries/active-account db)}
-                 :tx-id {:exercise {:hegic id}}
+                 :tx-id {:exercise {:hegex hegex-id}}
                  :on-tx-success [::exercise-success]
                  :on-tx-error [::logging/error [::exercise!]]}]}))
 

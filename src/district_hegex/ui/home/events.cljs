@@ -1,5 +1,5 @@
 (ns district-hegex.ui.home.events
-(:require
+  (:require
     [re-frame.core :as re-frame]))
 
 (def interceptors [re-frame/trim-v])
