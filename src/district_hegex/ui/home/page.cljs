@@ -72,42 +72,42 @@
 (def ^:private table-state (r/atom {:draggable false}))
 
 
-(def ^:private columns [{:path   [:hegex-id]
-                         :header "Actions"
-                         :attrs  (fn [data] {:style {:text-align     "left"
-                                                    :text-transform "uppercase"}})
-                         :key    :actions}
-                        {:path   [:hegex-id]
-                         :header "Hegex"
-                         :attrs  (fn [data] {:style {:text-align     "left"
-                                                    :text-transform "uppercase"}})
-                         :key    :hegex-id}
-                        {:path   [:option-type]
+(def ^:private columns [{:path   [:option-type]
                          :header "Option Type"
                          :attrs  (fn [data] {:style {:text-align     "left"
                                                     :text-transform "uppercase"}})
                          :key    :option-type}
                         {:path   [:asset]
-                         :header "Asset"
+                         :header "Currency"
                          :attrs  (fn [data] {:style {:text-align     "left"
                                                     :text-transform "uppercase"}})
                          :key    :asset}
                         {:path   [:amount]
-                         :header "Size"
+                         :header "Option Size"
                          :attrs  (fn [data] {:style {:text-align "left"}})
                          :key    :amount}
                         {:path   [:strike]
                          :header "Strike Price"
                          :attrs  (fn [data] {:style {:text-align "left"}})
                          :key    :strike}
+                        {:path   [:premium]
+                         :header "Total Cost"
+                         :attrs  (fn [data] {:style {:text-align "left"}})
+                         :key    :premium}
                         {:path   [:expiration]
                          :header "Expires On"
                          :attrs  (fn [data] {:style {:text-align "left"}})
                          :key    :expiration}
-                        {:path   [:premium]
-                         :header "Total Cost"
-                         :attrs  (fn [data] {:style {:text-align "left"}})
-                         :key    :premium}])
+                        #_{:path   [:hegex-id]
+                         :header "Actions"
+                         :attrs  (fn [data] {:style {:text-align     "left"
+                                                    :text-transform "uppercase"}})
+                         :key    :actions}
+                        {:path   [:hegex-id]
+                         :header "NFT"
+                         :attrs  (fn [data] {:style {:text-align     "left"
+                                                    :text-transform "uppercase"}})
+                         :key    :hegex-id}])
 
 
 (defn- row-key-fn
@@ -216,7 +216,8 @@
               attrs (fn [_] {})}} render-info
       data    (cell-data row render-info)
       content (format data)
-      attrs   (attrs data)]
+      attrs   (attrs data)
+      total-cols (count columns)]
   (println "row is" row)
   [:div
    (cond-> (merge-with merge attrs  {:style {:padding "10px"
@@ -225,13 +226,16 @@
                                              :min-height "47px"
                                              :position "relative"}})
      (even? row-num) (assoc-in [:style :background-color] "#212c35"))
-   (case col-num
-     0  (if (:hegex-id row)
+   content
+   #_(case col-num
+     ;;NOTE
+     ;;moved below the table
+     #_0  #_(if (:hegex-id row)
           [exercise-badge (:hegex-id row)]
           [wrap-hegic (:hegic-id row)])
-     1 (if (:hegex-id row)
-         [nft-badge (:hegex-id row)]
-         [:<>])
+     total-cols (if (:hegex-id row)
+                  [nft-badge (:hegex-id row)]
+                  [:<>])
      content)]))
 
 
