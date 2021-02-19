@@ -217,10 +217,13 @@
   [:> (c/c :tag)
    (str "NFT#" id)])
 
-(defn- p&l [[paid strike amount]]
+(defn- p&l [[paid strike amount] option-type]
   (let [current-price @(subscribe [::external-subs/eth-price])]
+    ;;NOTE recheck P&L formula (esp. premium)
     [:div
-     current-price]))
+     (if (= :call option-type)
+       (- (* current-price amount) (* strike amount) paid)
+       (- (* strike amount) (* current-price amount) paid))]))
 
 (defn- cell-fn
 "Return the cell hiccup form for rendering.
@@ -236,7 +239,7 @@
       content (format data)
       attrs   (attrs data)
       total-cols (count columns)]
-  (println "attrs are" data)
+  (println "attrs are" row)
   [:div
     (merge-with merge attrs  {:style {:padding "10px"
                                             :display "flex"
@@ -245,7 +248,7 @@
                                             :position "relative"}})
    #_(even? row-num) #_(assoc-in [:style :background-color] "#212c35")
    (case key
-     :p&l [p&l data]
+     :p&l [p&l data (:option-type row)]
      content)
    #_(case col-num
      ;;NOTE
