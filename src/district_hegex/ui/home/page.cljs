@@ -569,7 +569,6 @@
                     :justify-content "flex-start"}}
       [:h1 "Buy New Option Contract"]]
        [:div
-        [:h3 "Asset: " [:b "ETH"]]
         [:br]
         [:> (c/c :control-group)
          {:vertical true
@@ -747,6 +746,7 @@
         :title "Hegic"}]]
      [:br]
      [my-hegic-options]
+     [:hr]
      [new-hegex]
      [my-hegex-options]
      [orderbook]]]])
