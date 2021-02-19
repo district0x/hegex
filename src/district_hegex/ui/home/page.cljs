@@ -563,13 +563,34 @@
   (let [form-data (r/atom {:new-hegex/option-type :call})]
     (fn []
       [:div
+
+       [:div.form-wrapper
+        [:div.box.a "A"]
+        [:div.box.b "A"]
+        [:div.box.c "A"]
+        [:div.box.d "A"]
+        [:div.box.e "A"]
+        [:div.box.f "A"]]
      [:div {:style {:display "flex"
                     :margin-top "30px"
                     :align-items "flex-start"
                     :justify-content "flex-start"}}
       [:h1 "Buy New Option Contract"]]
+
+
+;; <div class="wrapper">
+;;   <div class="box a">A</div>
+;;   <div class="box b">B</div>
+;;   <div class="box c">C</div>
+;;   <div class="box d">D</div>
+;;   <div class="box e">E</div>
+;;   <div class="box f">F</div>
+;; </div>
+
+
        [:div
         [:br]
+
         [:> (c/c :control-group)
          {:vertical true
           :style {:max-width "230px"}}
