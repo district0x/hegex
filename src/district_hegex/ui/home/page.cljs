@@ -237,8 +237,7 @@
               attrs (fn [_] {})}} render-info
       data    (cell-data row render-info)
       content (format data)
-      attrs   (attrs data)
-      total-cols (count columns)]
+      attrs   (attrs data)]
   (println "attrs are" row)
   [:div
     (merge-with merge attrs  {:style {:padding "10px"
@@ -563,79 +562,69 @@
 (defn- new-hegex []
   (let [form-data (r/atom {:new-hegex/option-type :call})]
     (fn []
-      [:div {:style {:text-align "center"}}
-       [:> (c/c :card)
-        {:style {:background-color "black"
-                 :margin-bottom "20px"}}
-        [:div {:style {:margin "20px"
-                       :margin-bottom "30px"
-                       :text-align "center"}}
-         [:h4.primary
-          [c/i {:i "add"}]
-          " Mint a fresh Hegex NFT via Hegic"]]
+      [:div
+     [:div {:style {:display "flex"
+                    :margin-top "30px"
+                    :align-items "flex-start"
+                    :justify-content "flex-start"}}
+      [:h1 "Buy New Option Contract"]]
+       [:div
+        [:h3 "Asset: " [:b "ETH"]]
         [:br]
-        [:> (c/c :card)
-         {:elevation 4
-          :interactive true
-          :class-name "mint-new-card"}
-         [:div {:className "bp3-body"}
-          [:div
-           [:h3 "Asset: " [:b "ETH"]]
-           [:br]
-           [:> (c/c :control-group)
-            {:vertical true
-             :style {:max-width "230px"}}
+        [:> (c/c :control-group)
+         {:vertical true
+          :style {:max-width "230px"}}
 
-            [:> (c/c :numeric-input)
-             {:fill true
-              :left-icon "calendar"
-              :on-value-change (fn [e]
-                                 ((debounce #(swap! form-data assoc
-                                                    :new-hegex/period
-                                                    e)
-                                            500)))
-              :placeholder "Period, days"}]
+         [:> (c/c :numeric-input)
+          {:fill true
+           :left-icon "calendar"
+           :on-value-change (fn [e]
+                              ((debounce #(swap! form-data assoc
+                                                 :new-hegex/period
+                                                 e)
+                                         500)))
+           :placeholder "Period, days"}]
 
-            [:> (c/c :input-group)
-             {:fill true
-              :left-icon "dashboard"
-              :on-change  (fn [e]
-                            (js/e.persist)
-                            ((debounce #(swap! form-data assoc
-                                               :new-hegex/amount
-                                               (oget e ".?target.?value"))
-                                       500)))
-              :placeholder "Option Size"}]
-            [:> (c/c :input-group)
-             {:fill true
-              :left-icon "dollar"
-              :on-change  (fn [e]
-                            (js/e.persist)
-                            ((debounce #(swap! form-data assoc
-                                               :new-hegex/strike-price
-                                               (oget e ".?target.?value"))
-                                       500)))
-              :placeholder "Strike Price"}]
-            [:> (c/c "HTMLSelect")
-             {:on-change (fn [e]
-                           (js/e.persist)
-                           ((debounce #(swap! form-data
-                                              assoc
-                                              :new-hegex/option-type
-                                              (oget e ".?target.?value"))
-                                      500)))}
-             [:option {:selected true
-                       :value :call}
-              "Call"]
-             [:option {:value :put}
-              "Put"]]]
-           [:br]
-           [:br]
-           [:> (c/c :button)
-            {:outlined true
-             :large true
-             :on-click #(dispatch [::hegex-nft/mint-hegex @form-data])}
-            "Mint"]]]]]])))
+         [:> (c/c :input-group)
+          {:fill true
+           :left-icon "dashboard"
+           :on-change  (fn [e]
+                         (js/e.persist)
+                         ((debounce #(swap! form-data assoc
+                                            :new-hegex/amount
+                                            (oget e ".?target.?value"))
+                                    500)))
+           :placeholder "Option Size"}]
+         [:> (c/c :input-group)
+          {:fill true
+           :left-icon "dollar"
+           :on-change  (fn [e]
+                         (js/e.persist)
+                         ((debounce #(swap! form-data assoc
+                                            :new-hegex/strike-price
+                                            (oget e ".?target.?value"))
+                                    500)))
+           :placeholder "Strike Price"}]
+         [:> (c/c "HTMLSelect")
+          {:on-change (fn [e]
+                        (js/e.persist)
+                        ((debounce #(swap! form-data
+                                           assoc
+                                           :new-hegex/option-type
+                                           (oget e ".?target.?value"))
+                                   500)))}
+          [:option {:selected true
+                    :value :call}
+           "Call"]
+          [:option {:value :put}
+           "Put"]]]
+        [:br]
+        [:br]
+        [:> (c/c :button)
+         {:outlined true
+          :large true
+          :on-click #(dispatch [::hegex-nft/mint-hegex @form-data])}
+         "Mint"]]])))
 
 (defn- convert-weth []
   (let [form-data (r/atom {:weth/type :wrap})]
