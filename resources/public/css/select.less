@@ -1,0 +1,61 @@
+.hegex-select {
+    position: relative;
+/* Reset Select */
+select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  -ms-appearance: none;
+  appearance: none;
+  outline: 0;
+  box-shadow: none;
+  border: 2px solid cyan;
+  background-image: none;
+}
+/* Remove IE arrow */
+select::-ms-expand {
+  display: none;
+}
+/* Custom Select */
+.select {
+  position: relative;
+  display: flex;
+  min-height: 1em;
+  line-height: 3;
+  overflow: hidden;
+  border-radius: .25em;
+}
+select {
+  flex: 1;
+  position: relative;
+  padding: 0 .5em;
+  cursor: pointer;
+}
+/* Arrow */
+/* Transition */
+.select:hover::after {
+  color: cyan;
+}
+
+}
+
+
+.little-arrow {
+  color: navy;
+  display: flex;
+  justify-content: center;
+  align-items: top;
+  line-height: 1.5;
+  background-color: cyan;
+  border-radius: 50%;
+  position: absolute;
+  top: 0.6em;
+  z-index: 89;
+  right: 10px;
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+  pointer-events: none;
+  -webkit-transition: .25s all ease;
+  -o-transition: .25s all ease;
+  transition: .25s all ease;
+}

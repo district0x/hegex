@@ -2,6 +2,7 @@
  (:import [goog.async Debouncer])
   (:require
    [clojure.string :as cs]
+   [district-hegex.ui.components.inputs :as inputs]
    [district.ui.web3-account-balances.subs :as account-balances-subs]
    [district-hegex.ui.external.subs :as external-subs]
    [district-hegex.ui.weth.subs :as weth-subs]
@@ -15,7 +16,6 @@
    [reagent.ratom :as ratom]
    [district-hegex.ui.spec :as spec]
    [oops.core :refer [oget]]
-   [district.ui.component.form.input :as inputs]
     [district.ui.smart-contracts.subs :as contracts-subs]
     [district-hegex.ui.trading.events :as trading-events]
     [district-hegex.ui.home.table :as dt]
@@ -528,6 +528,7 @@
                              :text-align "center"
                              :padding       "15px"}}
    :th              {:style {:color            "#aaa"
+                             :border-bottom "1px solid green"
                              :font-size        "12px"
                              :text-align       "left"
                              :padding   "10px"}}
@@ -563,30 +564,23 @@
   (let [form-data (r/atom {:new-hegex/option-type :call})]
     (fn []
       [:div
-
-       [:div.form-wrapper
-        [:div.box.a "A"]
-        [:div.box.b "A"]
-        [:div.box.c "A"]
-        [:div.box.d "A"]
-        [:div.box.e "A"]
-        [:div.box.f "A"]]
-     [:div {:style {:display "flex"
+       [:div {:style {:display "flex"
                     :margin-top "30px"
                     :align-items "flex-start"
                     :justify-content "flex-start"}}
       [:h1 "Buy New Option Contract"]]
 
-
-;; <div class="wrapper">
-;;   <div class="box a">A</div>
-;;   <div class="box b">B</div>
-;;   <div class="box c">C</div>
-;;   <div class="box d">D</div>
-;;   <div class="box e">E</div>
-;;   <div class="box f">F</div>
-;; </div>
-
+       [:div.form-wrapper
+        [:div.box.a
+         [inputs/select {:disabled true}
+          [:option {:selected true
+                    :disabled true}
+           "ETH"]]]
+        [:div.box.b "c"]
+        [:div.box.c "a"]
+        [:div.box.d "m"]
+        [:div.box.e "z"]
+        [:div.box.f "o"]]
 
        [:div
         [:br]
