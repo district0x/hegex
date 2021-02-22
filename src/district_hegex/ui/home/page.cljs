@@ -572,9 +572,8 @@
 
        [:div.form-wrapper
         [:div.box.a
-         [inputs/select {:disabled true}
-          [:option {:selected true
-                    :disabled true}
+         [inputs/select
+          [:option {:selected true}
            "ETH"]]]
         [:div.box.b "c"]
         [:div.box.c "a"]
