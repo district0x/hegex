@@ -569,12 +569,17 @@
                     :align-items "flex-start"
                     :justify-content "flex-start"}}
       [:h1 "Buy New Option Contract"]]
-
        [:div.form-wrapper
         [:div.box.a
+         [:div.hover-label "Currency"]
          [inputs/select
-          [:option {:selected true}
-           "ETH"]]]
+         #_ {:on-change #(js/console.log (keyword (oget % ".?target.?value")))}
+          [:option {:selected true
+                    :value :eth}
+           "ETH"]
+          #_[:option {:selected true
+                    :value :btc}
+           "BTC"]]]
         [:div.box.b "c"]
         [:div.box.c "a"]
         [:div.box.d "m"]
