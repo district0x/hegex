@@ -47,9 +47,15 @@
 
 .hinput-wrapper {
     position:relative;
+    background-color: inherit;
 }
 .hinput-label {
     position: absolute;
     top: 1em;
+    background-color: inherit;
     right: 20px;
+}
+
+.hegex-input:focus + .hinput-label {
+  display: none;
 }
