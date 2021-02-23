@@ -579,17 +579,41 @@
            "ETH"]
           #_[:option {:selected true
                     :value :btc}
-           "BTC"]]]
-        [:div.box.b "c"]
-        [:div.box.c "a"]
-        [:div.box.d "m"]
+             "BTC"]]]
+        [:div.box.d
+         [:div.hover-label "Option type"]
+         [inputs/select
+          {:on-change (fn [e]
+                        (js/e.persist)
+                        ((debounce #(swap! form-data
+                                           assoc
+                                           :new-hegex/option-type
+                                           (oget e ".?target.?value"))
+                                   500)))}
+          [:option {:selected true
+                    :value :call}
+           "Call"]
+          [:option {:value :put}
+           "Put"]]]
+        [:div.box.f
+         [:div.hover-label "Option size"]
+         [inputs/text-input
+          {:type :number
+           :on-change (fn [e]
+                        (js/e.persist)
+                        ((debounce #(swap! form-data assoc
+                                           :new-hegex/amount
+                                           (oget e ".?target.?value"))
+                                   500)))
+           :min 0}]]
         [:div.box.e "z"]
-        [:div.box.f "o"]]
+        [:div.box.b "c"]
+        [:div.box.c "a"]]
 
        [:div
         [:br]
 
-        [:> (c/c :control-group)
+        #_[:> (c/c :control-group)
          {:vertical true
           :style {:max-width "230px"}}
 
