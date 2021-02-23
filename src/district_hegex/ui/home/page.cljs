@@ -561,7 +561,8 @@
 
 
 (defn- new-hegex []
-  (let [form-data (r/atom {:new-hegex/option-type :call})]
+  (let [form-data (r/atom {:new-hegex/currency :eth
+                           :new-hegex/option-type :call})]
     (fn []
       [:div
        [:div {:style {:display "flex"
@@ -599,6 +600,7 @@
          [:div.hover-label "Option size"]
          [inputs/text-input
           {:type :number
+           :label (some-> @form-data :new-hegex/currency name cs/upper-case)
            :on-change (fn [e]
                         (js/e.persist)
                         ((debounce #(swap! form-data assoc

@@ -10,8 +10,12 @@
    [:div.select
     (into [:select] children)]])
 
-(defn text-input [{:keys [type min max on-change]}]
-  [:input.hegex-input {:type type
+(defn text-input [{:keys [type min max on-change label]}]
+  [:div.hinput-wrapper
+   (when label
+     [:div.hinput-label
+      label])
+   [:input.hegex-input {:type type
                         :on-change on-change
                         :min min
-                        :max max}])
+                        :max max}]])
