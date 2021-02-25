@@ -600,6 +600,7 @@
          [:div.hover-label "Option size"]
          [inputs/text-input
           {:type :number
+           :placeholder 0
            :label (some-> @form-data :new-hegex/currency name cs/upper-case)
            :on-change (fn [e]
                         (js/e.persist)
@@ -608,9 +609,29 @@
                                            (oget e ".?target.?value"))
                                    500)))
            :min 0}]]
-        [:div.box.e "z"]
-        [:div.box.b "c"]
-        [:div.box.c "a"]]
+        [:div.box.e
+         [:div.hover-label "Strike price"]
+         [inputs/text-input
+          {:type :number
+           :min 0
+           :placeholder 0
+           :on-change  (fn [e]
+                         (js/e.persist)
+                         ((debounce #(swap! form-data assoc
+                                            :new-hegex/strike-price
+                                            (oget e ".?target.?value"))
+                                    500)))}]]
+        [:div.box.b
+         [:div.hover-label "Days of holding"]
+         [inputs/text-input
+          {:type :number
+           :min 0
+           :placeholder "0"
+           :on-change (fn [e]
+                              ((debounce #(swap! form-data assoc
+                                                 :new-hegex/period
+                                                 e)
+                                         500)))}]]]
 
        [:div
         [:br]
