@@ -564,7 +564,10 @@
   (let [form-data (r/atom {:new-hegex/currency :eth
                            :new-hegex/option-type :call})]
     (fn []
-      (let [sp (some-> form-data deref :new-hegex/strike-price)]
+      (let [current-price @(subscribe [::external-subs/eth-price])
+            total-cost 0
+            break-even 0
+            sp (some-> form-data deref :new-hegex/strike-price)]
         [:div
         [:div {:style {:display "flex"
                        :margin-top "30px"
@@ -639,10 +642,10 @@
           [:h3.stats "$" (if (pos? (count sp)) sp 0)]]
          [:div.box.d
           [:div.hover-label "Total cost"]
-          ]
+          [:h3.stats "$" total-cost]]
          [:div.box.f
           [:div.hover-label "Break-even"]
-          ]
+          [:h3.stats "$" break-even]]
          [:div.box.e
           [:button.primary
            {:on-click #(dispatch [::hegex-nft/mint-hegex @form-data])}
@@ -650,54 +653,6 @@
 
         [:div
          [:br]
-
-         #_[:> (c/c :control-group)
-            {:vertical true
-             :style {:max-width "230px"}}
-
-            [:> (c/c :numeric-input)
-             {:fill true
-              :left-icon "calendar"
-              :on-value-change (fn [e]
-                                 ((debounce #(swap! form-data assoc
-                                                    :new-hegex/period
-                                                    e)
-                                            500)))
-              :placeholder "Period, days"}]
-
-            [:> (c/c :input-group)
-             {:fill true
-              :left-icon "dashboard"
-              :on-change  (fn [e]
-                            (js/e.persist)
-                            ((debounce #(swap! form-data assoc
-                                               :new-hegex/amount
-                                               (oget e ".?target.?value"))
-                                       500)))
-              :placeholder "Option Size"}]
-            [:> (c/c :input-group)
-             {:fill true
-              :left-icon "dollar"
-              :on-change  (fn [e]
-                            (js/e.persist)
-                            ((debounce #(swap! form-data assoc
-                                               :new-hegex/strike-price
-                                               (oget e ".?target.?value"))
-                                       500)))
-              :placeholder "Strike Price"}]
-            [:> (c/c "HTMLSelect")
-             {:on-change (fn [e]
-                           (js/e.persist)
-                           ((debounce #(swap! form-data
-                                              assoc
-                                              :new-hegex/option-type
-                                              (oget e ".?target.?value"))
-                                      500)))}
-             [:option {:selected true
-                       :value :call}
-              "Call"]
-             [:option {:value :put}
-              "Put"]]]
          [:br]
          [:br]
          ]]))))
