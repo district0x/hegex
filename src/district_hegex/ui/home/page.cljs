@@ -564,6 +564,7 @@
   (let [form-data (r/atom {:new-hegex/currency :eth
                            :new-hegex/option-type :call})]
     (fn []
+      (println "form-data inside is" @form-data)
       (let [current-price @(subscribe [::external-subs/eth-price])
             total-cost 0
             break-even 0
@@ -630,8 +631,9 @@
           [inputs/text-input
            {:type :number
             :min 0
-            :placeholder "0"
+            :placeholder 0
             :on-change (fn [e]
+                          (js/e.persist)
                          ((debounce #(swap! form-data assoc
                                             :new-hegex/period
                                             (oget e ".?target.?value"))
