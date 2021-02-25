@@ -385,6 +385,37 @@
                    (contract-queries/contract-address db :optionchef))}))
 
 (re-frame/reg-event-fx
+  ::estimate-mint-hegex
+  interceptors
+  (fn [{:keys [db]} [{:keys [:new-hegex/period
+                            :new-hegex/amount
+                            :new-hegex/strike-price
+                            :new-hegex/option-type]}]]
+    (let [opt-dir (case (keyword option-type)
+                    :put 1
+                    :call 2
+                    2)
+          period-secs (some-> period (* 86400))
+          strike-wei (some-> strike-price (* 100000000))
+          option-args [period-secs amount strike-wei opt-dir]]
+      {:web3/call
+       {:web3 (web3-queries/web3 db)
+        :fns [{:instance (contract-queries/instance db :brokenethoptions)
+               :fn :fees
+               :args option-args
+               :on-success [::estimate-mint-hegex-success option-args]
+               :on-error [::logging/error [::estimate-mint-hegex]]}]}})))
+
+(re-frame/reg-event-fx
+  ::estimate-mint-hegex-success
+  interceptors
+  ;;NOTE first is total
+  (fn [{:keys [db]} [opt-args fees]]
+    (println "estimate-mint-hegex is" (first fees))
+    {:db db}))
+
+
+(re-frame/reg-event-fx
   ::mint-hegex
   interceptors
   (fn [{:keys [db]} [{:keys [:new-hegex/period

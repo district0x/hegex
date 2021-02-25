@@ -559,6 +559,15 @@
         [:h5.dim-icon.gap-top
          "You don't own any Hegic options or Hegex NFTs. Mint one now!"])]]))
 
+(defn- upd-new-hegex [form-data e key]
+  ((debounce (fn []
+               (dispatch [::hegex-nft/estimate-mint-hegex @form-data])
+               (swap! form-data
+                      assoc
+                      key
+                      (oget e ".?target.?value")))
+             500)))
+
 
 (defn- new-hegex []
   (let [form-data (r/atom {:new-hegex/currency :eth
@@ -591,11 +600,7 @@
           [inputs/select
            {:on-change (fn [e]
                          (js/e.persist)
-                         ((debounce #(swap! form-data
-                                            assoc
-                                            :new-hegex/option-type
-                                            (oget e ".?target.?value"))
-                                    500)))}
+                         (upd-new-hegex form-data e :new-hegex/option-type))}
            [:option {:selected true
                      :value :call}
             "Call"]
@@ -609,10 +614,7 @@
             :label (some-> @form-data :new-hegex/currency name cs/upper-case)
             :on-change (fn [e]
                          (js/e.persist)
-                         ((debounce #(swap! form-data assoc
-                                            :new-hegex/amount
-                                            (oget e ".?target.?value"))
-                                    500)))
+                         (upd-new-hegex form-data e :new-hegex/amount))
             :min 0}]]
          [:div.box.e
           [:div.hover-label "Strike price"]
@@ -622,10 +624,7 @@
             :placeholder 0
             :on-change  (fn [e]
                           (js/e.persist)
-                          ((debounce #(swap! form-data assoc
-                                             :new-hegex/strike-price
-                                             (oget e ".?target.?value"))
-                                     500)))}]]
+                          (upd-new-hegex form-data e :new-hegex/strike-price))}]]
          [:div.box.b
           [:div.hover-label "Days of holding"]
           [inputs/text-input
@@ -633,11 +632,8 @@
             :min 0
             :placeholder 0
             :on-change (fn [e]
-                          (js/e.persist)
-                         ((debounce #(swap! form-data assoc
-                                            :new-hegex/period
-                                            (oget e ".?target.?value"))
-                                    500)))}]]]
+                         (js/e.persist)
+                         (upd-new-hegex form-data e :new-hegex/period))}]]]
         [:div.form-wrapper
          [:div.box.a
           [:div.hover-label "Strike price"]
@@ -652,12 +648,7 @@
           [:button.primary
            {:on-click #(dispatch [::hegex-nft/mint-hegex @form-data])}
            "Buy"]]]
-
-        [:div
-         [:br]
-         [:br]
-         [:br]
-         ]]))))
+        [:div [:br] [:br] [:br]]]))))
 
 (defn- convert-weth []
   (let [form-data (r/atom {:weth/type :wrap})]
