@@ -634,7 +634,7 @@
             :on-change (fn [e]
                          ((debounce #(swap! form-data assoc
                                             :new-hegex/period
-                                            e)
+                                            (oget e ".?target.?value"))
                                     500)))}]]]
         [:div.form-wrapper
          [:div.box.a
