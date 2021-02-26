@@ -36,4 +36,4 @@
 (re-frame/reg-sub
   ::new-hegic-cost
   (fn [db _]
-    (get-in db [::hegic-options :new :total-cost])))
+    (get-in db [::hegex-nft/hegic-options :new :total-cost])))

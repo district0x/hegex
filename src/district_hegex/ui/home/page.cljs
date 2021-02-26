@@ -575,8 +575,8 @@
     (fn []
       (println "form-data inside is" @form-data)
       (let [current-price @(subscribe [::external-subs/eth-price])
-            total-cost 0
-            break-even 0
+            total-cost (or @(subscribe [::subs/new-hegic-cost]) 0)
+            break-even (+ total-cost current-price)
             sp (some-> form-data deref :new-hegex/strike-price)]
         [:div
         [:div {:style {:display "flex"
