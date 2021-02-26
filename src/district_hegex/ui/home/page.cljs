@@ -491,38 +491,6 @@
        [:span.price-caption.primary (:eth-price hegic) " WETH"]
       ]]))
 
-(defn- my-hegex-options []
-  (let [ids (subscribe [::subs/my-hegex-ids])]
-    [:> (c/c :card)
-     {:elevation 5
-      :class-name "my-nfts-bg"}
-     [:br]
-     [:div {:style {:display "flex"
-                    :flex-direction "horizontal"
-                    :align-items "center"
-                    :justify-content "center"}}
-      [c/i {:i "person"
-            :size "13"
-            :class "special"}]
-      [:h3.dim-icon.special {:style {:display "flex"
-                             :align-items "baseline"
-                             :margin-left "10px"}} "My Hegex NFTs"]]
-
-     [:br]
-     [:div.container {:style {:font-size 16
-                              :text-align "center"
-                              :justify-content "center"
-                              :align-items "center"}}
-      (when (zero? (count @ids))
-        [:h5.dim-icon "You don't own Hegex NFTs yet. Mint one now!"])
-      [:div#hegex-wrapper
-       [:div#hegex-container (doall (map (fn [id]
-                      ^{:key id}
-                      [my-hegex-option-wrapper {:id id}])
-                    @ids))]
-       [:div {:style {:clear "both"}}]]]]))
-
-
 (def ^:private table-props
   {:table-container {:style {:border-radius "5px"
                              :text-align "center"
@@ -558,6 +526,55 @@
 
         [:h5.dim-icon.gap-top
          "You don't own any Hegic options or Hegex NFTs. Mint one now!"])]]))
+
+(defn- my-hegex-options []
+  (let [ids (subscribe [::subs/my-hegex-ids])]
+[:div
+     [:div {:style {:display "flex"
+                    :align-items "flex-start"
+                    :justify-content "flex-start"}}
+      [:h1 "My Option Contracts"]]
+     [:div.container {:style {:font-size 16
+                              :text-align "center"
+                              :justify-content "center"
+                              :align-items "center"}}
+      (if-not (zero? (count @ids))
+        [:div {:style {:margin-left "auto"
+                      :margin-right "auto"
+                      :overflow-x "auto"}}
+     #_    [dt/reagent-table @ids table-props]]
+
+        [:h5.dim-icon.gap-top
+         "You don't own any Hegic options or Hegex NFTs. Mint one now!"])]]
+
+    #_[:> (c/c :card)
+     {:elevation 5
+      :class-name "my-nfts-bg"}
+     [:br]
+     [:div {:style {:display "flex"
+                    :flex-direction "horizontal"
+                    :align-items "center"
+                    :justify-content "center"}}
+      [c/i {:i "person"
+            :size "13"
+            :class "special"}]
+      [:h3.dim-icon.special {:style {:display "flex"
+                             :align-items "baseline"
+                             :margin-left "10px"}} "My Hegex NFTs"]]
+
+     [:br]
+     [:div.container {:style {:font-size 16
+                              :text-align "center"
+                              :justify-content "center"
+                              :align-items "center"}}
+      (when (zero? (count @ids))
+        [:h5.dim-icon "You don't own Hegex NFTs yet. Mint one now!"])
+      [:div#hegex-wrapper
+       [:div#hegex-container (doall (map (fn [id]
+                      ^{:key id}
+                      [my-hegex-option-wrapper {:id id}])
+                    @ids))]
+       [:div {:style {:clear "both"}}]]]]))
 
 (defn- upd-new-hegex [form-data e key]
   ((debounce (fn []
