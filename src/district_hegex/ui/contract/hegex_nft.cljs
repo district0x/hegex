@@ -410,10 +410,9 @@
   ::estimate-mint-hegex-success
   interceptors
   ;;NOTE first is total
-  (fn [{:keys [db]} [opt-args fees]]
-    (println "estimate-mint-hegex is" (first fees))
-    {:db db}))
-
+  (fn [{:keys [db]} [_ fees]]
+    {:db (assoc-in db [::hegic-options :new :total-cost]
+                   (some-> fees first bn/number))}))
 
 (re-frame/reg-event-fx
   ::mint-hegex
