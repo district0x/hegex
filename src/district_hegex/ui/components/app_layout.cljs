@@ -48,49 +48,7 @@
 
 (defn footer []
   [:footer#globalFooter
-   [:div.container
-    [:br]
-    [:br]
-    [:div.row.spaced
-     [:div.col
-      [:h2 "Largest DeFi NFT option exchange to date"]
-      [:p "Brought to you with ❤ ️by " [:code  "district0x"]]
-      [:br]]
-     [:div.col
-      [:nav.footerlinks
-       [:ul
-        [:li [:a {:href "https://blog.district0x.io" :target :_blank} "Blog"]]
-        [:li [:a {:href "https://district0x.io/team/" :target :_blank} "Team"]]
-        [:li [:a {:href "https://district0x.io/transparency/" :target :_blank} "Transparency"]]
-        [:li [:a {:href "https://district0x.io/faq/" :target :_blank} "FAQ"]]
-        [:li [nav/a {:route [:route/terms]} "Terms Of Use"]]]]]
-     [:div.col
-      [:a.cta-btn.has-icon
-       {:href "https://discord.gg/rJvBEyV"
-        :target :_blank}
-       [:span "Join Us On Discord"]
-       [:span.icon-discord]]]
-     [:div.col
-      [:nav.social
-       [:ul
-        [:li [:a {:href "https://www.facebook.com/district0x/"
-                  :target :_blank}
-              [:span.icon-facebook]]]
-        [:li [:a {:href "https://www.reddit.com/r/district0x"
-                  :target :_blank}
-              [:span.icon-reddit-alien]]]
-        [:li [:a {:href "https://t.me/district0x"
-                  :target :_blank}
-              [:span.icon-telegram]]]
-        [:li [:a {:href "https://twitter.com/district0x"
-                  :target :_blank}
-              [:span.icon-twitter]]]
-        [:li [:a {:href "https://blog.district0x.io"
-                  :target :_blank}
-              [:span.icon-medium]]]
-        [:li [:a {:href "https://github.com/district0x"
-                  :target :_blank}
-              [:span.icon-github]]]]]]]]])
+   [:div {:style {:margin-top "5em"}}]])
 
 (defn app-layout [& children]
   (let [dark? @(subscribe [::home-subs/dark-mode?])]
