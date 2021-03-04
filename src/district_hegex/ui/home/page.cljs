@@ -138,7 +138,7 @@
              (expr row)))))
 
 (defn- wrap-hegic [id]
-  [:> (c/c :button)
+  [:span
    {:outlined true
     :small true
     :intent :primary
@@ -146,7 +146,7 @@
    "Wrap"])
 
 (defn- exercise-badge [hegex-id]
-  [:> (c/c :button)
+  [:span
    {:outlined true
     :small true
     :intent :primary
@@ -155,7 +155,7 @@
 
 (defn- sell-hegex [open? id]
   (println "open? in sell-hegex is" open?)
-  [:> (c/c :button)
+  [:span
    {:outlined true
     :small true
     :intent :primary
@@ -164,7 +164,7 @@
 
 (defn- unwrap-hegex [open? id]
   (println "open? in sell-hegex is" open?)
-  [:> (c/c :button)
+  [:span
    {:outlined true
     :small true
     :intent :primary
@@ -172,7 +172,7 @@
    "Unwrap"])
 
 (defn- buy-hegex-offer [order]
-  [:> (c/c :button)
+  [:span
    {:outlined true
     :small true
     :style {:margin-top "17px"
@@ -182,7 +182,7 @@
    "Buy"])
 
 (defn- cancel-hegex-offer [order]
-  [:> (c/c :button)
+  [:span
    {:outlined true
     :small true
     :style {:margin-top "17px"
@@ -192,7 +192,7 @@
    "Cancel"])
 
 (defn- approve-weth-exchange []
-  [:> (c/c :button)
+  [:span
    {:outlined true
     :small true
     :style {:margin-top "17px"
@@ -202,7 +202,7 @@
    "Approve WETH"])
 
 (defn- approve-weth-staking []
-  [:> (c/c :button)
+  [:span
    {:outlined true
     :small true
     :style {:margin-top "17px"
@@ -214,7 +214,7 @@
 (defn- nft-badge
   "WIP, should be a fun metadata pic"
   [id]
-  [:> (c/c :tag)
+  [:span
    (str "NFT#" id)])
 
 (defn- p&l [[paid strike amount] option-type]
@@ -325,7 +325,7 @@
 
 (defn- unlock-hegex [uid]
   [:div
-   [:> (c/c :button)
+   [:span
    {:outlined true
     :small true
     :intent :primary
@@ -336,7 +336,7 @@
 
 (defn- approve-exchange-hegex []
   [:div
-   [:> (c/c :button)
+   [:span
    {:outlined true
     :small true
     :intent :primary
@@ -351,12 +351,12 @@
         hegic @(subscribe [::subs/hegic-by-hegex id])
         unlocked? (= chef-address (:holder hegic))
         uid (:hegic-id hegic)]
-    [:> (c/c :card)
+    [:span
      {:elevation 4
       :interactive true
       :class-name "hegex-option"}
      [:div
-      [:> (c/c :tag)
+      [:span
        {:style {:margin-bottom "5px"}
         :minimal true}
        "Hegex NFT#" id]
@@ -399,7 +399,7 @@
        [:h4 "Sellling NFT#" id]
        [:br]
        [:h2 "For "
-        [:> (c/c :editable-text)
+        [:span
          {:intent "primary"
           :on-change (fn [e]
                      ((debounce #(swap! form-data assoc
@@ -410,7 +410,7 @@
        [:h4 "WETH"]
        [:br]
        [:h2 "Expires in "
-        [:> (c/c :editable-text)
+        [:span
          {:intent "primary"
           :on-change (fn [e]
                      ((debounce #(swap! form-data assoc
@@ -420,7 +420,7 @@
           :placeholder "0"}]]
        [:h4 "hours"]
        [:br]
-       [:> (c/c :button)
+       [:span
         {:outlined true
          :small true
          :on-click #(dispatch [::trading-events/create-offer (assoc @form-data :id id) open?])
@@ -434,7 +434,7 @@
       [:<>
        [my-hegex-option {:id id
                          :open? open?}]
-       [:> (c/c :dialog)
+       [:span
         {:on-close #(reset! open? false)
          :portal-class-name "bp3-dark"
          :is-open @open?}
@@ -457,12 +457,12 @@
         uid (:hegic-id hegic)]
     (println "offer is" offer)
     (println "off keys are" (keys offer))
-    [:> (c/c :card)
+    [:span
          {:elevation 4
           :interactive true
           :class-name "hegex-option"}
      [:div
-      [:> (c/c :tag)
+      [:span
        {:style {:margin-bottom "5px"}
         :minimal true}
         "Hegex NFT#" (:hegex-id offer)]
@@ -509,6 +509,7 @@
 
 (defn- my-hegic-options []
   (let [opts (subscribe [::subs/hegic-full-options])]
+    (println "opts are" opts)
     [:div
      [:div {:style {:display "flex"
                     :align-items "flex-start"
@@ -547,7 +548,7 @@
         [:h5.dim-icon.gap-top
          "You don't own any Hegic options or Hegex NFTs. Mint one now!"])]]
 
-    #_[:> (c/c :card)
+    #_[:span
      {:elevation 5
       :class-name "my-nfts-bg"}
      [:br]
@@ -685,9 +686,9 @@
       [:br]
       [:br]
       [:div {:style {:max-width "250px"}}
-       [:> (c/c :control-group)
+       [:span
         {:vertical false}
-        [:> (c/c "HTMLSelect")
+        [:span
          {:on-change (fn [e]
                        (js/e.persist)
                        ((debounce #(swap! form-data
@@ -699,7 +700,7 @@
           "Wrap"]
          [:option {:value :unwrap}
           "Unwrap"]]
-        [:> (c/c :input-group)
+        [:span
          {:fill true
           :left-lable "WETH"
           :on-change  (fn [e]
@@ -709,7 +710,7 @@
                                            (oget e ".?target.?value"))
                                    500)))
           :placeholder "Amount"}]
-        [:> (c/c :button)
+        [:span
          {:outlined true
           :on-click #(dispatch [(:evt form-res) @form-data])}
          (:btn form-res)]]]]))))
@@ -722,7 +723,7 @@
                          deref
                          web3-utils/wei->eth-number
                          (format/format-number {:max-fraction-digits 5}))]
-    [:> (c/c :card)
+    [:span
      {:elevation 5
       :class-name "trade-nfts-bg"}
      [:br]
@@ -741,7 +742,7 @@
 
      [:br]
      [:div {:style {:text-align "center"}}
-      [:> (c/c :button)
+      [:span
        {:outlined true
         :small true
         :on-click #(dispatch [::trading-events/load-orderbook])
@@ -750,12 +751,12 @@
      [:br]
      [:div {:style {:text-align "center"}}
       [:p "You need some WETH to buy Hegex NFTs"]
-      [:> (c/c :tag)
+      [:span
        {:intent "primary"
         :minimal true}
        eth-bal " ETH"]
       " "
-      [:> (c/c :tag)
+      [:span
        {:intent "success"
         :minimal true}
        weth-bal " WETH"]]
@@ -778,11 +779,11 @@
   [app-layout
    [:section#intro
     [:div.container
-     [:> (c/c :tabs)
+     [:span
       {:on-change constantly
        :large true
        :selected-tab-id "hegic"}
-      [:> (c/c :tab)
+      [:span
        {:id "hegic"
         :large true
         :title "Hegic"}]]
