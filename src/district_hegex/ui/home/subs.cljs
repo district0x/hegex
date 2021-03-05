@@ -7,3 +7,8 @@
   ::dark-mode?
   (fn [db]
     (get-in db [::events/dark-mode?])))
+
+(re-frame/reg-sub
+  ::my-active-option
+  (fn [db]
+    (get-in db [:hegic-options/active-option])))

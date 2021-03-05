@@ -9,3 +9,9 @@
   interceptors
   (fn [db _]
     (update-in db [::dark-mode?] not)))
+
+(re-frame/reg-event-db
+  ::set-my-active-option
+  interceptors
+  (fn [db [option row-num]]
+    (update-in db [:hegic-options/active-option] {:option option :row-num row-num})))

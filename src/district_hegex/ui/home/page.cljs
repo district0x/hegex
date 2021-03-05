@@ -2,6 +2,7 @@
  (:import [goog.async Debouncer])
   (:require
    [clojure.string :as cs]
+   [district-hegex.ui.home.events :as home-events]
    [district-hegex.ui.components.inputs :as inputs]
    [district.ui.web3-account-balances.subs :as account-balances-subs]
    [district-hegex.ui.external.subs :as external-subs]
@@ -240,7 +241,11 @@
       attrs   (attrs data)]
   (println "attrs are" row)
   [:div
-    (merge-with merge attrs  {:style {:padding "10px"
+   (merge-with merge attrs  {:on-click (fn []
+
+                                         (js/alert (str row-num "row is" row)))
+                             :style {:padding "10px"
+                                      :cursor "pointer"
                                             :display "flex"
                                             :align-items "center"
                                             :min-height "47px"
