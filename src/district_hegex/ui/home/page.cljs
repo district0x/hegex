@@ -3,6 +3,7 @@
   (:require
    [clojure.string :as cs]
    [district-hegex.ui.home.events :as home-events]
+   [district-hegex.ui.home.subs :as home-subs]
    [district-hegex.ui.components.inputs :as inputs]
    [district.ui.web3-account-balances.subs :as account-balances-subs]
    [district-hegex.ui.external.subs :as external-subs]
@@ -238,18 +239,27 @@
               attrs (fn [_] {})}} render-info
       data    (cell-data row render-info)
       content (format data)
-      attrs   (attrs data)]
-  (println "attrs are" row)
-  [:div
+      attrs   (attrs data)
+      active-option @(subscribe [::home-subs/my-active-option])
+      selected? (= row-num (:row-num active-option))]
+  (println "selected?" selected? active-option)
+  [:a
    (merge-with merge attrs  {:on-click (fn []
+                                         (if selected?
+                                           (dispatch
+                                            [::home-events/set-my-active-option nil nil])
 
-                                         (js/alert (str row-num "row is" row)))
+                                           (dispatch
+                                            [::home-events/set-my-active-option
+                                             row row-num])))
                              :style {:padding "10px"
-                                      :cursor "pointer"
-                                            :display "flex"
-                                            :align-items "center"
-                                            :min-height "47px"
-                                            :position "relative"}})
+                                     :outline "none"
+                                     :cursor "pointer"
+                                     :display "flex"
+                                     :align-items "center"
+                                     :background-color (if selected? "red" "inherit")
+                                     :min-height "47px"
+                                     :position "relative"}})
    #_(even? row-num) #_(assoc-in [:style :background-color] "#212c35")
    (case key
      :p&l [p&l data (:option-type row)]
