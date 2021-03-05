@@ -102,19 +102,9 @@
   "using up-to-date instance of web3 out of npm [ROPSTEN]"
   [web3-host addr db]
   (let [Web3 (gget ".?Web3x")
-        _ (println "web3 is" Web3)
-        ;; _ (println "snackbars are" (r/adapt-react-class stacked-snackbars))
         by-chef (contract-queries/contract-address db :optionchef)
-        web3js (Web3. (gget ".?web3.?currentProvider"))
-        #_ (ocall! js/window.ethereum "enable")]
+        web3js (Web3. (gget ".?web3.?currentProvider"))]
     (println "mho"  (oget web3js ".?version"))
-    ;; (println web3 #_(gget "Web3"))
-    ;; TODO: migrate .getPastLogs call to oops if munged in :advanced
-    ;; TODO: add transferred options (pull by transfer topic + receiver)
-    ;; NOTE js-invoke
-
-    #_(js/console.log (oget web3js ".?eth.?getPastLogs.?call"))
-    #_(js/console.log (oget web3js ".?eth"))
     (js-invoke (oget web3js ".?eth")
                "getPastLogs"
                (clj->js {:address  (contract-queries/contract-address db :brokenethoptions)
