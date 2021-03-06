@@ -252,12 +252,12 @@
                                            (dispatch
                                             [::home-events/set-my-active-option
                                              row row-num])))
+                             :class-name (when selected? "aqua")
                              :style {:padding "10px"
                                      :outline "none"
                                      :cursor "pointer"
                                      :display "flex"
                                      :align-items "center"
-                                     :background-color (if selected? "aqua" "inherit")
                                      :min-height "47px"
                                      :position "relative"}})
    #_(even? row-num) #_(assoc-in [:style :background-color] "#212c35")
@@ -523,7 +523,9 @@
    :sort            sort-fn})
 
 (defn- my-hegic-option-controls []
-  (let [offer {:price 0}]
+  (let [offer (r/atom {:total 0
+                       ;;NOTE not in design, just add another field
+                       :expires 24})]
     (fn []
      (let [active-option (:option @(subscribe [::home-subs/my-active-option]))]
        [:div
@@ -550,12 +552,13 @@
             :placeholder 0
             :on-change  (fn [e]
                           (js/e.persist)
-                          (swap! offer assoc :price e))}]]
+                          (swap! offer assoc :total (oget e ".?target.?value")))}]]
          [:div.box.e
           [:button.primary
            {:className (when-not active-option "disabled")
             :disabled  (not active-option)
-            :on-click #(dispatch [::hegex-nft/exercise! (:hegex-id active-option)])}
+            :on-click #(dispatch [::trading-events/create-offer
+                                  (assoc @offer :id (:hegex-id active-option)) false])}
            "Offer"]]]]))))
 
 (defn- my-hegic-options []
