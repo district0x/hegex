@@ -14,5 +14,4 @@
   ::set-my-active-option
   interceptors
   (fn [db [option row-num]]
-    (println "setting my active option" option row-num)
-    (update-in db [:hegic-options/active-option] {:option option :row-num row-num})))
+    (assoc-in db [:hegic-options/active-option] {:option option :row-num row-num})))

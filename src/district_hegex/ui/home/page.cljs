@@ -525,6 +525,7 @@
 (defn- my-hegic-options []
   (let [opts (subscribe [::subs/hegic-full-options])]
     (println "opts are" opts)
+    (println "active opt is" @(subscribe [::home-subs/my-active-option]))
     [:div
      [:div {:style {:display "flex"
                     :align-items "flex-start"
