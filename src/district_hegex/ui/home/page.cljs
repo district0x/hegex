@@ -523,16 +523,40 @@
    :sort            sort-fn})
 
 (defn- my-hegic-option-controls []
-  (let [active-option (:option @(subscribe [::home-subs/my-active-option]))]
-    [:div
-     (str active-option)
-     [:div.box-grid
-      [:div.box.e
+  (let [offer {:price 0}]
+    (fn []
+     (let [active-option (:option @(subscribe [::home-subs/my-active-option]))]
+       [:div
+        #_(str active-option)
+        [:div.box-grid
+         [:div.box.e
           [:button.primary
            {:className (when-not active-option "disabled")
             :disabled  (not active-option)
             :on-click #(dispatch [::hegex-nft/exercise! (:hegex-id active-option)])}
-           "Exercise"]]]]))
+           "Exercise"]]
+         [:div.box.d
+          [inputs/select
+           {:disabled true}
+           [:option {:selected true
+                     :value :eth}
+            "ETH"]
+           [:option {:value :wbtc}
+            "WBTC"]]]
+         [:div.box.e
+          [inputs/text-input
+           {:type :number
+            :min 0
+            :placeholder 0
+            :on-change  (fn [e]
+                          (js/e.persist)
+                          (swap! offer assoc :price e))}]]
+         [:div.box.e
+          [:button.primary
+           {:className (when-not active-option "disabled")
+            :disabled  (not active-option)
+            :on-click #(dispatch [::hegex-nft/exercise! (:hegex-id active-option)])}
+           "Offer"]]]]))))
 
 (defn- my-hegic-options []
   (let [opts (subscribe [::subs/hegic-full-options])]
