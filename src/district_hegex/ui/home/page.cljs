@@ -257,7 +257,7 @@
                                      :cursor "pointer"
                                      :display "flex"
                                      :align-items "center"
-                                     :background-color (if selected? "red" "inherit")
+                                     :background-color (if selected? "aqua" "inherit")
                                      :min-height "47px"
                                      :position "relative"}})
    #_(even? row-num) #_(assoc-in [:style :background-color] "#212c35")
@@ -522,10 +522,20 @@
    :render-cell     cell-fn
    :sort            sort-fn})
 
+(defn- my-hegic-option-controls []
+  (let [active-option (:option @(subscribe [::home-subs/my-active-option]))]
+    [:div
+     (str active-option)
+     [:div.box-grid
+      [:div.box.e
+          [:button.primary
+           {:className (when-not active-option "disabled")
+            :disabled  (not active-option)
+            :on-click #(dispatch [::hegex-nft/exercise! (:hegex-id active-option)])}
+           "Exercise"]]]]))
+
 (defn- my-hegic-options []
   (let [opts (subscribe [::subs/hegic-full-options])]
-    (println "opts are" opts)
-    (println "active opt is" @(subscribe [::home-subs/my-active-option]))
     [:div
      [:div {:style {:display "flex"
                     :align-items "flex-start"
@@ -542,7 +552,8 @@
          [dt/reagent-table opts table-props]]
 
         [:h5.dim-icon.gap-top
-         "You don't own any Hegic options or Hegex NFTs. Mint one now!"])]]))
+         "You don't own any Hegic options or Hegex NFTs. Mint one now!"])
+      [my-hegic-option-controls]]]))
 
 (defn- my-hegex-options []
   (let [ids (subscribe [::subs/my-hegex-ids])]
@@ -618,7 +629,7 @@
                        :align-items "flex-start"
                        :justify-content "flex-start"}}
          [:h1 "Buy New Option Contract"]]
-        [:div.form-wrapper
+        [:div.box-grid
          [:div.box.a
           [:div.hover-label "Currency"]
           [inputs/select
@@ -668,7 +679,7 @@
             :on-change (fn [e]
                          (js/e.persist)
                          (upd-new-hegex form-data e :new-hegex/period))}]]]
-        [:div.form-wrapper
+        [:div.box-grid
          [:div.box.a
           [:div.hover-label "Strike price"]
           [:h3.stats "$" (if (pos? (count sp)) sp 0)]]
