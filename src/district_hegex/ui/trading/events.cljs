@@ -13,7 +13,6 @@
     [district-hegex.ui.contract.hegex-nft :as hegex-nft]
    [cljs.core.async :refer [go]]
    [bignumber.core :as bn]
-   [web3 :as web3+]
    [cljs.core.async.interop :refer-macros [<p!]]
    [cljs-bean.core :refer [bean ->clj ->js]]
    ["@0x/connect" :as connect0x]

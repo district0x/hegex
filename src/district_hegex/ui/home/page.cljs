@@ -2,6 +2,8 @@
  (:import [goog.async Debouncer])
   (:require
    [clojure.string :as cs]
+   [district-hegex.ui.home.events :as home-events]
+   [district-hegex.ui.home.subs :as home-subs]
    [district-hegex.ui.components.inputs :as inputs]
    [district.ui.web3-account-balances.subs :as account-balances-subs]
    [district-hegex.ui.external.subs :as external-subs]
@@ -138,7 +140,7 @@
              (expr row)))))
 
 (defn- wrap-hegic [id]
-  [:> (c/c :button)
+  [:span
    {:outlined true
     :small true
     :intent :primary
@@ -146,7 +148,7 @@
    "Wrap"])
 
 (defn- exercise-badge [hegex-id]
-  [:> (c/c :button)
+  [:span
    {:outlined true
     :small true
     :intent :primary
@@ -155,7 +157,7 @@
 
 (defn- sell-hegex [open? id]
   (println "open? in sell-hegex is" open?)
-  [:> (c/c :button)
+  [:span
    {:outlined true
     :small true
     :intent :primary
@@ -164,7 +166,7 @@
 
 (defn- unwrap-hegex [open? id]
   (println "open? in sell-hegex is" open?)
-  [:> (c/c :button)
+  [:span
    {:outlined true
     :small true
     :intent :primary
@@ -172,7 +174,7 @@
    "Unwrap"])
 
 (defn- buy-hegex-offer [order]
-  [:> (c/c :button)
+  [:span
    {:outlined true
     :small true
     :style {:margin-top "17px"
@@ -182,7 +184,7 @@
    "Buy"])
 
 (defn- cancel-hegex-offer [order]
-  [:> (c/c :button)
+  [:span
    {:outlined true
     :small true
     :style {:margin-top "17px"
@@ -192,7 +194,7 @@
    "Cancel"])
 
 (defn- approve-weth-exchange []
-  [:> (c/c :button)
+  [:span
    {:outlined true
     :small true
     :style {:margin-top "17px"
@@ -202,7 +204,7 @@
    "Approve WETH"])
 
 (defn- approve-weth-staking []
-  [:> (c/c :button)
+  [:span
    {:outlined true
     :small true
     :style {:margin-top "17px"
@@ -214,7 +216,7 @@
 (defn- nft-badge
   "WIP, should be a fun metadata pic"
   [id]
-  [:> (c/c :tag)
+  [:span
    (str "NFT#" id)])
 
 (defn- p&l [[paid strike amount] option-type]
@@ -237,14 +239,27 @@
               attrs (fn [_] {})}} render-info
       data    (cell-data row render-info)
       content (format data)
-      attrs   (attrs data)]
-  (println "attrs are" row)
-  [:div
-    (merge-with merge attrs  {:style {:padding "10px"
-                                            :display "flex"
-                                            :align-items "center"
-                                            :min-height "47px"
-                                            :position "relative"}})
+      attrs   (attrs data)
+      active-option @(subscribe [::home-subs/my-active-option])
+      selected? (= row-num (:row-num active-option))]
+  (println "selected?" selected? active-option)
+  [:a
+   (merge-with merge attrs  {:on-click (fn []
+                                         (if selected?
+                                           (dispatch
+                                            [::home-events/set-my-active-option nil nil])
+
+                                           (dispatch
+                                            [::home-events/set-my-active-option
+                                             row row-num])))
+                             :class-name (when selected? "aqua")
+                             :style {:padding "10px"
+                                     :outline "none"
+                                     :cursor "pointer"
+                                     :display "flex"
+                                     :align-items "center"
+                                     :min-height "47px"
+                                     :position "relative"}})
    #_(even? row-num) #_(assoc-in [:style :background-color] "#212c35")
    (case key
      :p&l [p&l data (:option-type row)]
@@ -325,7 +340,7 @@
 
 (defn- unlock-hegex [uid]
   [:div
-   [:> (c/c :button)
+   [:span
    {:outlined true
     :small true
     :intent :primary
@@ -336,7 +351,7 @@
 
 (defn- approve-exchange-hegex []
   [:div
-   [:> (c/c :button)
+   [:span
    {:outlined true
     :small true
     :intent :primary
@@ -351,12 +366,12 @@
         hegic @(subscribe [::subs/hegic-by-hegex id])
         unlocked? (= chef-address (:holder hegic))
         uid (:hegic-id hegic)]
-    [:> (c/c :card)
+    [:span
      {:elevation 4
       :interactive true
       :class-name "hegex-option"}
      [:div
-      [:> (c/c :tag)
+      [:span
        {:style {:margin-bottom "5px"}
         :minimal true}
        "Hegex NFT#" id]
@@ -399,7 +414,7 @@
        [:h4 "Sellling NFT#" id]
        [:br]
        [:h2 "For "
-        [:> (c/c :editable-text)
+        [:span
          {:intent "primary"
           :on-change (fn [e]
                      ((debounce #(swap! form-data assoc
@@ -410,7 +425,7 @@
        [:h4 "WETH"]
        [:br]
        [:h2 "Expires in "
-        [:> (c/c :editable-text)
+        [:span
          {:intent "primary"
           :on-change (fn [e]
                      ((debounce #(swap! form-data assoc
@@ -420,7 +435,7 @@
           :placeholder "0"}]]
        [:h4 "hours"]
        [:br]
-       [:> (c/c :button)
+       [:span
         {:outlined true
          :small true
          :on-click #(dispatch [::trading-events/create-offer (assoc @form-data :id id) open?])
@@ -434,7 +449,7 @@
       [:<>
        [my-hegex-option {:id id
                          :open? open?}]
-       [:> (c/c :dialog)
+       [:span
         {:on-close #(reset! open? false)
          :portal-class-name "bp3-dark"
          :is-open @open?}
@@ -457,12 +472,12 @@
         uid (:hegic-id hegic)]
     (println "offer is" offer)
     (println "off keys are" (keys offer))
-    [:> (c/c :card)
+    [:span
          {:elevation 4
           :interactive true
           :class-name "hegex-option"}
      [:div
-      [:> (c/c :tag)
+      [:span
        {:style {:margin-bottom "5px"}
         :minimal true}
         "Hegex NFT#" (:hegex-id offer)]
@@ -507,6 +522,45 @@
    :render-cell     cell-fn
    :sort            sort-fn})
 
+(defn- my-hegic-option-controls []
+  (let [offer (r/atom {:total 0
+                       ;;NOTE not in design, just add another field
+                       :expires 24})]
+    (fn []
+     (let [active-option (:option @(subscribe [::home-subs/my-active-option]))]
+       [:div
+        #_(str active-option)
+        [:div.box-grid
+         [:div.box.e
+          [:button.primary
+           {:className (when-not active-option "disabled")
+            :disabled  (not active-option)
+            :on-click #(dispatch [::hegex-nft/exercise! (:hegex-id active-option)])}
+           "Exercise"]]
+         [:div.box.d
+          [inputs/select
+           {:disabled true}
+           [:option {:selected true
+                     :value :eth}
+            "ETH"]
+           [:option {:value :wbtc}
+            "WBTC"]]]
+         [:div.box.e
+          [inputs/text-input
+           {:type :number
+            :min 0
+            :placeholder 0
+            :on-change  (fn [e]
+                          (js/e.persist)
+                          (swap! offer assoc :total (oget e ".?target.?value")))}]]
+         [:div.box.e
+          [:button.primary
+           {:className (when-not active-option "disabled")
+            :disabled  (not active-option)
+            :on-click #(dispatch [::trading-events/create-offer
+                                  (assoc @offer :id (:hegex-id active-option)) false])}
+           "Offer"]]]]))))
+
 (defn- my-hegic-options []
   (let [opts (subscribe [::subs/hegic-full-options])]
     [:div
@@ -525,7 +579,8 @@
          [dt/reagent-table opts table-props]]
 
         [:h5.dim-icon.gap-top
-         "You don't own any Hegic options or Hegex NFTs. Mint one now!"])]]))
+         "You don't own any Hegic options or Hegex NFTs. Mint one now!"])
+      [my-hegic-option-controls]]]))
 
 (defn- my-hegex-options []
   (let [ids (subscribe [::subs/my-hegex-ids])]
@@ -547,7 +602,7 @@
         [:h5.dim-icon.gap-top
          "You don't own any Hegic options or Hegex NFTs. Mint one now!"])]]
 
-    #_[:> (c/c :card)
+    #_[:span
      {:elevation 5
       :class-name "my-nfts-bg"}
      [:br]
@@ -601,7 +656,7 @@
                        :align-items "flex-start"
                        :justify-content "flex-start"}}
          [:h1 "Buy New Option Contract"]]
-        [:div.form-wrapper
+        [:div.box-grid
          [:div.box.a
           [:div.hover-label "Currency"]
           [inputs/select
@@ -651,7 +706,7 @@
             :on-change (fn [e]
                          (js/e.persist)
                          (upd-new-hegex form-data e :new-hegex/period))}]]]
-        [:div.form-wrapper
+        [:div.box-grid
          [:div.box.a
           [:div.hover-label "Strike price"]
           [:h3.stats "$" (if (pos? (count sp)) sp 0)]]
@@ -685,9 +740,9 @@
       [:br]
       [:br]
       [:div {:style {:max-width "250px"}}
-       [:> (c/c :control-group)
+       [:span
         {:vertical false}
-        [:> (c/c "HTMLSelect")
+        [:span
          {:on-change (fn [e]
                        (js/e.persist)
                        ((debounce #(swap! form-data
@@ -699,7 +754,7 @@
           "Wrap"]
          [:option {:value :unwrap}
           "Unwrap"]]
-        [:> (c/c :input-group)
+        [:span
          {:fill true
           :left-lable "WETH"
           :on-change  (fn [e]
@@ -709,7 +764,7 @@
                                            (oget e ".?target.?value"))
                                    500)))
           :placeholder "Amount"}]
-        [:> (c/c :button)
+        [:span
          {:outlined true
           :on-click #(dispatch [(:evt form-res) @form-data])}
          (:btn form-res)]]]]))))
@@ -722,7 +777,7 @@
                          deref
                          web3-utils/wei->eth-number
                          (format/format-number {:max-fraction-digits 5}))]
-    [:> (c/c :card)
+    [:span
      {:elevation 5
       :class-name "trade-nfts-bg"}
      [:br]
@@ -741,7 +796,7 @@
 
      [:br]
      [:div {:style {:text-align "center"}}
-      [:> (c/c :button)
+      [:span
        {:outlined true
         :small true
         :on-click #(dispatch [::trading-events/load-orderbook])
@@ -750,12 +805,12 @@
      [:br]
      [:div {:style {:text-align "center"}}
       [:p "You need some WETH to buy Hegex NFTs"]
-      [:> (c/c :tag)
+      [:span
        {:intent "primary"
         :minimal true}
        eth-bal " ETH"]
       " "
-      [:> (c/c :tag)
+      [:span
        {:intent "success"
         :minimal true}
        weth-bal " WETH"]]
@@ -778,11 +833,11 @@
   [app-layout
    [:section#intro
     [:div.container
-     [:> (c/c :tabs)
+     [:span
       {:on-change constantly
        :large true
        :selected-tab-id "hegic"}
-      [:> (c/c :tab)
+      [:span
        {:id "hegic"
         :large true
         :title "Hegic"}]]

@@ -16,7 +16,6 @@
     [district.ui.notification]
     [district.ui.now]
     [district.ui.reagent-render]
-    [district.ui.router-google-analytics]
     [district.ui.router.effects :as router-effects]
     [district.ui.router]
     [district.ui.smart-contracts.events :as contracts-events]
@@ -51,7 +50,7 @@
   interceptors
   (fn [{:keys [:db]} arg2]
     (println "dbg init2route" arg2)
-    {:async-flow {:rules [{:when :seen-any-of?
+  {:async-flow {:rules [{:when :seen-any-of?
                            :events [#_::web3-accounts-events/active-account-changed
                                     ::web3-accounts-events/set-accounts
                                     #_::web3-accounts-events/load-accounts]

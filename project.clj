@@ -148,48 +148,30 @@
                                    :infer-externs true
                                    :foreign-libs
                                    [{:file "dist/index_bundle.js"
-                                     :provides ["react"
-                                                "react-dom"
+                                     :provides [
+             ;; "react"
+             ;; "react-dom"
                                                 "web3"
-                                                "stacked-snackbars"
-                                                "with-stacked-snackbars"
                                                 "@0x/connect"
                                                 "@0x/contract-wrappers"
                                                 "@0x/order-utils"
                                                 "@0x/utils"
                                                 "@0x/subproviders"
                                                 "@0x/contract-addresses"
-                                                ;;might end up unused
-                                                "@0x/web3-wrapper"
-                                                "rebass"
-                                                "rebass/styled-components"
-                                                "@rebass/preset"
-                                                "@emotion/react"
-                                                "@rebass/forms"
-                                                "styled-components"
-                                                "@blueprintjs/core"
-                                                "@blueprintjs/icons"]
-                                     :global-exports {react React
-                                                      react-dom ReactDOM
+                                                ;; ;;might end up unused
+                                                "@0x/web3-wrapper"]
+                                     :global-exports {
+                   ;; react React
+                   ;; react-dom ReactDOM
                                                       web3 Web3x
-                                                      stacked-snackbars StackedSnackbars
-                                                      with-stacked-snackbars withSnackbar
-                                                      "styled-components" Styled
-                                                      "rebass/styled-components" RebassStyled
                                                       "@0x/connect" Connect0x
                                                       "@0x/contract-wrappers" Contract0x
                                                       "@0x/order-utils" OrderUtils0x
                                                       "@0x/utils" Utils0x
                                                       "@0x/subproviders" Subproviders0x
                                                       "@0x/contract-addresses" Addresses0x
-                                                      ;;might end up unused
-                                                      "@0x/web3-wrapper" Web3Wrapper0x
-                                                      "rebass" Rebass
-                                                      "@rebass/preset" RebassPreset
-                                                      "@emotion/react" Emotion
-                                                      "@rebass/forms" RebassForms
-                                                      "@blueprintjs/core" Blueprint
-                                                      "@blueprintjs/icons" BlueprintIcons}}]
+                                                      ;; ;;might end up unused
+                                                      "@0x/web3-wrapper" Web3Wrapper0x}}]
                                    :preloads [print.foo.preloads.devtools
                                               re-frisk.preload]
                                    #_:external-config #_{:devtools/config {:features-to-install :all}}}}
@@ -206,45 +188,31 @@
                                    :infer-externs true
                                    :foreign-libs
 [{:file "dist/index_bundle.js"
-                                     :provides ["react"
-                                                "react-dom"
+  :provides [
+             ;; "react"
+             ;;                                    "react-dom"
                                                 "web3"
-                                                "stacked-snackbars"
-                                                "with-stacked-snackbars"
+             ;;                                    "stacked-snackbars"
+             ;;                                    "with-stacked-snackbars"
                                                 "@0x/connect"
                                                 "@0x/contract-wrappers"
                                                 "@0x/order-utils"
                                                 "@0x/utils"
                                                 "@0x/subproviders"
                                                 "@0x/contract-addresses"
-                                                ;;might end up unused
+                                                ;; ;;might end up unused
                                                 "@0x/web3-wrapper"
-                                                "rebass"
-                                                "rebass/styled-components"
-                                                "@rebass/preset"
-                                                "@emotion/react"
-                                                "@rebass/forms"
-                                                "styled-components"
-                                                "@blueprintjs/core"
-                                                "@blueprintjs/icons"]
-                                     :global-exports {react React
-                                                      react-dom ReactDOM
+             ]
+  :global-exports {
+                   ;; react React
+                   ;;                                    react-dom ReactDOM
                                                       web3 Web3x
-                                                      stacked-snackbars StackedSnackbars
-                                                      with-stacked-snackbars withSnackbar
-                                                      "styled-components" Styled
-                                                      "rebass/styled-components" RebassStyled
                                                       "@0x/connect" Connect0x
                                                       "@0x/contract-wrappers" Contract0x
                                                       "@0x/order-utils" OrderUtils0x
                                                       "@0x/utils" Utils0x
                                                       "@0x/subproviders" Subproviders0x
                                                       "@0x/contract-addresses" Addresses0x
-                                                      ;;might end up unused
+                                                      ;; ;;might end up unused
                                                       "@0x/web3-wrapper" Web3Wrapper0x
-                                                      "rebass" Rebass
-                                                      "@rebass/preset" RebassPreset
-                                                      "@emotion/react" Emotion
-                                                      "@rebass/forms" RebassForms
-                                                      "@blueprintjs/core" Blueprint
-                                                      "@blueprintjs/icons" BlueprintIcons}}]}}]})
+                   }}]}}]})
