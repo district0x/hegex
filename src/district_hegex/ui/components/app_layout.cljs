@@ -1,6 +1,7 @@
 (ns district-hegex.ui.components.app-layout
   (:require
    [district-hegex.ui.components.nav :as nav]
+   [district-hegex.ui.components.tab :as tabs]
    [react-dom :as rdom]
    [district-hegex.ui.home.events :as home-events]
    [district-hegex.ui.home.subs :as home-subs]
@@ -27,7 +28,8 @@
 
 (defn- logo []
   [:div.header-logo
-   [:img.hegexlogo {:src "/images/hegexLogo.png"}]])
+   [:img.hegexlogo {:src "/images/hegexLogo.png"}]
+   [tabs/tab {:caption "Hegex"}]])
 
 (defn- night-mode []
   [:div.nightmode

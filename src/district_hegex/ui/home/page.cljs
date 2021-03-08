@@ -833,14 +833,6 @@
   [app-layout
    [:section#intro
     [:div.container
-     [:span
-      {:on-change constantly
-       :large true
-       :selected-tab-id "hegic"}
-      [:span
-       {:id "hegic"
-        :large true
-        :title "Hegic"}]]
      [:br]
      [my-hegic-options]
      [:hr]
