@@ -2,7 +2,7 @@
   :description "District0x-powered synthetic options DEX"
   :url "https://github.com/district0x/hegex"
   :license {:name "Eclipse Public License"
-            :url "http://www.eclipse.org/legal/epl-v10.html"}
+            :url  "http://www.eclipse.org/legal/epl-v10.html"}
   :jvm-opts ["-Xss2m" "-XX:+TieredCompilation" "-XX:TieredStopAtLevel=1"]
   :dependencies [[camel-snake-kebab "0.4.0"]
                  [org.clojure/core.async "1.3.610"]
@@ -90,26 +90,20 @@
 
   :doo {:paths {:karma "./node_modules/karma/bin/karma"}}
 
-  :less4clj {:target-path "resources/public/css-compiled"
+  :less4clj {:target-path  "resources/public/css-compiled"
              :source-paths ["resources/public/css"]}
 
   :source-paths ["src" "test"]
 
-  :figwheel {:server-port 4177
-             :css-dirs ["resources/public/css" "resources/public/css-compiled"]
+  :figwheel {:server-port       4177
+             :css-dirs          ["resources/public/css" "resources/public/css-compiled"]
              :repl-eval-timeout 60000}
 
   :aliases {"clean-prod-server" ["shell" "rm" "-rf" "server"]
-            "watch-css" ["less4clj" "auto"]
-            "build-css" ["less4clj" "once"]
-            ;; "build-prod-server" ["do" ["clean-prod-server"] ["cljsbuild" "once" "server"]]
-            "build-prod-ui" ["do" ["clean"] ["cljsbuild" "once" "ui"] ["build-css"]]
-            "build-prod" ["pdo" ["build-prod-server"] ["build-prod-ui"] ["build-css"]]
-            ;; "build-tests" ["cljsbuild" "once" "server-tests"]
-            ;; "test" ["do" ["build-tests"] ["shell" "node" "server-tests/server-tests.js"]]
-            ;; "test-doo" ["doo" "node" "server-tests"]
-            ;; "test-doo-once" ["doo" "node" "server-tests" "once"]
-            }
+            "watch-css"         ["less4clj" "auto"]
+            "build-css"         ["less4clj" "once"]
+            "build-prod-ui"     ["do" ["clean"] ["cljsbuild" "once" "ui"] ["build-css"]]
+            "build-prod"        ["pdo" ["build-prod-server"] ["build-prod-ui"] ["build-css"]]}
 
   :clean-targets ^{:protect false} [[:solc :build-path]
                                     ".cljs_node_repl"
@@ -120,99 +114,79 @@
                                     "server/"
                                     "target/"]
 
-  :profiles {:dev {:dependencies [[org.clojure/clojure "1.9.0"]
-                                  [org.clojure/clojurescript "1.10.439"]
-                                  [binaryage/devtools "0.9.10"]
-                                  [cider/piggieback "0.5.2"]
-                                  [figwheel-sidecar "0.5.20"]
-                                  [org.clojure/tools.nrepl "0.2.13"]
-                                  [lein-doo "0.1.8"]
-                                  [org.clojure/clojure "1.9.0"]
-                                  [org.clojure/tools.reader "1.3.0"]
-                                  [re-frisk "1.3.5"]]
-                   :repl-options {:nrepl-middleware [cider.piggieback/wrap-cljs-repl]}
-                   :source-paths ["dev" "src"]
+  :profiles {:dev {:dependencies   [[org.clojure/clojure "1.9.0"]
+                                    [org.clojure/clojurescript "1.10.439"]
+                                    [binaryage/devtools "0.9.10"]
+                                    [cider/piggieback "0.5.2"]
+                                    [figwheel-sidecar "0.5.20"]
+                                    [org.clojure/tools.nrepl "0.2.13"]
+                                    [lein-doo "0.1.8"]
+                                    [org.clojure/clojure "1.9.0"]
+                                    [org.clojure/tools.reader "1.3.0"]
+                                    [re-frisk "1.3.5"]]
+                   :repl-options   {:nrepl-middleware [cider.piggieback/wrap-cljs-repl]}
+                   :source-paths   ["dev" "src"]
                    :resource-paths ["resources"]}}
 
-  :cljsbuild {:builds [{:id "dev"
+  :cljsbuild {:builds [{:id           "dev"
                         :source-paths ["src/district_hegex/ui"
                                        "src/district_hegex/shared"]
-                        :figwheel {:on-jsload "district.ui.reagent-render/rerender"}
-                        :compiler {:main "district-hegex.ui.core"
-                                   :output-to "resources/public/js/compiled/app.js"
-                                   :output-dir "resources/public/js/compiled/out"
-                                   :asset-path "/js/compiled/out"
-                                   :source-map-timestamp true
-                                   :optimizations :none
-                                   :npm-deps false
-                                   :infer-externs true
-                                   :foreign-libs
-                                   [{:file "dist/index_bundle.js"
-                                     :provides [
-             ;; "react"
-             ;; "react-dom"
-                                                "web3"
-                                                "@0x/connect"
-                                                "@0x/contract-wrappers"
-                                                "@0x/order-utils"
-                                                "@0x/utils"
-                                                "@0x/subproviders"
-                                                "@0x/contract-addresses"
-                                                ;; ;;might end up unused
-                                                "@0x/web3-wrapper"]
-                                     :global-exports {
-                   ;; react React
-                   ;; react-dom ReactDOM
-                                                      web3 Web3x
-                                                      "@0x/connect" Connect0x
-                                                      "@0x/contract-wrappers" Contract0x
-                                                      "@0x/order-utils" OrderUtils0x
-                                                      "@0x/utils" Utils0x
-                                                      "@0x/subproviders" Subproviders0x
-                                                      "@0x/contract-addresses" Addresses0x
-                                                      ;; ;;might end up unused
-                                                      "@0x/web3-wrapper" Web3Wrapper0x}}]
-                                   :preloads [print.foo.preloads.devtools
-                                              re-frisk.preload]
-                                   #_:external-config #_{:devtools/config {:features-to-install :all}}}}
-                       {:id "ui"
-                        ;; :source-paths ["src"]
+                        :figwheel     {:on-jsload "district.ui.reagent-render/rerender"}
+                        :compiler     {:main                 "district-hegex.ui.core"
+                                       :output-to            "resources/public/js/compiled/app.js"
+                                       :output-dir           "resources/public/js/compiled/out"
+                                       :asset-path           "/js/compiled/out"
+                                       :source-map-timestamp true
+                                       :optimizations        :none
+                                       :npm-deps             false
+                                       :infer-externs        true
+                                       :foreign-libs
+                                       [{:file           "dist/index_bundle.js"
+                                         :provides       ["web3"
+                                                          "@0x/connect"
+                                                          "@0x/contract-wrappers"
+                                                          "@0x/order-utils"
+                                                          "@0x/utils"
+                                                          "@0x/subproviders"
+                                                          "@0x/contract-addresses"
+                                                          "@0x/web3-wrapper"]
+                                         :global-exports {web3                     Web3x
+                                                          "@0x/connect"            Connect0x
+                                                          "@0x/contract-wrappers"  Contract0x
+                                                          "@0x/order-utils"        OrderUtils0x
+                                                          "@0x/utils"              Utils0x
+                                                          "@0x/subproviders"       Subproviders0x
+                                                          "@0x/contract-addresses" Addresses0x
+                                                          ;; ;;might end up unused
+                                                          "@0x/web3-wrapper"       Web3Wrapper0x}}]
+                                       :preloads             [print.foo.preloads.devtools
+                                                              re-frisk.preload]}}
+                       {:id           "ui"
                         :source-paths ["src/district_hegex/ui"
                                        "src/district_hegex/shared"]
-                        :compiler {:main "district-hegex.ui.core"
-                                   :output-to "resources/public/js/compiled/app.js"
-                                   :optimizations :advanced
-                                   :pretty-print false
-                                   :pseudo-names false
-                                   :npm-deps false
-                                   :infer-externs true
-                                   :foreign-libs
-[{:file "dist/index_bundle.js"
-  :provides [
-             ;; "react"
-             ;;                                    "react-dom"
-                                                "web3"
-             ;;                                    "stacked-snackbars"
-             ;;                                    "with-stacked-snackbars"
-                                                "@0x/connect"
-                                                "@0x/contract-wrappers"
-                                                "@0x/order-utils"
-                                                "@0x/utils"
-                                                "@0x/subproviders"
-                                                "@0x/contract-addresses"
-                                                ;; ;;might end up unused
-                                                "@0x/web3-wrapper"
-             ]
-  :global-exports {
-                   ;; react React
-                   ;;                                    react-dom ReactDOM
-                                                      web3 Web3x
-                                                      "@0x/connect" Connect0x
-                                                      "@0x/contract-wrappers" Contract0x
-                                                      "@0x/order-utils" OrderUtils0x
-                                                      "@0x/utils" Utils0x
-                                                      "@0x/subproviders" Subproviders0x
-                                                      "@0x/contract-addresses" Addresses0x
-                                                      ;; ;;might end up unused
-                                                      "@0x/web3-wrapper" Web3Wrapper0x
-                   }}]}}]})
+                        :compiler     {:main          "district-hegex.ui.core"
+                                       :output-to     "resources/public/js/compiled/app.js"
+                                       :optimizations :advanced
+                                       :pretty-print  false
+                                       :pseudo-names  false
+                                       :npm-deps      false
+                                       :infer-externs true
+                                       :foreign-libs
+                                       [{:file           "dist/index_bundle.js"
+                                         :provides       ["web3"
+                                                          "@0x/connect"
+                                                          "@0x/contract-wrappers"
+                                                          "@0x/order-utils"
+                                                          "@0x/utils"
+                                                          "@0x/subproviders"
+                                                          "@0x/contract-addresses"
+                                                          "@0x/web3-wrapper"]
+                                         :global-exports {web3                     Web3x
+                                                          "@0x/connect"            Connect0x
+                                                          "@0x/contract-wrappers"  Contract0x
+                                                          "@0x/order-utils"        OrderUtils0x
+                                                          "@0x/utils"              Utils0x
+                                                          "@0x/subproviders"       Subproviders0x
+                                                          "@0x/contract-addresses" Addresses0x
+                                                          ;; ;;might end up unused
+                                                          "@0x/web3-wrapper"       Web3Wrapper0x}}]}}]})
