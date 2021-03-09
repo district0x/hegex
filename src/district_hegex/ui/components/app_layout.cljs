@@ -63,7 +63,8 @@
                     :route/my-account "page-my-account"
                     :route/terms "page-terms"
                     :route/not-found "not-found")}
-            dark? (assoc :className "bp3-dark dark-overlay") )
+            (not dark?) (assoc :className "day")
+            dark? (assoc :className "night bp3-dark dark-overlay") )
     [header :route/home]
     (into [:div#page-content]
           children)
