@@ -509,12 +509,7 @@
 (def ^:private table-props
   {:table-container {:style {:border-radius "5px"
                              :text-align "center"
-                             :padding       "15px"}}
-   :th              {:style {:color            "#aaa"
-                             :border-bottom "1px solid green"
-                             :font-size        "12px"
-                             :text-align       "left"
-                             :padding   "10px"}}
+                             :padding-top       "15px"}}
    :table-state     table-state
    :table {:style {:margin "auto"}}
    :column-model    columns
@@ -573,7 +568,8 @@
                               :justify-content "center"
                               :align-items "center"}}
       (if-not (zero? (count @opts))
-        [:div {:style {:margin-left "auto"
+        [:div {:className "my-option-table"
+               :style {:margin-left "auto"
                       :margin-right "auto"
                       :overflow-x "auto"}}
          [dt/reagent-table opts table-props]]
