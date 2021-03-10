@@ -97,6 +97,7 @@
                         {:path   [:premium]
                          :header "Total Cost"
                          :attrs  (fn [data] {:style {:text-align "left"}})
+                         :format (fn [v] (str "$" v))
                          :key    :premium}
                         ;;NOTE a bit cryptic model, P&L is fetched later via (price+-strike(+-premium*price))
                         ;;NOTE P&L with premium is inaccurate since we _can't_ fetch historical price for premium
@@ -220,12 +221,15 @@
    (str "NFT#" id)])
 
 (defn- p&l [[paid strike amount] option-type]
-  (let [current-price @(subscribe [::external-subs/eth-price])]
+  (let [current-price @(subscribe [::external-subs/eth-price])
+        pl (if (= :call option-type)
+             (- (* current-price amount) (* strike amount) paid)
+             (- (* strike amount) (* current-price amount) paid))]
     ;;NOTE recheck P&L formula (esp. premium)
-    [:div
-     (if (= :call option-type)
-       (- (* current-price amount) (* strike amount) paid)
-       (- (* strike amount) (* current-price amount) paid))]))
+    [:div (str "$"
+               (some->
+                pl
+                (format/format-number {:max-fraction-digits 9})))]))
 
 (defn- cell-fn
 "Return the cell hiccup form for rendering.
