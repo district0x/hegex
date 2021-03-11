@@ -35,7 +35,7 @@
 
 ;;TODO clear up whether active account belong under "+"
 (defn header [active-page-name]
-  [:header#globalHeader
+  [:header
    [:div.header-space
     [logo]
     [night-mode]
@@ -59,8 +59,8 @@
                     :route/not-found "not-found")}
             (not dark?) (assoc :className "day")
             dark? (assoc :className "night bp3-dark dark-overlay") )
-    [header :route/home]
-    (into [:div#page-content]
-          children)
-    [footer]]))
-
+     [:div.app-layout
+      [header :route/home]
+      (into [:div#page-content]
+            children)
+      [footer]]]))
