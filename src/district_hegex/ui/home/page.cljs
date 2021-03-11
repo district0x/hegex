@@ -229,7 +229,7 @@
     [:div (str "$"
                (some->
                 pl
-                (format/format-number {:max-fraction-digits 9})))]))
+                (format/format-number {:max-fraction-digits 5})))]))
 
 (defn- cell-fn
 "Return the cell hiccup form for rendering.
@@ -258,15 +258,16 @@
                                              row row-num])))
                              :class-name (when selected? "aqua")
                              :style {:padding "10px"
-                                     :outline "none"
-                                     :cursor "pointer"
-                                     :display "flex"
-                                     :align-items "center"
-                                     :min-height "47px"
-                                     :position "relative"}})
+                                              :outline "none"
+                                              :cursor "pointer"
+                                              :display "flex"
+                                              :align-items "center"
+                                              :min-height "47px"
+                                              :position "relative"}})
    #_(even? row-num) #_(assoc-in [:style :background-color] "#212c35")
    (case key
      :p&l [p&l data (:option-type row)]
+     :option-type [:div {:style {:margin-left "10px"}} content]
      content)
    #_(case col-num
      ;;NOTE

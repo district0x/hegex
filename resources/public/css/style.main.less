@@ -941,7 +941,7 @@ form {
 
 
 #intro {
-  padding-top: 150px;
+  padding-top: 50px;
   overflow: visible;
   p {
     .fils(~"22px/1.45", 300);
@@ -2367,10 +2367,21 @@ h1 {
 
 .hover-label {
   text-transform: uppercase;
-  color: @deepblue;
   font-size: 0.5em;
   font-weight: bold;
   margin-bottom: 1em;
+}
+
+.night {
+  .hover-label {
+    color: white;
+  }
+}
+
+.day {
+  .hover-label {
+    color: black;
+  }
 }
 
 .aqua {
