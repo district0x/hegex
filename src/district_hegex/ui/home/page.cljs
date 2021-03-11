@@ -554,12 +554,19 @@
                           (js/e.persist)
                           (swap! offer assoc :total (oget e ".?target.?value")))}]]
          [:div.box.e
-          [:button.primary
-           {:className (when-not active-option "disabled")
-            :disabled  (not active-option)
-            :on-click #(dispatch [::trading-events/create-offer
-                                  (assoc @offer :id (:hegex-id active-option)) false])}
-           "Offer"]]]]))))
+          (if-not @(subscribe [::trading-subs/approved-for-exchange?])
+            [:button.primary
+            {:className (when-not active-option "disabled")
+             :disabled  (not active-option)
+             :on-click #(dispatch [::hegex-nft/approve-for-exchange!])}
+            "Approve"]
+
+            [:button.primary
+            {:className (when-not active-option "disabled")
+             :disabled  (not active-option)
+             :on-click #(dispatch [::trading-events/create-offer
+                                   (assoc @offer :id (:hegex-id active-option)) false])}
+            "Offer"])]]]))))
 
 (defn- my-hegic-options []
   (let [opts (subscribe [::subs/hegic-full-options])]
@@ -775,6 +782,28 @@
           :on-click #(dispatch [(:evt form-res) @form-data])}
          (:btn form-res)]]]]))))
 
+#_(defn- my-hegic-options []
+  (let [opts (subscribe [::subs/hegic-full-options])]
+    [:div
+     [:div {:style {:display "flex"
+                    :align-items "flex-start"
+                    :justify-content "flex-start"}}
+      [:h1 "My Option Contracts"]]
+     [:div.container {:style {:font-size 16
+                              :text-align "center"
+                              :justify-content "center"
+                              :align-items "center"}}
+      (if-not (zero? (count @opts))
+        [:div {:className "my-option-table"
+               :style {:margin-left "auto"
+                      :margin-right "auto"
+                      :overflow-x "auto"}}
+         [dt/reagent-table opts table-props]]
+
+        [:h5.dim-icon.gap-top
+         "You don't own any Hegic options or Hegex NFTs. Mint one now!"])
+      [my-hegic-option-controls]]]))
+
 (defn- orderbook []
   (let [weth-bal @(subscribe [::weth-subs/balance])
         book @(subscribe [::trading-subs/hegic-book])
@@ -784,8 +813,11 @@
                          web3-utils/wei->eth-number
                          (format/format-number {:max-fraction-digits 5}))]
     [:span
-     {:elevation 5
-      :class-name "trade-nfts-bg"}
+     [:div {:style {:display "flex"
+                    :align-items "flex-start"
+                    :justify-content "flex-start"}}
+      [:h1 "Option Contracts Offers"]]
+
      [:br]
      [:div {:style {:display "flex"
                     :flex-direction "horizontal"
@@ -843,5 +875,8 @@
      [my-hegic-options]
      [:hr]
      [new-hegex]
-     [my-hegex-options]
+     [:hr]
+     [:br]
+     [:br]
+     #_[my-hegex-options]
      [orderbook]]]])
