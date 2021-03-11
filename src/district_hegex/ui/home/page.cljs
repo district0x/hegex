@@ -661,6 +661,7 @@
          [:div.box.a
           [:div.hover-label "Currency"]
           [inputs/select
+           {:color :secondary}
            #_ {:on-change #(js/console.log (keyword (oget % ".?target.?value")))}
            [:option {:selected true
                      :value :eth}
@@ -671,7 +672,8 @@
          [:div.box.d
           [:div.hover-label "Option type"]
           [inputs/select
-           {:on-change (fn [e]
+           {:color :secondary
+            :on-change (fn [e]
                          (js/e.persist)
                          (upd-new-hegex form-data e :new-hegex/option-type))}
            [:option {:selected true
@@ -683,6 +685,7 @@
           [:div.hover-label "Option size"]
           [inputs/text-input
            {:type :number
+            :color :secondary
             :placeholder 0
             :label (some-> @form-data :new-hegex/currency name cs/upper-case)
             :on-change (fn [e]
@@ -693,6 +696,7 @@
           [:div.hover-label "Strike price"]
           [inputs/text-input
            {:type :number
+            :color :secondary
             :min 0
             :placeholder 0
             :on-change  (fn [e]
@@ -702,6 +706,7 @@
           [:div.hover-label "Days of holding"]
           [inputs/text-input
            {:type :number
+            :color :secondary
             :min 0
             :placeholder 0
             :on-change (fn [e]
@@ -718,7 +723,7 @@
           [:div.hover-label "Break-even"]
           [:h3.stats "$" break-even]]
          [:div.box.e
-          [:button.primary
+          [:button.secondary
            {:on-click #(dispatch [::hegex-nft/mint-hegex @form-data])}
            "Buy"]]]
         [:div [:br] [:br] [:br]]]))))

@@ -15,6 +15,11 @@ select {
 select.primary {
   border: 2px solid @hegexgreen;
 }
+
+select.secondary {
+  border: 2px solid @hegexseablue;
+}
+
 /* Remove IE arrow */
 select::-ms-expand {
   display: none;
@@ -47,7 +52,7 @@ select {
 
 
 .little-arrow {
-  color: gray;
+  color: black;
   display: flex;
   justify-content: center;
   align-items: top;
@@ -69,4 +74,8 @@ select {
 
 .little-arrow.primary {
   background-color: @hegexgreen;
+}
+
+.little-arrow.secondary {
+  background-color: @hegexseablue;
 }
