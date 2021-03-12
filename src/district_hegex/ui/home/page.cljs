@@ -3,6 +3,7 @@
   (:require
    [clojure.string :as cs]
    [district-hegex.ui.home.events :as home-events]
+   [district-hegex.ui.home.orderbook :as orderbook]
    [district-hegex.ui.home.subs :as home-subs]
    [district-hegex.ui.components.inputs :as inputs]
    [district.ui.web3-account-balances.subs :as account-balances-subs]
@@ -220,17 +221,6 @@
   [:span
    (str "NFT#" id)])
 
-(defn- p&l [[paid strike amount] option-type]
-  (let [current-price @(subscribe [::external-subs/eth-price])
-        pl (if (= :call option-type)
-             (- (* current-price amount) (* strike amount) paid)
-             (- (* strike amount) (* current-price amount) paid))]
-    ;;NOTE recheck P&L formula (esp. premium)
-    [:div (str "$"
-               (some->
-                pl
-                (format/format-number {:max-fraction-digits 5})))]))
-
 (defn- cell-fn
 "Return the cell hiccup form for rendering.
  - render-info the specific column from :column-model
@@ -266,7 +256,7 @@
                                               :position "relative"}})
    #_(even? row-num) #_(assoc-in [:style :background-color] "#212c35")
    (case key
-     :p&l [p&l data (:option-type row)]
+     :p&l [orderbook/p&l data (:option-type row)]
      :option-type [:div {:style {:margin-left "10px"}} content]
      content)
    #_(case col-num
@@ -804,9 +794,9 @@
          "You don't own any Hegic options or Hegex NFTs. Mint one now!"])
       [my-hegic-option-controls]]]))
 
-(defn- orderbook []
+(defn- orderbook-section []
   (let [weth-bal @(subscribe [::weth-subs/balance])
-        book @(subscribe [::trading-subs/hegic-book])
+        book (subscribe [::trading-subs/hegic-book])
         eth-bal (some-> (subscribe
                           [::account-balances-subs/active-account-balance :ETH])
                          deref
@@ -817,9 +807,24 @@
                     :align-items "flex-start"
                     :justify-content "flex-start"}}
       [:h1 "Option Contracts Offers"]]
+[:div.container {:style {:font-size 16
+                              :text-align "center"
+                              :justify-content "center"
+                         :align-items "center"}}
+ (println "book is "  @book)
+      (if-not (zero? (count @book))
+        [:div {:className "orderbook-table"
+               :style {:margin-left "auto"
+                      :margin-right "auto"
+                      :overflow-x "auto"}}
+         [dt/reagent-table book orderbook/table-props]]
+
+        [:h5.dim-icon.gap-top
+         "There are no active orderbook offers"])
+      #_[my-hegic-option-controls]]
 
      [:br]
-     [:div {:style {:display "flex"
+     #_[:div {:style {:display "flex"
                     :flex-direction "horizontal"
                     :align-items "center"
                     :justify-content "center"}}
@@ -833,7 +838,7 @@
        [:span {:style {:margin-left "5px"}}"NFTs"]]]
 
      [:br]
-     [:div {:style {:text-align "center"}}
+     #_[:div {:style {:text-align "center"}}
       [:span
        {:outlined true
         :small true
@@ -841,7 +846,7 @@
         :intent :primary}
        "Force orderbook update"]]
      [:br]
-     [:div {:style {:text-align "center"}}
+     #_[:div {:style {:text-align "center"}}
       [:p "You need some WETH to buy Hegex NFTs"]
       [:span
        {:intent "primary"
@@ -852,11 +857,11 @@
        {:intent "success"
         :minimal true}
        weth-bal " WETH"]]
-     [convert-weth]
-     [:br]
-     [:br]
-     [:br]
-     [:div.container {:style {:font-size 16
+     #_[convert-weth]
+     ;; [:br]
+     ;; [:br]
+     ;; [:br]
+     #_[:div.container {:style {:font-size 16
                               :text-align "center"
                               :justify-content "center"
                               :align-items "center"}}
@@ -879,4 +884,4 @@
      [:br]
      [:br]
      #_[my-hegex-options]
-     [orderbook]]]])
+     [orderbook-section]]]])

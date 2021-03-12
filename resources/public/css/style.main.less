@@ -2388,6 +2388,10 @@ h1 {
   background-color: @hegexlightgreen;
 }
 
+.hegexyellow {
+  background-color: @hegexorange;
+}
+
 body.night {
   background-color: #121d3e;
 }
@@ -2450,4 +2454,26 @@ tr:first-of-type > td:last-of-type {
 
 tr:first-of-type > td:first-of-type {
   border-radius: 5px 0px 0px 0px;
+}
+
+
+.orderbook-table {
+  margin-bottom: 20px;
+  margin-top: 20px;
+  border-radius: 5px;
+  th {
+    border-bottom: 2px solid @hegexorange;
+    padding: 10px;
+    font-size: 10px;
+    text-align: left;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+  td {
+    background-color: white;
+    font-size: 0.9em;
+    a {
+      color: black !important;
+    }
+  }
 }

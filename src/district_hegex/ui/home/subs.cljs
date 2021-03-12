@@ -12,3 +12,8 @@
   ::my-active-option
   (fn [db]
     (get-in db [:hegic-options/active-option])))
+
+(re-frame/reg-sub
+  ::my-orderbook-option
+  (fn [db]
+    (get-in db [:hegic-options/orderbook-option])))
