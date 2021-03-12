@@ -811,7 +811,6 @@
                               :text-align "center"
                               :justify-content "center"
                          :align-items "center"}}
- (println "book is "  @book)
       (if-not (zero? (count @book))
         [:div {:className "orderbook-table"
                :style {:margin-left "auto"
@@ -821,7 +820,7 @@
 
         [:h5.dim-icon.gap-top
          "There are no active orderbook offers"])
-      #_[my-hegic-option-controls]]
+      [orderbook/controls]]
 
      [:br]
      #_[:div {:style {:display "flex"
