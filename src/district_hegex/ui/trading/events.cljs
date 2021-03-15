@@ -40,11 +40,6 @@
   (http-client/create-http-client "https://sra.bamboorelay.com/ropsten/0x/v3/"))
 
 
-
-(def ^:private token-pair
-  {:base-token-address "0xe41d2489571d322189246dafa5ebde1f4699f498"
-   :quote-token-address "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"})
-
 ;; Uncaught (in promise) SyntaxError: JSON.parse: unexpected character at line 1 column 1 of the JSON data
 #_(defn- orders-legacy []
 ;; get-token-pairs-async
@@ -80,7 +75,7 @@
 ;;TODO
 ;;swap for ::contract-address sub when out of testing
 ;;(contract-queries/contract-address db :hegexoption)
-(def ^:private nft-address "0x3ea0eab5fc002c0b02842996cbed4ce2e20ee7c5")
+(def ^:private nft-address "0xc369dd7700c6d9a29038c129ec65b6a776b1aca1")
 
 
 ;; const zrxTokenAddress = contractWrappers.contractAddresses.zrxToken;

@@ -2,8 +2,6 @@
 @import "functions.less";
 @import "colors.less";
 @import "new-option.less";
-@import '~@blueprintjs/core/lib/css/blueprint.css';
-@import '~@blueprintjs/icons/lib/css/blueprint-icons.css';
 @import "hegex-switch.less";
 @import "select.less";
 @import "input.less";
@@ -49,16 +47,8 @@ ul {
   border: 0;
 }
 
-body {
-  font-size: 100%;
-  color: @bcblue;
-  font: 400 16px 'filson-soft', sans-serif;
-  letter-spacing: .01em;
-  .highlight(@green);
-}
-
 .dark-overlay {
-  background: @darkgrey;
+  background: @hegexbg;
 }
 
 a {
@@ -186,7 +176,6 @@ section {
   position: relative;
   width: 100%;
   height: 100%;
-  max-width: @baseW;
   margin: 0 auto;
 }
 
@@ -952,7 +941,7 @@ form {
 
 
 #intro {
-  padding-top: 150px;
+  padding-top: 50px;
   overflow: visible;
   p {
     .fils(~"22px/1.45", 300);
@@ -2353,11 +2342,18 @@ p.error {
   }
   .header-logo {
     flex-grow: 1;
+    display: flex;
+    flex-direction: horizontal;
+    align-items: center;
   }
   h4 {
     margin-right:1em;
   }
 }
+
+  .hegexlogo {
+    margin-right: 2em;
+  }
 
 hr {
   opacity: 0.1;
@@ -2371,12 +2367,113 @@ h1 {
 
 .hover-label {
   text-transform: uppercase;
-  color: @deepblue;
   font-size: 0.5em;
   font-weight: bold;
   margin-bottom: 1em;
 }
 
+.night {
+  .hover-label {
+    color: white;
+  }
+}
+
+.day {
+  .hover-label {
+    color: black;
+  }
+}
+
 .aqua {
-  background-color: @aqua;
+  background-color: @hegexlightgreen;
+}
+
+.hegexyellow {
+  background-color: @hegexorange;
+}
+
+body.night {
+  background-color: #121d3e;
+}
+
+body.day {
+  background-color: white;
+}
+
+.night {
+.tab {
+  border-bottom: 2px solid #98fbe3;
+  color: #98fbe3;
+  padding-bottom: 4px;
+}
+}
+
+.my-option-table {
+  margin-bottom: 20px;
+  margin-top: 20px;
+  border-radius: 5px;
+  th {
+    border-bottom: 2px solid @hegexgreen;
+    padding: 10px;
+    font-size: 10px;
+    text-align: left;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+  td {
+    background-color: white;
+    font-size: 0.9em;
+    a {
+      color: black !important;
+    }
+  }
+}
+
+.day {
+.tab {
+  border-bottom: 2px solid #121d3e;
+  padding-bottom: 4px;
+  color: #121d3e;
+}
+}
+
+.app-layout {
+  margin-top: 20px;
+  max-width: 980px;
+  margin: auto;
+
+}
+
+header {
+  padding-top: 20px;
+}
+
+tr:first-of-type > td:last-of-type {
+  border-radius: 0px 5px 0px 0px;
+}
+
+tr:first-of-type > td:first-of-type {
+  border-radius: 5px 0px 0px 0px;
+}
+
+
+.orderbook-table {
+  margin-bottom: 20px;
+  margin-top: 20px;
+  border-radius: 5px;
+  th {
+    border-bottom: 2px solid @hegexorange;
+    padding: 10px;
+    font-size: 10px;
+    text-align: left;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+  td {
+    background-color: white;
+    font-size: 0.9em;
+    a {
+      color: black !important;
+    }
+  }
 }

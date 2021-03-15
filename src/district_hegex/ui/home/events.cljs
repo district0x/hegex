@@ -15,3 +15,10 @@
   interceptors
   (fn [db [option row-num]]
     (assoc-in db [:hegic-options/active-option] {:option option :row-num row-num})))
+
+
+(re-frame/reg-event-db
+  ::set-orderbook-active-option
+  interceptors
+  (fn [db [option row-num]]
+    (assoc-in db [:hegic-options/orderbook-option] {:option option :row-num row-num})))

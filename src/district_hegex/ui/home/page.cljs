@@ -3,6 +3,7 @@
   (:require
    [clojure.string :as cs]
    [district-hegex.ui.home.events :as home-events]
+   [district-hegex.ui.home.orderbook :as orderbook]
    [district-hegex.ui.home.subs :as home-subs]
    [district-hegex.ui.components.inputs :as inputs]
    [district.ui.web3-account-balances.subs :as account-balances-subs]
@@ -97,6 +98,7 @@
                         {:path   [:premium]
                          :header "Total Cost"
                          :attrs  (fn [data] {:style {:text-align "left"}})
+                         :format (fn [v] (str "$" v))
                          :key    :premium}
                         ;;NOTE a bit cryptic model, P&L is fetched later via (price+-strike(+-premium*price))
                         ;;NOTE P&L with premium is inaccurate since we _can't_ fetch historical price for premium
@@ -219,14 +221,6 @@
   [:span
    (str "NFT#" id)])
 
-(defn- p&l [[paid strike amount] option-type]
-  (let [current-price @(subscribe [::external-subs/eth-price])]
-    ;;NOTE recheck P&L formula (esp. premium)
-    [:div
-     (if (= :call option-type)
-       (- (* current-price amount) (* strike amount) paid)
-       (- (* strike amount) (* current-price amount) paid))]))
-
 (defn- cell-fn
 "Return the cell hiccup form for rendering.
  - render-info the specific column from :column-model
@@ -254,15 +248,16 @@
                                              row row-num])))
                              :class-name (when selected? "aqua")
                              :style {:padding "10px"
-                                     :outline "none"
-                                     :cursor "pointer"
-                                     :display "flex"
-                                     :align-items "center"
-                                     :min-height "47px"
-                                     :position "relative"}})
+                                              :outline "none"
+                                              :cursor "pointer"
+                                              :display "flex"
+                                              :align-items "center"
+                                              :min-height "47px"
+                                              :position "relative"}})
    #_(even? row-num) #_(assoc-in [:style :background-color] "#212c35")
    (case key
-     :p&l [p&l data (:option-type row)]
+     :p&l [orderbook/p&l data (:option-type row)]
+     :option-type [:div {:style {:margin-left "10px"}} content]
      content)
    #_(case col-num
      ;;NOTE
@@ -509,12 +504,7 @@
 (def ^:private table-props
   {:table-container {:style {:border-radius "5px"
                              :text-align "center"
-                             :padding       "15px"}}
-   :th              {:style {:color            "#aaa"
-                             :border-bottom "1px solid green"
-                             :font-size        "12px"
-                             :text-align       "left"
-                             :padding   "10px"}}
+                             :padding-top       "15px"}}
    :table-state     table-state
    :table {:style {:margin "auto"}}
    :column-model    columns
@@ -554,12 +544,19 @@
                           (js/e.persist)
                           (swap! offer assoc :total (oget e ".?target.?value")))}]]
          [:div.box.e
-          [:button.primary
-           {:className (when-not active-option "disabled")
-            :disabled  (not active-option)
-            :on-click #(dispatch [::trading-events/create-offer
-                                  (assoc @offer :id (:hegex-id active-option)) false])}
-           "Offer"]]]]))))
+          (if-not @(subscribe [::trading-subs/approved-for-exchange?])
+            [:button.primary
+            {:className (when-not active-option "disabled")
+             :disabled  (not active-option)
+             :on-click #(dispatch [::hegex-nft/approve-for-exchange!])}
+            "Approve"]
+
+            [:button.primary
+            {:className (when-not active-option "disabled")
+             :disabled  (not active-option)
+             :on-click #(dispatch [::trading-events/create-offer
+                                   (assoc @offer :id (:hegex-id active-option)) false])}
+            "Offer"])]]]))))
 
 (defn- my-hegic-options []
   (let [opts (subscribe [::subs/hegic-full-options])]
@@ -573,7 +570,8 @@
                               :justify-content "center"
                               :align-items "center"}}
       (if-not (zero? (count @opts))
-        [:div {:style {:margin-left "auto"
+        [:div {:className "my-option-table"
+               :style {:margin-left "auto"
                       :margin-right "auto"
                       :overflow-x "auto"}}
          [dt/reagent-table opts table-props]]
@@ -660,6 +658,7 @@
          [:div.box.a
           [:div.hover-label "Currency"]
           [inputs/select
+           {:color :secondary}
            #_ {:on-change #(js/console.log (keyword (oget % ".?target.?value")))}
            [:option {:selected true
                      :value :eth}
@@ -670,7 +669,8 @@
          [:div.box.d
           [:div.hover-label "Option type"]
           [inputs/select
-           {:on-change (fn [e]
+           {:color :secondary
+            :on-change (fn [e]
                          (js/e.persist)
                          (upd-new-hegex form-data e :new-hegex/option-type))}
            [:option {:selected true
@@ -682,6 +682,7 @@
           [:div.hover-label "Option size"]
           [inputs/text-input
            {:type :number
+            :color :secondary
             :placeholder 0
             :label (some-> @form-data :new-hegex/currency name cs/upper-case)
             :on-change (fn [e]
@@ -692,6 +693,7 @@
           [:div.hover-label "Strike price"]
           [inputs/text-input
            {:type :number
+            :color :secondary
             :min 0
             :placeholder 0
             :on-change  (fn [e]
@@ -701,6 +703,7 @@
           [:div.hover-label "Days of holding"]
           [inputs/text-input
            {:type :number
+            :color :secondary
             :min 0
             :placeholder 0
             :on-change (fn [e]
@@ -717,7 +720,7 @@
           [:div.hover-label "Break-even"]
           [:h3.stats "$" break-even]]
          [:div.box.e
-          [:button.primary
+          [:button.secondary
            {:on-click #(dispatch [::hegex-nft/mint-hegex @form-data])}
            "Buy"]]]
         [:div [:br] [:br] [:br]]]))))
@@ -769,19 +772,58 @@
           :on-click #(dispatch [(:evt form-res) @form-data])}
          (:btn form-res)]]]]))))
 
-(defn- orderbook []
+#_(defn- my-hegic-options []
+  (let [opts (subscribe [::subs/hegic-full-options])]
+    [:div
+     [:div {:style {:display "flex"
+                    :align-items "flex-start"
+                    :justify-content "flex-start"}}
+      [:h1 "My Option Contracts"]]
+     [:div.container {:style {:font-size 16
+                              :text-align "center"
+                              :justify-content "center"
+                              :align-items "center"}}
+      (if-not (zero? (count @opts))
+        [:div {:className "my-option-table"
+               :style {:margin-left "auto"
+                      :margin-right "auto"
+                      :overflow-x "auto"}}
+         [dt/reagent-table opts table-props]]
+
+        [:h5.dim-icon.gap-top
+         "You don't own any Hegic options or Hegex NFTs. Mint one now!"])
+      [my-hegic-option-controls]]]))
+
+(defn- orderbook-section []
   (let [weth-bal @(subscribe [::weth-subs/balance])
-        book @(subscribe [::trading-subs/hegic-book])
+        book (subscribe [::trading-subs/hegic-book])
         eth-bal (some-> (subscribe
                           [::account-balances-subs/active-account-balance :ETH])
                          deref
                          web3-utils/wei->eth-number
                          (format/format-number {:max-fraction-digits 5}))]
     [:span
-     {:elevation 5
-      :class-name "trade-nfts-bg"}
-     [:br]
      [:div {:style {:display "flex"
+                    :align-items "flex-start"
+                    :justify-content "flex-start"}}
+      [:h1 "Option Contracts Offers"]]
+[:div.container {:style {:font-size 16
+                              :text-align "center"
+                              :justify-content "center"
+                         :align-items "center"}}
+      (if-not (zero? (count @book))
+        [:div {:className "orderbook-table"
+               :style {:margin-left "auto"
+                      :margin-right "auto"
+                      :overflow-x "auto"}}
+         [dt/reagent-table book orderbook/table-props]]
+
+        [:h5.dim-icon.gap-top
+         "There are no active orderbook offers"])
+      [orderbook/controls]]
+
+     [:br]
+     #_[:div {:style {:display "flex"
                     :flex-direction "horizontal"
                     :align-items "center"
                     :justify-content "center"}}
@@ -795,7 +837,7 @@
        [:span {:style {:margin-left "5px"}}"NFTs"]]]
 
      [:br]
-     [:div {:style {:text-align "center"}}
+     #_[:div {:style {:text-align "center"}}
       [:span
        {:outlined true
         :small true
@@ -803,7 +845,7 @@
         :intent :primary}
        "Force orderbook update"]]
      [:br]
-     [:div {:style {:text-align "center"}}
+     #_[:div {:style {:text-align "center"}}
       [:p "You need some WETH to buy Hegex NFTs"]
       [:span
        {:intent "primary"
@@ -814,11 +856,11 @@
        {:intent "success"
         :minimal true}
        weth-bal " WETH"]]
-     [convert-weth]
-     [:br]
-     [:br]
-     [:br]
-     [:div.container {:style {:font-size 16
+     #_[convert-weth]
+     ;; [:br]
+     ;; [:br]
+     ;; [:br]
+     #_[:div.container {:style {:font-size 16
                               :text-align "center"
                               :justify-content "center"
                               :align-items "center"}}
@@ -833,17 +875,12 @@
   [app-layout
    [:section#intro
     [:div.container
-     [:span
-      {:on-change constantly
-       :large true
-       :selected-tab-id "hegic"}
-      [:span
-       {:id "hegic"
-        :large true
-        :title "Hegic"}]]
      [:br]
      [my-hegic-options]
      [:hr]
      [new-hegex]
-     [my-hegex-options]
-     [orderbook]]]])
+     [:hr]
+     [:br]
+     [:br]
+     #_[my-hegex-options]
+     [orderbook-section]]]])

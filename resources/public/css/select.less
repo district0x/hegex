@@ -8,10 +8,18 @@ select {
   appearance: none;
   outline: 0;
   box-shadow: none;
-  border: 2px solid cyan;
   background: transparent;
   color: inherit;
+  border: none;
 }
+select.primary {
+  border: 2px solid @hegexgreen;
+}
+
+select.secondary {
+  border: 2px solid @hegexseablue;
+}
+
 /* Remove IE arrow */
 select::-ms-expand {
   display: none;
@@ -21,43 +29,53 @@ select::-ms-expand {
   position: relative;
   display: flex;
   min-height: 1em;
-  line-height: 3;
   overflow: hidden;
+  font-size: 15px;
   border-radius: .25em;
 }
 select {
   flex: 1;
   position: relative;
-  padding: 0 .5em;
+  padding: 11px;
   cursor: pointer;
   color: inherit;
 }
 /* Arrow */
 /* Transition */
-.select:hover::after {
-  color: cyan;
-}
 
+}
+.night {
+  .hegex-select {
+    color: white;
+  }
 }
 
 
 .little-arrow {
-  color: navy;
+  color: black;
   display: flex;
   justify-content: center;
   align-items: top;
-  line-height: 1.5;
-  background-color: cyan;
+  line-height: 1;
   border-radius: 50%;
   position: absolute;
-  top: 0.6em;
+  top: 0.7em;
   z-index: 89;
   right: 10px;
-  width: 40px;
-  height: 40px;
+  width: 22px;
+  height: 22px;
+  font-size: 15px;
   cursor: pointer;
   pointer-events: none;
   -webkit-transition: .25s all ease;
   -o-transition: .25s all ease;
   transition: .25s all ease;
+}
+
+.little-arrow.primary {
+  background-color: @hegexgreen;
+}
+
+.little-arrow.secondary {
+  background-color: @hegexseablue;
 }

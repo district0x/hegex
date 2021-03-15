@@ -9,52 +9,61 @@
   padding-left: 0.5em;
   outline: 0;
   box-shadow: none;
-  border: 2px solid cyan;
   background: transparent;
   color: inherit;
   position: relative;
   display: inline-block;
   min-height: 1em;
+  font-size: 13px;
   width: 100%;
+  padding-left: 15px;
   line-height: 3;
   overflow: hidden;
   border-radius: .25em;
 }
 
+.night {
+  .hegex-input {
+    color: white;
+  }
+}
 
+.day {
+  .hegex-input {
+    color: black;
+  }
+}
 
+.hegex-input.primary {
+  border: 2px solid @hegexgreen;
+}
 
-.little-arrow {
-  color: navy;
-  display: flex;
-  justify-content: center;
-  align-items: top;
-  line-height: 1.5;
-  background-color: cyan;
-  border-radius: 50%;
-  position: absolute;
-  top: 0.6em;
-  z-index: 89;
-  right: 10px;
-  width: 40px;
-  height: 40px;
-  cursor: pointer;
-  pointer-events: none;
-  -webkit-transition: .25s all ease;
-  -o-transition: .25s all ease;
-  transition: .25s all ease;
+.hegex-input.secondary {
+  border: 2px solid @hegexseablue;
+}
+
+.hegex-input.yellow {
+  border: 2px solid @hegexorange;
 }
 
 .hinput-wrapper {
     position:relative;
     background-color: inherit;
 }
+
 .hinput-label {
     padding-left: 0.6em;
     position: absolute;
-    top: 1em;
-    background-color: inherit;
+    top: 1.2em;
+    font-size: 13px;
+    background-color: none;
     right: 20px;
+}
+
+.night {
+  .hinput-label {
+    color: white;
+  }
 }
 
 .hegex-input:focus + .hinput-label {

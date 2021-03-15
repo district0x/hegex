@@ -1,6 +1,7 @@
 (ns district-hegex.ui.components.app-layout
   (:require
    [district-hegex.ui.components.nav :as nav]
+   [district-hegex.ui.components.tab :as tabs]
    [react-dom :as rdom]
    [district-hegex.ui.home.events :as home-events]
    [district-hegex.ui.home.subs :as home-subs]
@@ -12,12 +13,6 @@
    [district.ui.component.active-account-balance :refer [active-account-balance]]
    [district.ui.component.form.input :as inputs :refer [text-input*]]
    [district.ui.router.events]
-   ;; ["@emotion/react" :as emotion]
-   ;; ["@rebass/preset" :as rebass-preset]
-   ;; ["rebass/styled-components" :as rebass-styled]
-   ;; ["styled-components" :as styled]
-   ;; ["@blueprintjs/core" :as blueprint]
-   ;; ["rebass" :as rebass]
    [district-hegex.ui.components.components :as c]
    [district.ui.router.subs :as router-subs]
    [district.ui.router.utils :as router-utils]
@@ -27,7 +22,8 @@
 
 (defn- logo []
   [:div.header-logo
-   [:img.hegexlogo {:src "/images/hegexLogo.png"}]])
+   [:img.hegexlogo {:src "/images/hegexLogo.png"}]
+   [tabs/tab {:caption "Hegex"}]])
 
 (defn- night-mode []
   [:div.nightmode
@@ -39,7 +35,7 @@
 
 ;;TODO clear up whether active account belong under "+"
 (defn header [active-page-name]
-  [:header#globalHeader
+  [:header
    [:div.header-space
     [logo]
     [night-mode]
@@ -61,9 +57,10 @@
                     :route/my-account "page-my-account"
                     :route/terms "page-terms"
                     :route/not-found "not-found")}
-            dark? (assoc :className "bp3-dark dark-overlay") )
-    [header :route/home]
-    (into [:div#page-content]
-          children)
-    [footer]]))
-
+            (not dark?) (assoc :className "day")
+            dark? (assoc :className "night bp3-dark dark-overlay") )
+     [:div.app-layout
+      [header :route/home]
+      (into [:div#page-content]
+            children)
+      [footer]]]))

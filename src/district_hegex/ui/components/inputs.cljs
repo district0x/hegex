@@ -3,24 +3,29 @@
    [district-hegex.ui.home.subs :as home-subs]
    [re-frame.core :refer [subscribe]]))
 
-(defn- little-arrow []
-  [:span.little-arrow
+(defn- little-arrow [color]
+  [:span.little-arrow {:className (or color "primary")}
    "⌄"])
 
 (defn select [& children]
-  [:div.hegex-select
-   [little-arrow]
-   [:div.select
-    (into [:select] children)]])
+  (let [color (some-> children first :color)
+        c (case color
+            :primary :select.primary
+            :secondary :select.secondary
+            :select.primary)]
+    [:div.hegex-select
+    [little-arrow color]
+    [:div.select
+     (into [c] children)]]))
 
-(defn text-input [{:keys [type min max on-change label] :as props}]
-  (let [dark? @(subscribe [::home-subs/dark-mode?])]
-    [:div.hinput-wrapper
-     [:input.hegex-input (merge props {:type      type
-                                       :on-change on-change
-                                       :min       min
-                                       :max       max})]
-    (when label
-      ;;NOTE ideally  should be set via less inheritance
-      [:div.hinput-label {:style {:background-color (if dark? "black" "white")}}
-       label])]))
+(defn text-input [{:keys [type min max on-change label color ] :as props}]
+  [:div.hinput-wrapper
+   [:input.hegex-input (merge props {:type      type
+                                     :className (or color "primary")
+                                     :on-change on-change
+                                     :min       min
+                                     :max       max})]
+   (when label
+     ;;NOTE ideally  should be set via less inheritance
+     [:div.hinput-label
+      label])])

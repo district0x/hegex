@@ -335,7 +335,10 @@
                                                                       config
                                                                       data-atom
                                                                       state-atom)]
+                                                      [:tr  [:td {:style {:height "30px"
+                                                                          :background-color "transparent"}}]]
                                                       [:tbody (:tbody config)
+
                                                        (rows-fn @data-atom state-atom config)]]])})))
 
 (defn reagent-table
