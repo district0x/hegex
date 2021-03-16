@@ -1,4 +1,4 @@
-(ns district-hegex.ui.components.tab
+(ns district-hegex.ui.components.tabs
   (:require
    [district.ui.router.utils :as router-utils]
    [re-frame.core :refer [subscribe dispatch]]
