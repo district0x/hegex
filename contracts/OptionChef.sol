@@ -94,6 +94,10 @@ contract OptionChef is Ownable {
         emit Exercised(_tokenId, profit);
     }
 
+    function transferHegexOwnership (uint _newOwner) public onlyOwner {
+        hegexoption.transferOwnership(_newOwner);
+    }
+
     function getUnderlyingOptionId(uint _tokenId) public view returns (uint) {
         return uIds[_tokenId];
     }
