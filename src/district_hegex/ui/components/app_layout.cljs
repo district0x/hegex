@@ -1,7 +1,7 @@
 (ns district-hegex.ui.components.app-layout
   (:require
    [district-hegex.ui.components.nav :as nav]
-   [district-hegex.ui.components.tab :as tabs]
+   [district-hegex.ui.components.tabs :as tabs]
    [react-dom :as rdom]
    [district-hegex.ui.home.events :as home-events]
    [district-hegex.ui.home.subs :as home-subs]
