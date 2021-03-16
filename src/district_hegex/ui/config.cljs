@@ -9,6 +9,7 @@
 (def contracts-to-load [:optionchef
                         :hegexoption
                         :weth
+                        :wbtcoptions
                         :brokenethoptions])
 
 (def development-config
