@@ -8,4 +8,5 @@ interface IHegexoption {
     function mintHegexoption(address _to) external returns (uint256);
     //IERC721 functions in use
     function ownerOf(uint256 tokenId) external view returns (address owner);
+    function transferOwnership(address newOwner) external;
 }
