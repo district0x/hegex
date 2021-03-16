@@ -1,7 +1,9 @@
 FROM node:15
 COPY . /build
 
-RUN apt-get update && apt-get install clojure -yqq --no-install-recommends
+RUN apt-get update && apt-get install clojure=1.10.* -yqq --no-install-recommends \
+        && apt-get clean \
+        && rm -rf /var/lib/apt/lists/*
 ADD  https://github.com/ethereum/solidity/releases/download/v0.4.24/solc-static-linux /bin
 ADD https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein /bin
 
@@ -10,8 +12,7 @@ RUN chmod a+x /bin/solc-static-linux /usr/bin/solc /bin/lein
 
 
 WORKDIR /build
-RUN npm set progress=false \
-    &&  npm i -s -y
+RUN npm set progress=false && npm i -s -y
 
 RUN  npm i -g -y -s truffle http-server
 RUN truffle compile
