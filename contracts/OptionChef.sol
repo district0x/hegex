@@ -16,7 +16,8 @@ contract OptionChef is Ownable {
 
     //storage
 
-    IHegicOptions public hegicOption;
+    IHegicOptions public hegicOptionETH;
+    IHegicOptions public hegicOptionBTC;
     IHegexoption public hegexoption;
 
     //ideally this should've been a mapping/arr of id->Struct {owner, id}
@@ -35,10 +36,12 @@ contract OptionChef is Ownable {
 
     //utility functions
 
-    function updateHegicOption(IHegicOptions _hegicOption)
+    function updateHegicOption(IHegicOptions _hegicOptionETH,
+                               IHegicOptions _hegicOptionBTC)
         external
         onlyOwner {
-        hegicOption = _hegicOption ;
+        hegicOptionETH = _hegicOptionETH;
+        hegicOptionBTC = _hegicOptionBTC;
     }
 
     function updateHegexoption(IHegexoption _hegexoption)
@@ -47,10 +50,21 @@ contract OptionChef is Ownable {
         hegexoption = _hegexoption;
     }
 
-    constructor(IHegicOptions _hegicOption) public {
-        hegicOption = _hegicOption ;
+    constructor(IHegicOptions _hegicOptionETH,
+                IHegicOptions _hegicOptionBTC) public {
+        hegicOptionETH = _hegicOptionETH;
+        hegicOptionBTC = _hegicOptionBTC;
     }
 
+    // direct user to a right contract
+    // NOTE: optimize to bool if gas savings are substantial
+    function getHegic(uint8 _optionType) public view returns (IHegicOptions) {
+        if (_optionType == 0) {
+            return hegicOptionETH;
+        } else  {
+            return hegicOptionBTC;
+        }
+    }
 
     //core (un)wrap functionality
 
@@ -58,8 +72,9 @@ contract OptionChef is Ownable {
     /**
      * @notice Hegexoption wrapper adapter for Hegic
      */
-    function wrapHegic(uint _uId) public returns (uint newTokenId) {
+    function wrapHegic(uint _uId, uint8 _optionType) public returns (uint newTokenId) {
         require(ids[_uId] == 0 , "UOPT:exists");
+        IHegicOptions hegicOption = getHegic(_optionType);
         (, address holder, , , , , , ) = hegicOption.options(_uId);
         //auth is a bit unintuitive for wrapping, see NFT.sol:isApprovedOrOwner()
         require(holder == msg.sender || holder == address(this), "UOPT:ownership");
@@ -74,9 +89,10 @@ contract OptionChef is Ownable {
      * @notice check burning logic, do we really want to burn it (vs meta)
      * @notice TODO recheck escrow mechanism on 0x relay to prevent unwrapping when locked
      */
-    function unwrapHegic(uint _tokenId) external onlyTokenOwner(_tokenId) {
+    function unwrapHegic(uint8 _optionType, uint _tokenId) external onlyTokenOwner(_tokenId) {
         // checks if hegicOption will allow to transfer option ownership
-        (IHegicOptions.State state, , , , , , uint expiration ,) = getUnderlyingOptionParams(_tokenId);
+        IHegicOptions hegicOption = getHegic(_optionType);
+        (IHegicOptions.State state, , , , , , uint expiration ,) = getUnderlyingOptionParams(_optionType, _tokenId);
         if (state == IHegicOptions.State.Active || expiration >= block.timestamp) {
             hegicOption.transfer(uIds[_tokenId], msg.sender);
         }
@@ -87,14 +103,15 @@ contract OptionChef is Ownable {
         emit Unwrapped(msg.sender, _tokenId);
     }
 
-    function exerciseHegic(uint _tokenId) external onlyTokenOwner(_tokenId) {
+    function exerciseHegic(uint8 _optionType, uint _tokenId) external onlyTokenOwner(_tokenId) {
+        IHegicOptions hegicOption = getHegic(_optionType);
         hegicOption.exercise(getUnderlyingOptionId(_tokenId));
         uint profit = address(this).balance;
         payable(msg.sender).transfer(profit);
         emit Exercised(_tokenId, profit);
     }
 
-    function transferHegexOwnership (uint _newOwner) public onlyOwner {
+    function transferHegexOwnership (address _newOwner) public onlyOwner {
         hegexoption.transferOwnership(_newOwner);
     }
 
@@ -102,7 +119,7 @@ contract OptionChef is Ownable {
         return uIds[_tokenId];
     }
 
-    function getUnderlyingOptionParams(uint _tokenId)
+    function getUnderlyingOptionParams(uint8 _optionType, uint _tokenId)
         public
         view
         returns (
@@ -122,18 +139,20 @@ contract OptionChef is Ownable {
          lockedAmount,
          premium,
          expiration,
-         optionType) = hegicOption.options(uIds[_tokenId]);
+         optionType) = getHegic(_optionType).options(uIds[_tokenId]);
     }
 
     /**
      * @notice check whether Chef has underlying option locked
      */
-    function isDelegated(uint _tokenId) public view returns (bool) {
+    function isDelegated(uint8 _optionType, uint _tokenId) public view returns (bool) {
+        IHegicOptions hegicOption = getHegic(_optionType);
         ( , address holder, , , , , , ) = hegicOption.options(uIds[_tokenId]);
         return holder == address(this);
     }
 
     function createHegic(
+        uint8 _hegicOptionType,
         uint _period,
         uint _amount,
         uint _strike,
@@ -143,10 +162,11 @@ contract OptionChef is Ownable {
         external
         returns (uint)
     {
+        IHegicOptions hegicOption = getHegic(_hegicOptionType);
         uint optionId = hegicOption.create{value: msg.value}(_period, _amount, _strike, _optionType);
         // return eth excess
         payable(msg.sender).transfer(address(this).balance);
-        uint hegexId = wrapHegic(optionId);
+        uint hegexId = wrapHegic(optionId, _hegicOptionType);
         return hegexId;
         emit CreatedHegic(optionId, hegexId);
     }
