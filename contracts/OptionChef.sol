@@ -6,6 +6,7 @@ pragma solidity 0.6.12;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./interfaces/IOptions.sol";
 import "./interfaces/IHegexoption.sol";
+import "./interfaces/IChefData.sol";
 
 /**
  * @author ivan@district0x
@@ -19,6 +20,7 @@ contract OptionChef is Ownable {
     IHegicOptions public hegicOptionETH;
     IHegicOptions public hegicOptionBTC;
     IHegexoption public hegexoption;
+    IOptionChefData public chefData;
 
     //ideally this should've been a mapping/arr of id->Struct {owner, id}
     //there are a few EVM gotchas for this (afaik one can't peek into
@@ -51,9 +53,11 @@ contract OptionChef is Ownable {
     }
 
     constructor(IHegicOptions _hegicOptionETH,
-                IHegicOptions _hegicOptionBTC) public {
+                IHegicOptions _hegicOptionBTC,
+                IOptionChefData  _chefData) public {
         hegicOptionETH = _hegicOptionETH;
         hegicOptionBTC = _hegicOptionBTC;
+        chefData = _chefData;
     }
 
     // direct user to a right contract

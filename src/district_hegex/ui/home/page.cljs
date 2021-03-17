@@ -641,6 +641,7 @@
 
 (defn- new-hegex []
   (let [form-data (r/atom {:new-hegex/currency :eth
+                           :new-hegex/hegic-type 0
                            :new-hegex/option-type :call})]
     (fn []
       (println "form-data inside is" @form-data)

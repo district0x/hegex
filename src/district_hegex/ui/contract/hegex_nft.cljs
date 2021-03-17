@@ -386,7 +386,7 @@
                     2)
           period-secs (some-> period (* 86400))
           strike-wei (some-> strike-price (* 100000000))
-          option-args [period-secs amount strike-wei opt-dir]]
+          option-args [0 period-secs amount strike-wei opt-dir]]
       {:web3/call
        {:web3 (web3-queries/web3 db)
         :fns [{:instance (contract-queries/instance db :brokenethoptions)
@@ -408,6 +408,7 @@
   interceptors
   (fn [{:keys [db]} [{:keys [:new-hegex/period
                             :new-hegex/amount
+                            :new-hegex/hegic-type
                             :new-hegex/strike-price
                             :new-hegex/option-type]
                      :as form-data}]]
@@ -418,7 +419,7 @@
                     2)
           period-secs (some-> period (* 86400))
           strike-wei (some-> strike-price (* 100000000))
-          option-args [period-secs amount strike-wei opt-dir]]
+          option-args [0 period-secs amount strike-wei opt-dir]]
       #_(println "mint-hegex dbg args are" [period amount strike-price opt-dir])
       {:web3/call
        {:web3 (web3-queries/web3 db)
