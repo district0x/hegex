@@ -167,8 +167,8 @@ contract OptionChef is Ownable {
         // return eth excess
         payable(msg.sender).transfer(address(this).balance);
         uint hegexId = wrapHegic(optionId, _hegicOptionType);
-        return hegexId;
         emit CreatedHegic(optionId, hegexId);
+        return hegexId;
     }
 
     modifier onlyTokenOwner(uint _itemId) {

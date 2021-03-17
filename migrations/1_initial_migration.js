@@ -10,6 +10,11 @@ const hegicETHFactory = {
   "mainnet": "0xefc0eeadc1132a12c9487d800112693bf49ecfa2",
 }
 
+const hegicWBTCFactory = {
+  "ropsten": "0x3aD466588F5f8f1Ce896645d5322db3F25810639",
+  "mainnet": "0x3961245db602ed7c03eeccda33ea3846bd8723bd",
+}
+
 
 const Migrations = artifacts.require("Migrations");
 const chef = artifacts.require('OptionChef');
@@ -21,7 +26,7 @@ module.exports = async (deployer, network) => {
   await deployer.deploy(Migrations);
   const migrations = await Migrations.deployed();
   //important - will throw on localnet as hegic contracts are deployed separately
-  await deployer.deploy(chef, hegicETHFactory[network]);
+  await deployer.deploy(chef, hegicETHFactory[network], hegicWBTCFactory[network]);
   const chefd = await chef.deployed();
   await deployer.deploy(token, chefd.address, METADATA_BASE);
   const tokend = await token.deployed();
