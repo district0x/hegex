@@ -121,6 +121,10 @@ contract OptionChef is Ownable {
         hegexoption.transferOwnership(_newOwner);
     }
 
+    function transferDataOwnership (address _newOwner) public onlyOwner {
+        chefData.transferOwnership(_newOwner);
+    }
+
     function getUnderlyingOptionId(uint _tokenId) public view returns (uint) {
         return chefData.uIds(_tokenId);
     }
