@@ -155,8 +155,9 @@ contract OptionChef is Ownable {
     /**
      * @notice check whether Chef has underlying option locked
      */
-    function isDelegated(uint8 _optionType, uint _tokenId) public view returns (bool) {
-        IHegicOptions hegicOption = getHegic(_optionType);
+    function isDelegated(uint _tokenId) public view returns (bool) {
+        uint8 optionType = chefData.optionType(chefData.uIds(_tokenId));
+        IHegicOptions hegicOption = getHegic(optionType);
         ( , address holder, , , , , , ) = hegicOption.options(chefData.uIds(_tokenId));
         return holder == address(this);
     }
