@@ -17,6 +17,7 @@ const hegicWBTCFactory = {
 
 
 const Migrations = artifacts.require("Migrations");
+const chefData = artifacts.require('OptionChefData');
 const chef = artifacts.require('OptionChef');
 const token = artifacts.require('Hegexoption.sol');
 const METADATA_BASE = "https://stacksideflow.github.io/hegexoption-nft/meta/"
@@ -26,7 +27,9 @@ module.exports = async (deployer, network) => {
   await deployer.deploy(Migrations);
   const migrations = await Migrations.deployed();
   //important - will throw on localnet as hegic contracts are deployed separately
-  await deployer.deploy(chef, hegicETHFactory[network], hegicWBTCFactory[network]);
+
+  const chefdatad = await chefData.deployed();
+  await deployer.deploy(chef, hegicETHFactory[network], hegicWBTCFactory[network], chefdatad.address);
   const chefd = await chef.deployed();
   await deployer.deploy(token, chefd.address, METADATA_BASE);
   const tokend = await token.deployed();
