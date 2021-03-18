@@ -9,7 +9,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract OptionChefData is Ownable {
     mapping (uint => uint) public uIds;
     mapping (uint => uint) public ids;
-    mapping (uint => uint) public optionType;
+    mapping (uint => uint8) public optionType;
 
     function setuid(uint k, uint v) public onlyOwner {
         uIds[k] = v;
@@ -19,7 +19,7 @@ contract OptionChefData is Ownable {
         ids[k] = v;
     }
 
-    function setoptiontype(uint k, uint v) public onlyOwner {
+    function setoptiontype(uint k, uint8 v) public onlyOwner {
         optionType[k] = v;
     }
 }

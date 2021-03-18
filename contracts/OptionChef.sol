@@ -25,8 +25,8 @@ contract OptionChef is Ownable {
     //ideally this should've been a mapping/arr of id->Struct {owner, id}
     //there are a few EVM gotchas for this (afaik one can't peek into
     //mapped structs from another contracts, happy to restructure if I'm wrong though)
-    mapping (uint => uint) uIds;
-    mapping (uint => uint) ids;
+    // mapping (uint => uint) uIds;
+    // mapping (uint => uint) ids;
 
     //events
 
@@ -77,14 +77,15 @@ contract OptionChef is Ownable {
      * @notice Hegexoption wrapper adapter for Hegic
      */
     function wrapHegic(uint _uId, uint8 _optionType) public returns (uint newTokenId) {
-        require(ids[_uId] == 0 , "UOPT:exists");
+        require(chefData.ids(_uId) == 0 , "UOPT:exists");
         IHegicOptions hegicOption = getHegic(_optionType);
         (, address holder, , , , , , ) = hegicOption.options(_uId);
         //auth is a bit unintuitive for wrapping, see NFT.sol:isApprovedOrOwner()
         require(holder == msg.sender || holder == address(this), "UOPT:ownership");
         newTokenId = hegexoption.mintHegexoption(msg.sender);
-        uIds[newTokenId] = _uId;
-        ids[_uId] = newTokenId;
+        chefData.setuid(newTokenId, _uId);
+        chefData.setid(_uId, newTokenId);
+        chefData.setoptiontype(_uId, _optionType);
         emit Wrapped(msg.sender, _uId);
     }
 
@@ -98,12 +99,13 @@ contract OptionChef is Ownable {
         IHegicOptions hegicOption = getHegic(_optionType);
         (IHegicOptions.State state, , , , , , uint expiration ,) = getUnderlyingOptionParams(_optionType, _tokenId);
         if (state == IHegicOptions.State.Active || expiration >= block.timestamp) {
-            hegicOption.transfer(uIds[_tokenId], msg.sender);
+            hegicOption.transfer(chefData.uIds(_tokenId), msg.sender);
         }
         //burns anyway if token is expired
         hegexoption.burnHegexoption(_tokenId);
-        ids[uIds[_tokenId]] = 0;
-        uIds[_tokenId] = 0;
+        uint utokenid = chefData.uIds(_tokenId);
+        chefData.setid(utokenid, 0);
+        chefData.setuid(_tokenId, 0);
         emit Unwrapped(msg.sender, _tokenId);
     }
 
@@ -120,7 +122,7 @@ contract OptionChef is Ownable {
     }
 
     function getUnderlyingOptionId(uint _tokenId) public view returns (uint) {
-        return uIds[_tokenId];
+        return chefData.uIds(_tokenId);
     }
 
     function getUnderlyingOptionParams(uint8 _optionType, uint _tokenId)
@@ -143,7 +145,7 @@ contract OptionChef is Ownable {
          lockedAmount,
          premium,
          expiration,
-         optionType) = getHegic(_optionType).options(uIds[_tokenId]);
+         optionType) = getHegic(_optionType).options(chefData.uIds(_tokenId));
     }
 
     /**
@@ -151,7 +153,7 @@ contract OptionChef is Ownable {
      */
     function isDelegated(uint8 _optionType, uint _tokenId) public view returns (bool) {
         IHegicOptions hegicOption = getHegic(_optionType);
-        ( , address holder, , , , , , ) = hegicOption.options(uIds[_tokenId]);
+        ( , address holder, , , , , , ) = hegicOption.options(chefData.uIds(_tokenId));
         return holder == address(this);
     }
 
