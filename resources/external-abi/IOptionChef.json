@@ -17,38 +17,38 @@
           "type": "bool"
         }
       ],
-      "stateMutability": "nonpayable",
+      "stateMutability": "view",
       "type": "function"
     }
   ],
-  "metadata": "{\"compiler\":{\"version\":\"0.6.12+commit.27d51765\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_tokenId\",\"type\":\"uint256\"}],\"name\":\"isDelegated\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"/home/stack/work/d0xhegex/contracts/interfaces/IOptionChef.sol\":\"IOptionChef\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"/home/stack/work/d0xhegex/contracts/interfaces/IOptionChef.sol\":{\"keccak256\":\"0x6ac7ca8658339ac3631a941645dcc7e75b057005420b9089bfa6c6eedbb2e0ec\",\"license\":\"UNLICENSED\",\"urls\":[\"bzz-raw://071e512a1ece151d16e6565e483ffde4ec7247da2bb1ebd1ef75a74326ac3087\",\"dweb:/ipfs/QmPB3dPMsz3mAqJb6Ci5j1AEstmKwRFuNcYUZEGL1sTACd\"]}},\"version\":1}",
+  "metadata": "{\"compiler\":{\"version\":\"0.6.12+commit.27d51765\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_tokenId\",\"type\":\"uint256\"}],\"name\":\"isDelegated\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"/home/stack/work/d0xhegex/contracts/interfaces/IOptionChef.sol\":\"IOptionChef\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"/home/stack/work/d0xhegex/contracts/interfaces/IOptionChef.sol\":{\"keccak256\":\"0x0299cab7cf671a9979dde8e8fdca3d53057aed14de7b84980c875b778b74a897\",\"license\":\"UNLICENSED\",\"urls\":[\"bzz-raw://46d7960bb530693c9d3719ae9002f623190afa029f2fdf02d90e224d6a30de89\",\"dweb:/ipfs/QmQnw1Mw512r751PB1kQhDaALWux4Ew4XtShAs7eydRhtM\"]}},\"version\":1}",
   "bytecode": "0x",
   "deployedBytecode": "0x",
   "immutableReferences": {},
   "sourceMap": "",
   "deployedSourceMap": "",
-  "source": "// SPDX-License-Identifier: UNLICENSED\n\npragma solidity 0.6.12;\n\ninterface IOptionChef {\n    function isDelegated(uint _tokenId) external returns (bool);\n}\n",
+  "source": "// SPDX-License-Identifier: UNLICENSED\n\npragma solidity 0.6.12;\n\ninterface IOptionChef {\n    function isDelegated(uint _tokenId) external view returns (bool);\n}\n",
   "sourcePath": "/home/stack/work/d0xhegex/contracts/interfaces/IOptionChef.sol",
   "ast": {
     "absolutePath": "/home/stack/work/d0xhegex/contracts/interfaces/IOptionChef.sol",
     "exportedSymbols": {
       "IOptionChef": [
-        688
+        130
       ]
     },
-    "id": 689,
+    "id": 131,
     "license": "UNLICENSED",
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 680,
+        "id": 122,
         "literals": [
           "solidity",
           "0.6",
           ".12"
         ],
         "nodeType": "PragmaDirective",
-        "src": "40:23:4"
+        "src": "40:23:1"
       },
       {
         "abstract": false,
@@ -57,9 +57,9 @@
         "contractKind": "interface",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 688,
+        "id": 130,
         "linearizedBaseContracts": [
-          688
+          130
         ],
         "name": "IOptionChef",
         "nodeType": "ContractDefinition",
@@ -68,7 +68,7 @@
             "body": null,
             "documentation": null,
             "functionSelector": "21d6ff46",
-            "id": 687,
+            "id": 129,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
@@ -76,18 +76,18 @@
             "nodeType": "FunctionDefinition",
             "overrides": null,
             "parameters": {
-              "id": 683,
+              "id": 125,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 682,
+                  "id": 124,
                   "mutability": "mutable",
                   "name": "_tokenId",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
-                  "scope": 687,
-                  "src": "114:13:4",
+                  "scope": 129,
+                  "src": "114:13:1",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -95,10 +95,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 681,
+                    "id": 123,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
-                    "src": "114:4:4",
+                    "src": "114:4:1",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -108,21 +108,21 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "113:15:4"
+              "src": "113:15:1"
             },
             "returnParameters": {
-              "id": 686,
+              "id": 128,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 685,
+                  "id": 127,
                   "mutability": "mutable",
                   "name": "",
                   "nodeType": "VariableDeclaration",
                   "overrides": null,
-                  "scope": 687,
-                  "src": "147:4:4",
+                  "scope": 129,
+                  "src": "152:4:1",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -130,10 +130,10 @@
                     "typeString": "bool"
                   },
                   "typeName": {
-                    "id": 684,
+                    "id": 126,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
-                    "src": "147:4:4",
+                    "src": "152:4:1",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bool",
                       "typeString": "bool"
@@ -143,27 +143,27 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "146:6:4"
+              "src": "151:6:1"
             },
-            "scope": 688,
-            "src": "93:60:4",
-            "stateMutability": "nonpayable",
+            "scope": 130,
+            "src": "93:65:1",
+            "stateMutability": "view",
             "virtual": false,
             "visibility": "external"
           }
         ],
-        "scope": 689,
-        "src": "65:90:4"
+        "scope": 131,
+        "src": "65:95:1"
       }
     ],
-    "src": "40:116:4"
+    "src": "40:121:1"
   },
   "legacyAST": {
     "attributes": {
       "absolutePath": "/home/stack/work/d0xhegex/contracts/interfaces/IOptionChef.sol",
       "exportedSymbols": {
         "IOptionChef": [
-          688
+          130
         ]
       },
       "license": "UNLICENSED"
@@ -177,9 +177,9 @@
             ".12"
           ]
         },
-        "id": 680,
+        "id": 122,
         "name": "PragmaDirective",
-        "src": "40:23:4"
+        "src": "40:23:1"
       },
       {
         "attributes": {
@@ -194,10 +194,10 @@
           "documentation": null,
           "fullyImplemented": false,
           "linearizedBaseContracts": [
-            688
+            130
           ],
           "name": "IOptionChef",
-          "scope": 689
+          "scope": 131
         },
         "children": [
           {
@@ -213,8 +213,8 @@
               ],
               "name": "isDelegated",
               "overrides": null,
-              "scope": 688,
-              "stateMutability": "nonpayable",
+              "scope": 130,
+              "stateMutability": "view",
               "virtual": false,
               "visibility": "external"
             },
@@ -227,7 +227,7 @@
                       "mutability": "mutable",
                       "name": "_tokenId",
                       "overrides": null,
-                      "scope": 687,
+                      "scope": 129,
                       "stateVariable": false,
                       "storageLocation": "default",
                       "type": "uint256",
@@ -240,19 +240,19 @@
                           "name": "uint",
                           "type": "uint256"
                         },
-                        "id": 681,
+                        "id": 123,
                         "name": "ElementaryTypeName",
-                        "src": "114:4:4"
+                        "src": "114:4:1"
                       }
                     ],
-                    "id": 682,
+                    "id": 124,
                     "name": "VariableDeclaration",
-                    "src": "114:13:4"
+                    "src": "114:13:1"
                   }
                 ],
-                "id": 683,
+                "id": 125,
                 "name": "ParameterList",
-                "src": "113:15:4"
+                "src": "113:15:1"
               },
               {
                 "children": [
@@ -262,7 +262,7 @@
                       "mutability": "mutable",
                       "name": "",
                       "overrides": null,
-                      "scope": 687,
+                      "scope": 129,
                       "stateVariable": false,
                       "storageLocation": "default",
                       "type": "bool",
@@ -275,34 +275,34 @@
                           "name": "bool",
                           "type": "bool"
                         },
-                        "id": 684,
+                        "id": 126,
                         "name": "ElementaryTypeName",
-                        "src": "147:4:4"
+                        "src": "152:4:1"
                       }
                     ],
-                    "id": 685,
+                    "id": 127,
                     "name": "VariableDeclaration",
-                    "src": "147:4:4"
+                    "src": "152:4:1"
                   }
                 ],
-                "id": 686,
+                "id": 128,
                 "name": "ParameterList",
-                "src": "146:6:4"
+                "src": "151:6:1"
               }
             ],
-            "id": 687,
+            "id": 129,
             "name": "FunctionDefinition",
-            "src": "93:60:4"
+            "src": "93:65:1"
           }
         ],
-        "id": 688,
+        "id": 130,
         "name": "ContractDefinition",
-        "src": "65:90:4"
+        "src": "65:95:1"
       }
     ],
-    "id": 689,
+    "id": 131,
     "name": "SourceUnit",
-    "src": "40:116:4"
+    "src": "40:121:1"
   },
   "compiler": {
     "name": "solc",
@@ -310,7 +310,7 @@
   },
   "networks": {},
   "schemaVersion": "3.3.4",
-  "updatedAt": "2021-03-19T11:59:34.693Z",
+  "updatedAt": "2021-03-21T14:07:22.025Z",
   "devdoc": {
     "kind": "dev",
     "methods": {},

@@ -9,6 +9,6 @@ interface IOptionChefData {
 
     function setuid(uint k, uint v) external;
     function setid(uint k, uint v) external;
-    function setoptiontype(uint k, uint v) external;
+    function setoptiontype(uint k, uint8 v) external;
     function transferOwnership(address newOwner) external;
 }
