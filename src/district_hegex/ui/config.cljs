@@ -7,6 +7,7 @@
   (:require-macros [district-hegex.shared.macros :refer [get-environment]]))
 
 (def contracts-to-load [:optionchef
+                        :optionchefdata
                         :hegexoption
                         :weth
                         :wbtcoptions
