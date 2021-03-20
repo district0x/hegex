@@ -28,6 +28,7 @@ module.exports = async (deployer, network) => {
   const migrations = await Migrations.deployed();
   //important - will throw on localnet as hegic contracts are deployed separately
 
+  await deployer.deploy(chefData);
   const chefdatad = await chefData.deployed();
   await deployer.deploy(chef, hegicETHFactory[network], hegicWBTCFactory[network], chefdatad.address);
   const chefd = await chef.deployed();
