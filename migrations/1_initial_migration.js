@@ -36,6 +36,7 @@ module.exports = async (deployer, network) => {
   const tokend = await token.deployed();
 
   await chefd.updateHegexoption(tokend.address);
+  await chefdatad.transferOwnership(chefd.address);
 
   let smartContracts = readSmartContractsFile(smartContractsPath);
 
