@@ -314,28 +314,42 @@
   ::my-uhegex-option
   interceptors
   (fn [{:keys [db]} [hg-id]]
+    (println "dbghgdata0" hg-id)
     {:web3/call
      {:web3 (web3-queries/web3 db)
       :fns [{:instance (contract-queries/instance db :optionchef)
              :fn :getUnderlyingOptionId
              :args [hg-id]
-             :on-success [::my-uhegex-option-full hg-id]
+             :on-success [::my-uhegex-option-type hg-id]
              :on-error [::logging/error [::my-uhegex-option]]}]}}))
+
+(re-frame/reg-event-fx
+  ::my-uhegex-option-type
+  interceptors
+  (fn [{:keys [db]} [hg-id uid-raw]]
+    (when-let [uid (bn/number uid-raw)]
+    (println "dbghgdata1" uid)
+      {:web3/call
+      {:web3 (web3-queries/web3 db)
+       :fns [{:instance (contract-queries/instance db :optionchefdata)
+              :fn :optionType
+              :args [uid]
+              :on-success [::my-uhegex-option-full hg-id uid-raw]
+              :on-error [::logging/error [::my-uhegex-option-type]]}]}})))
 
 (re-frame/reg-event-fx
   ::my-uhegex-option-full
   interceptors
-  (fn [{:keys [db]} [hg-id uid-raw]]
+  (fn [{:keys [db]} [hg-id uid-raw option-type-raw]]
     (when-let [uid (bn/number uid-raw)]
       (cond->  {:db (assoc-in db [::hegic-options :full uid :hegex-id] hg-id)}
-
         ;;query full when full hegic option is not in db (e.g. created by chef)
         (not (get-in db [::hegic-options :full uid :holder]))
         (assoc :web3/call
                {:web3 (web3-queries/web3 db)
                 :fns [{:instance (contract-queries/instance db :optionchef)
                        :fn :getUnderlyingOptionParams
-                       :args [hg-id]
+                       :args [(bn/number option-type-raw) hg-id]
                        :on-success [::my-uhegex-option-full-success hg-id uid]
                        :on-error [::logging/error [::my-uhegex-option-full]]}]})))))
 
@@ -343,7 +357,7 @@
   ::my-uhegex-option-full-success
   interceptors
   (fn [{:keys [db]} [hg-id uid hegic-info-raw]]
-    (println "dbg" ::my-uhegex-option-full-success hg-id uid hegic-info-raw)
+    (println "dbg____________" ::my-uhegex-option-full-success hg-id uid hegic-info-raw)
     {:db (update-in db [::hegic-options :full uid] merge
                     (->hegic-info hegic-info-raw uid))}))
 

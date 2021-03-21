@@ -644,8 +644,11 @@
                            :new-hegex/hegic-type 0
                            :new-hegex/option-type :call})]
     (fn []
-      (println "form-data inside is" @form-data)
-      (let [current-price @(subscribe [::external-subs/eth-price])
+      (let [hegic-type (some-> form-data deref :new-hegex/hegic-type)
+            current-price (case  hegic-type
+                            "1" @(subscribe [::external-subs/btc-price])
+                            "0" @(subscribe [::external-subs/eth-price])
+                            0)
             total-cost (or @(subscribe [::subs/new-hegic-cost]) 0)
             break-even (+ total-cost current-price)
             sp (some-> form-data deref :new-hegex/strike-price)]
@@ -686,7 +689,10 @@
            {:type :number
             :color :secondary
             :placeholder 0
-            :label (some-> @form-data :new-hegex/currency name cs/upper-case)
+            :label (case hegic-type
+                     "1" "BTC"
+                     "0" "ETH"
+                     "ETH")
             :on-change (fn [e]
                          (js/e.persist)
                          (upd-new-hegex form-data e :new-hegex/amount))
