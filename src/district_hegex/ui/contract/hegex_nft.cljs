@@ -364,7 +364,7 @@
   (fn [{:keys [db]} [hg-id uid option-type hegic-info-raw]]
     (println "dbg____________" ::my-uhegex-option-full-success hg-id uid hegic-info-raw)
     {:db (update-in db [::hegic-options :full uid] merge
-                    (->hegic-info (assoc hegic-info-raw :asset option-type) uid))}))
+                    (->hegic-info  (conj hegic-info-raw option-type) uid))}))
 
 
 (re-frame/reg-event-fx
