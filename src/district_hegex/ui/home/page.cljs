@@ -37,6 +37,13 @@
     [re-frame.core :refer [subscribe dispatch]]
     [reagent.core :as r]))
 
+
+  #_(defn home-page []
+    (let []
+      (fn []
+        [:div "Transaction pending? " @tx-pending?]
+        [:div "Transaction pending? " @same-tx-pending?])))
+
 (defn debounce [f interval]
   (let [dbnc (Debouncer. f interval)]
     (fn [& args] (.apply (.-fire dbnc) dbnc (to-array args)))))
@@ -646,6 +653,7 @@
                            :new-hegex/option-type :call})]
     (fn []
       (let [hegic-type (some-> form-data deref :new-hegex/hegic-type)
+            tx-pending? (subscribe [::tx-id-subs/tx-pending? :mint-hegex!])
             current-price (case  hegic-type
                             "1" @(subscribe [::external-subs/btc-price])
                             "0" @(subscribe [::external-subs/eth-price])
@@ -653,6 +661,7 @@
             total-cost (or @(subscribe [::subs/new-hegic-cost]) 0)
             break-even (+ total-cost current-price)
             sp (some-> form-data deref :new-hegex/strike-price)]
+        (println "tx-pending" @tx-pending?)
         [:div
         [:div {:style {:display "flex"
                        :margin-top "30px"
@@ -731,7 +740,7 @@
          [:div.box.e
           [:button.secondary
            {:on-click #(dispatch [::hegex-nft/mint-hegex @form-data])}
-           "Buy"]]]
+           (if @tx-pending? "Pending..." "Buy")]]]
         [:div [:br] [:br] [:br]]]))))
 
 (defn- convert-weth []
