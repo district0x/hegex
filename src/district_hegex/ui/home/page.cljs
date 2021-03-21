@@ -659,13 +659,14 @@
          [:div.box.a
           [:div.hover-label "Currency"]
           [inputs/select
-           {:color :secondary}
-           #_ {:on-change #(js/console.log (keyword (oget % ".?target.?value")))}
+           {:color :secondary
+            :on-change (fn [e]
+                         (js/e.persist)
+                         (upd-new-hegex form-data e :new-hegex/hegic-type))}
            [:option {:selected true
-                     :value :eth}
+                     :value 0}
             "ETH"]
-           #_[:option {:selected true
-                       :value :btc}
+           [:option {:value 1}
               "BTC"]]]
          [:div.box.d
           [:div.hover-label "Option type"]
