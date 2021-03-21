@@ -19,6 +19,8 @@
 (re-frame/reg-sub
   ::hegic-full-options
   (fn [db _]
+    (println "hegicinfois 0" (vals (get-in db [::hegex-nft/hegic-options :full]))
+             )
     (vals (get-in db [::hegex-nft/hegic-options :full]))))
 
 (re-frame/reg-sub
@@ -29,6 +31,11 @@
 (re-frame/reg-sub
   ::hegic-by-hegex
   (fn [db [_ h-id]]
+    (println
+     "hegicinfois"
+     (first (filter
+            (fn [h] (= (:hegex-id h) h-id))
+            (vals (get-in db [::hegex-nft/hegic-options :full])))))
     (first (filter
             (fn [h] (= (:hegex-id h) h-id))
             (vals (get-in db [::hegex-nft/hegic-options :full]))))))

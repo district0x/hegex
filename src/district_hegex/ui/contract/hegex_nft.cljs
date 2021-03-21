@@ -164,8 +164,8 @@
 
 (defn- ->hegic-info [[state holder strike amount
                       locked-amount premium expiration
-                      option-type] id]
-  (println "hegicinfo" option-type)
+                      option-type asset] id]
+  (println "hegicinfoasset" asset)
   (let [amount-hr (some->> amount
                            bn/number
                            (*  0.001))]
@@ -185,7 +185,7 @@
                             (gstring/format "%.3f"))
     :expiration    (tf/unparse simple-date-format
                                (web3-utils/web3-time->local-date-time expiration))
-    :asset         :eth
+    :asset         asset
     ;;NOTE a bit cryptic model, P&L is fetched later via (price+-strike(+-premium*price))
     ;;NOTE P&L with premium is inaccurate since we _can't_ fetch historical price for premium
      :p&l           (mapv (fn [v] (some->> v bn/number (*  0.00000001)))
@@ -341,25 +341,30 @@
   ::my-uhegex-option-full
   interceptors
   (fn [{:keys [db]} [hg-id uid-raw option-type-raw]]
+    (println "uhegex0" (bn/number uid-raw) (bn/number option-type-raw))
     (when-let [uid (bn/number uid-raw)]
-      (cond->  {:db (assoc-in db [::hegic-options :full uid :hegex-id] hg-id)}
-        ;;query full when full hegic option is not in db (e.g. created by chef)
-        (not (get-in db [::hegic-options :full uid :holder]))
-        (assoc :web3/call
-               {:web3 (web3-queries/web3 db)
-                :fns [{:instance (contract-queries/instance db :optionchef)
-                       :fn :getUnderlyingOptionParams
-                       :args [(bn/number option-type-raw) hg-id]
-                       :on-success [::my-uhegex-option-full-success hg-id uid]
-                       :on-error [::logging/error [::my-uhegex-option-full]]}]})))))
+      (let [with-uid (assoc-in db [::hegic-options :full uid :hegex-id] hg-id)
+            with-option-type (assoc-in with-uid [::hegic-options :full uid :asset]
+                                       (bn/number option-type-raw))]
+        (println "uhegex1 with option-type is" with-option-type)
+        (cond->  {:db with-option-type}
+         ;;query full when full hegic option is not in db (e.g. created by chef)
+         (not (get-in db [::hegic-options :full uid :holder]))
+         (assoc :web3/call
+                {:web3 (web3-queries/web3 db)
+                 :fns [{:instance (contract-queries/instance db :optionchef)
+                        :fn :getUnderlyingOptionParams
+                        :args [(bn/number option-type-raw) hg-id]
+                        :on-success [::my-uhegex-option-full-success hg-id uid (bn/number option-type-raw)]
+                        :on-error [::logging/error [::my-uhegex-option-full]]}]}))))))
 
 (re-frame/reg-event-fx
   ::my-uhegex-option-full-success
   interceptors
-  (fn [{:keys [db]} [hg-id uid hegic-info-raw]]
+  (fn [{:keys [db]} [hg-id uid option-type hegic-info-raw]]
     (println "dbg____________" ::my-uhegex-option-full-success hg-id uid hegic-info-raw)
     {:db (update-in db [::hegic-options :full uid] merge
-                    (->hegic-info hegic-info-raw uid))}))
+                    (->hegic-info (assoc hegic-info-raw :asset option-type) uid))}))
 
 
 (re-frame/reg-event-fx
