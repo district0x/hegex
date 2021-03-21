@@ -29,6 +29,7 @@
 (def ^:private null-address "0x0000000000000000000000000000000000000000")
 
 (defn- get-0x-addresses [chain-id]
+  (println  "calling 0x addresses " chain-id contract-addresses)
   (ocall contract-addresses "getContractAddressesForChainOrThrow" chain-id))
 
 
@@ -75,7 +76,7 @@
 ;;TODO
 ;;swap for ::contract-address sub when out of testing
 ;;(contract-queries/contract-address db :hegexoption)
-(def ^:private nft-address "0xc369dd7700c6d9a29038c129ec65b6a776b1aca1")
+(def ^:private nft-address "0x0866faaec29710398cc5ced40081515018d18c21")
 
 
 ;; const zrxTokenAddress = contractWrappers.contractAddresses.zrxToken;
@@ -113,8 +114,7 @@
            weth-address (oget contract-wrapper ".?contractAddresses.?etherToken")
            _ (println "weth is " weth-address)
            ;; produces the wrong value on ropsten, swap for literal for the time being
-           exchange-address #_(oget (get-0x-addresses 3) ".?exchange")
-           (or  "0xFb2DD2A1366dE37f7241C83d47DA58fd503E2C64"
+           exchange-address (or  "0xFb2DD2A1366dE37f7241C83d47DA58fd503E2C64"
                                   #_(oget contract-wrapper ".?contractAddresses.?exchange"))
            maker-asset-data (<p! (ocall
                                   (ocall

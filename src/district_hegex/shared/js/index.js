@@ -16,4 +16,4 @@ window.Utils0x = Utils0x;
 window.Subproviders0x = Subproviders0x;
 window.Web3Wrapper0x = Web3Wrapper0x;
 window.Web3x = Web3;
-
+window.Addresses0x = Addresses0x;
