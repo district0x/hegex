@@ -9,8 +9,6 @@
 
 (def ^:private base-uri "https://api.coingecko.com/api/v3/coins/")
 
-(def ^:private asset-to-fetch "ethereum")
-
 (re-frame/reg-event-fx
   ::fetch-asset-prices
   interceptors
@@ -20,22 +18,25 @@
 (re-frame/reg-event-db
   ::fetch-asset-prices-success
   interceptors
-  (fn [db [price]]
-    (assoc-in db [:prices :eth] price)))
+  (fn [db [asset price]]
+    (println "assetprice" asset price)
+    (assoc-in db [:prices asset] price)))
 
-(defn fetch-asset-prices []
+(defn fetch-asset-prices [asset]
   (go
     (try
       (dispatch [::fetch-asset-prices-success
+                 (keyword asset)
                  (oget (<p! (ocall (<p! (gcall "fetch"
-                                           (str base-uri asset-to-fetch))) "json"))
+                                           (str base-uri asset))) "json"))
             ".?market_data.?current_price.?usd")])
       (catch js/Error err (js/console.log (ex-cause err))))))
 
 (re-frame/reg-fx
   ::fetch-asset-prices!
   (fn []
-    (fetch-asset-prices)))
+    (fetch-asset-prices "bitcoin")
+    (fetch-asset-prices "ethereum")))
 
 
 ;; fetch for P&L

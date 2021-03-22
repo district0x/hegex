@@ -164,8 +164,8 @@
 
 (defn- ->hegic-info [[state holder strike amount
                       locked-amount premium expiration
-                      option-type] id]
-  (println "hegicinfo" option-type)
+                      option-type asset] id]
+  (println "hegicinfoasset" asset)
   (let [amount-hr (some->> amount
                            bn/number
                            (*  0.001))]
@@ -185,7 +185,7 @@
                             (gstring/format "%.3f"))
     :expiration    (tf/unparse simple-date-format
                                (web3-utils/web3-time->local-date-time expiration))
-    :asset         :eth
+    :asset         asset
     ;;NOTE a bit cryptic model, P&L is fetched later via (price+-strike(+-premium*price))
     ;;NOTE P&L with premium is inaccurate since we _can't_ fetch historical price for premium
      :p&l           (mapv (fn [v] (some->> v bn/number (*  0.00000001)))
@@ -314,38 +314,57 @@
   ::my-uhegex-option
   interceptors
   (fn [{:keys [db]} [hg-id]]
+    (println "dbghgdata0" hg-id)
     {:web3/call
      {:web3 (web3-queries/web3 db)
       :fns [{:instance (contract-queries/instance db :optionchef)
              :fn :getUnderlyingOptionId
              :args [hg-id]
-             :on-success [::my-uhegex-option-full hg-id]
+             :on-success [::my-uhegex-option-type hg-id]
              :on-error [::logging/error [::my-uhegex-option]]}]}}))
+
+(re-frame/reg-event-fx
+  ::my-uhegex-option-type
+  interceptors
+  (fn [{:keys [db]} [hg-id uid-raw]]
+    (when-let [uid (bn/number uid-raw)]
+    (println "dbghgdata1" uid)
+      {:web3/call
+      {:web3 (web3-queries/web3 db)
+       :fns [{:instance (contract-queries/instance db :optionchefdata)
+              :fn :optionType
+              :args [uid]
+              :on-success [::my-uhegex-option-full hg-id uid-raw]
+              :on-error [::logging/error [::my-uhegex-option-type]]}]}})))
 
 (re-frame/reg-event-fx
   ::my-uhegex-option-full
   interceptors
-  (fn [{:keys [db]} [hg-id uid-raw]]
+  (fn [{:keys [db]} [hg-id uid-raw option-type-raw]]
+    (println "uhegex0" (bn/number uid-raw) (bn/number option-type-raw))
     (when-let [uid (bn/number uid-raw)]
-      (cond->  {:db (assoc-in db [::hegic-options :full uid :hegex-id] hg-id)}
-
-        ;;query full when full hegic option is not in db (e.g. created by chef)
-        (not (get-in db [::hegic-options :full uid :holder]))
-        (assoc :web3/call
-               {:web3 (web3-queries/web3 db)
-                :fns [{:instance (contract-queries/instance db :optionchef)
-                       :fn :getUnderlyingOptionParams
-                       :args [hg-id]
-                       :on-success [::my-uhegex-option-full-success hg-id uid]
-                       :on-error [::logging/error [::my-uhegex-option-full]]}]})))))
+      (let [with-uid (assoc-in db [::hegic-options :full uid :hegex-id] hg-id)
+            with-option-type (assoc-in with-uid [::hegic-options :full uid :asset]
+                                       (bn/number option-type-raw))]
+        (println "uhegex1 with option-type is" with-option-type)
+        (cond->  {:db with-option-type}
+         ;;query full when full hegic option is not in db (e.g. created by chef)
+         (not (get-in db [::hegic-options :full uid :holder]))
+         (assoc :web3/call
+                {:web3 (web3-queries/web3 db)
+                 :fns [{:instance (contract-queries/instance db :optionchef)
+                        :fn :getUnderlyingOptionParams
+                        :args [(bn/number option-type-raw) hg-id]
+                        :on-success [::my-uhegex-option-full-success hg-id uid (bn/number option-type-raw)]
+                        :on-error [::logging/error [::my-uhegex-option-full]]}]}))))))
 
 (re-frame/reg-event-fx
   ::my-uhegex-option-full-success
   interceptors
-  (fn [{:keys [db]} [hg-id uid hegic-info-raw]]
-    (println "dbg" ::my-uhegex-option-full-success hg-id uid hegic-info-raw)
+  (fn [{:keys [db]} [hg-id uid option-type hegic-info-raw]]
+    (println "dbg____________" ::my-uhegex-option-full-success hg-id uid hegic-info-raw)
     {:db (update-in db [::hegic-options :full uid] merge
-                    (->hegic-info hegic-info-raw uid))}))
+                    (->hegic-info  (conj hegic-info-raw option-type) uid))}))
 
 
 (re-frame/reg-event-fx
@@ -386,7 +405,7 @@
                     2)
           period-secs (some-> period (* 86400))
           strike-wei (some-> strike-price (* 100000000))
-          option-args [period-secs amount strike-wei opt-dir]]
+          option-args [0 period-secs amount strike-wei opt-dir]]
       {:web3/call
        {:web3 (web3-queries/web3 db)
         :fns [{:instance (contract-queries/instance db :brokenethoptions)
@@ -408,17 +427,17 @@
   interceptors
   (fn [{:keys [db]} [{:keys [:new-hegex/period
                             :new-hegex/amount
+                            :new-hegex/hegic-type
                             :new-hegex/strike-price
                             :new-hegex/option-type]
                      :as form-data}]]
-    (println "hegicinfo minting option type" (keyword option-type))
     (let [opt-dir (case (keyword option-type)
                     :put 1
                     :call 2
                     2)
           period-secs (some-> period (* 86400))
           strike-wei (some-> strike-price (* 100000000))
-          option-args [period-secs amount strike-wei opt-dir]]
+          option-args [hegic-type period-secs amount strike-wei opt-dir]]
       #_(println "mint-hegex dbg args are" [period amount strike-price opt-dir])
       {:web3/call
        {:web3 (web3-queries/web3 db)
@@ -496,26 +515,57 @@
   ::uhegex-option-full
   interceptors
   (fn [{:keys [db]} [hegex-id eth-price raw-price order hegic]]
-    (println "uhegex-full db is"
+   #_ (println "dbguhegex -full db is"
              (get-in db [::hegic-options :orderbook :full hegex-id]))
+
     (when-let [uid (bn/number hegic)]
+    (println "dbguhegex uid is" uid)
+    {:db (update-in db [::hegic-options :orderbook :full hegex-id] merge
+                      {:hegic-id uid})
+     :web3/call
+      {:web3 (web3-queries/web3 db)
+       :fns [{:instance (contract-queries/instance db :optionchefdata)
+              :fn :optionType
+              :args [uid]
+              :on-success [::uhegex-option-full-fetch hegex-id uid eth-price
+                           raw-price order]
+              :on-error [::logging/error [::my-uhegex-option-full]]}]}})
+
+    #_(when-let [uid (bn/number hegic)]
       {:db (update-in db [::hegic-options :orderbook :full hegex-id] merge
                       {:hegic-id uid})
        :web3/call {:web3 (web3-queries/web3 db)
                   :fns [{:instance (contract-queries/instance db :optionchef)
                          :fn :getUnderlyingOptionParams
                          :args [hegex-id]
-                         :on-success [::uhegex-option-full-success
+                         :on-success [::uhegex-option-full-fetch
                                       hegex-id uid eth-price
                                       raw-price order]
                          :on-error [::logging/error [::uhegex-option-full]]}]}})))
 
 (re-frame/reg-event-fx
+  ::uhegex-option-full-fetch
+  interceptors
+  (fn [{:keys [db]} [hegex-id uid eth-price raw-price order hegic-type]]
+    (println "dbguhegex -full db is" uid)
+    {:db (update-in db [::hegic-options :orderbook :full hegex-id] merge
+                    {:hegic-id uid})
+     :web3/call {:web3 (web3-queries/web3 db)
+                 :fns [{:instance (contract-queries/instance db :optionchef)
+                        :fn :getUnderlyingOptionParams
+                        :args [(bn/number hegic-type) hegex-id]
+                        :on-success [::uhegex-option-full-success
+                                     hegex-id uid eth-price
+                                     raw-price order hegic-type]
+                        :on-error [::logging/error [::uhegex-option-full-fetch]]}]}}))
+
+(re-frame/reg-event-fx
   ::uhegex-option-full-success
   interceptors
-  (fn [{:keys [db]} [hg-id uid eth-price raw-price order hegic-info-raw]]
+  (fn [{:keys [db]} [hg-id uid eth-price raw-price order hegic-type hegic-info-raw]]
+    (println "dbguhegex option full success" [hg-id uid eth-price raw-price order hegic-info-raw])
     {:db (update-in db [::hegic-options :orderbook :full hg-id] merge
-                    (merge (->hegic-info hegic-info-raw uid)
+                    (merge (->hegic-info (conj hegic-info-raw hegic-type) uid)
                            {:hegex-id hg-id
                             :eth-price eth-price
                             ;; raw info for filling an order

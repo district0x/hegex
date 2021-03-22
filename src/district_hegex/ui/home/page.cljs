@@ -37,6 +37,13 @@
     [re-frame.core :refer [subscribe dispatch]]
     [reagent.core :as r]))
 
+
+  #_(defn home-page []
+    (let []
+      (fn []
+        [:div "Transaction pending? " @tx-pending?]
+        [:div "Transaction pending? " @same-tx-pending?])))
+
 (defn debounce [f interval]
   (let [dbnc (Debouncer. f interval)]
     (fn [& args] (.apply (.-fire dbnc) dbnc (to-array args)))))
@@ -83,6 +90,7 @@
                          :key    :option-type}
                         {:path   [:asset]
                          :header "Currency"
+                         :format (fn [v] (case v 1 "WBTC" 0 "ETH" "ETH"))
                          :attrs  (fn [data] {:style {:text-align     "left"
                                                     :text-transform "uppercase"}})
                          :key    :asset}
@@ -641,13 +649,19 @@
 
 (defn- new-hegex []
   (let [form-data (r/atom {:new-hegex/currency :eth
+                           :new-hegex/hegic-type 0
                            :new-hegex/option-type :call})]
     (fn []
-      (println "form-data inside is" @form-data)
-      (let [current-price @(subscribe [::external-subs/eth-price])
+      (let [hegic-type (some-> form-data deref :new-hegex/hegic-type)
+            tx-pending? (subscribe [::tx-id-subs/tx-pending? :mint-hegex!])
+            current-price (case  hegic-type
+                            "1" @(subscribe [::external-subs/btc-price])
+                            "0" @(subscribe [::external-subs/eth-price])
+                            0)
             total-cost (or @(subscribe [::subs/new-hegic-cost]) 0)
             break-even (+ total-cost current-price)
             sp (some-> form-data deref :new-hegex/strike-price)]
+        (println "tx-pending" @tx-pending?)
         [:div
         [:div {:style {:display "flex"
                        :margin-top "30px"
@@ -658,13 +672,14 @@
          [:div.box.a
           [:div.hover-label "Currency"]
           [inputs/select
-           {:color :secondary}
-           #_ {:on-change #(js/console.log (keyword (oget % ".?target.?value")))}
+           {:color :secondary
+            :on-change (fn [e]
+                         (js/e.persist)
+                         (upd-new-hegex form-data e :new-hegex/hegic-type))}
            [:option {:selected true
-                     :value :eth}
+                     :value 0}
             "ETH"]
-           #_[:option {:selected true
-                       :value :btc}
+           [:option {:value 1}
               "BTC"]]]
          [:div.box.d
           [:div.hover-label "Option type"]
@@ -684,7 +699,10 @@
            {:type :number
             :color :secondary
             :placeholder 0
-            :label (some-> @form-data :new-hegex/currency name cs/upper-case)
+            :label (case hegic-type
+                     "1" "BTC"
+                     "0" "ETH"
+                     "ETH")
             :on-change (fn [e]
                          (js/e.persist)
                          (upd-new-hegex form-data e :new-hegex/amount))
@@ -722,7 +740,7 @@
          [:div.box.e
           [:button.secondary
            {:on-click #(dispatch [::hegex-nft/mint-hegex @form-data])}
-           "Buy"]]]
+           (if @tx-pending? "Pending..." "Buy")]]]
         [:div [:br] [:br] [:br]]]))))
 
 (defn- convert-weth []

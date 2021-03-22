@@ -5,4 +5,9 @@
 (re-frame/reg-sub
  ::eth-price
   (fn [db _]
-    (get-in db [:prices :eth])))
+    (get-in db [:prices :ethereum])))
+
+(re-frame/reg-sub
+ ::btc-price
+  (fn [db _]
+    (get-in db [:prices :bitcoin])))

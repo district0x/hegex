@@ -1,6 +1,7 @@
 (ns district-hegex.ui.home.orderbook
   (:require
    [re-frame.core :refer [subscribe dispatch]]
+    [district-hegex.ui.trading.events :as trading-events]
    [district-hegex.ui.external.subs :as external-subs]
    [district-hegex.ui.components.inputs :as inputs]
    [district.format :as format]
@@ -17,6 +18,7 @@
                          :key    :option-type}
                         {:path   [:asset]
                          :header "Currency"
+                         :format (fn [v] (case v 1 "WBTC" 0 "ETH" "ETH"))
                          :attrs  (fn [data] {:style {:text-align     "left"
                                                     :text-transform "uppercase"}})
                          :key    :asset}
@@ -209,23 +211,22 @@
    :sort            sort-fn})
 
 (defn controls []
-  (let [offer (r/atom {:total 0
-                       ;;NOTE not in design, just add another field
-                       :expires 24})]
-    (fn []
-     (let [active-option (:option @(subscribe [::home-subs/my-orderbook-option]))]
-       [:div {:style {:max-width "500px"
-                      :margin-left "auto"}}
-        #_(str active-option)
-        [:div.box-grid
-         [:div.box.e
-          [inputs/text-input
-           {:type :number
-            :color "yellow"
-            :min 0
-            :placeholder "[WIP] My WETH bal"}]]
-         [:div.box.e
-          [:button.yellow
-           {:className (when-not active-option "disabled")
-            :disabled  (not active-option)}
-           "Buy"]]]]))))
+  (let [active-option @(subscribe [::home-subs/my-orderbook-option])]
+    (println "active option is" active-option)
+    [:div {:style {:max-width "500px"
+                   :margin-left "auto"}}
+     #_(str active-option)
+     [:div.box-grid
+      [:div.box.e
+       [inputs/text-input
+        {:type :number
+         :color "yellow"
+         :disabled true
+         :min 0
+         :placeholder (str (-> active-option :option (:eth-price 0)) " ETH")}]]
+      [:div.box.e
+       [:button.yellow
+        {:className (when-not active-option "disabled")
+         :on-click #(dispatch [::trading-events/fill-offer (:option active-option)])
+         :disabled  (not active-option)}
+        "Buy"]]]]))
