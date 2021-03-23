@@ -50,15 +50,15 @@
   interceptors
   (fn [{:keys [:db]} arg2]
     (println "dbg init2route" arg2)
-  {:async-flow {:rules [{:when :seen-any-of?
-                           :events [#_::web3-accounts-events/active-account-changed
-                                    ::web3-accounts-events/set-accounts
-                                    #_::web3-accounts-events/load-accounts]
-                           :dispatch [::events/load-my-hegic-options]}
+    {:async-flow {:rules ['(comment
+                             "NOTE active-account-changed listener triggers
+                              an infinite loop")
                           #_{:when :seen-any-of?
-                           :events [::hegex-nft/hegic-option-success
-                                    ::web3-accounts-events/set-accounts]
-                           :dispatch []}]}}))
+                           :events [::web3-accounts-events/active-account-changed]
+                           :dispatch [::events/reboot]}
+                          {:when :seen-any-of?
+                           :events [::web3-accounts-events/set-accounts]
+                           :dispatch [::events/load-my-hegic-options]}]}}))
 
 
 (re-frame/reg-event-fx

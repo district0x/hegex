@@ -186,6 +186,11 @@
       {:store (update store :district-hegex.ui.core/votes cljs-utils/merge-in votes)
        :db (update db :district-hegex.ui.core/votes cljs-utils/merge-in votes)})))
 
+(re-frame/reg-event-fx
+  ::reboot
+  interceptors
+  (fn []
+    {::reboot! true}))
 
 (re-frame/reg-fx
   :file/write
@@ -197,3 +202,8 @@
  (fn [{:keys [web3 account db]}]
     (println "dbg web3 is" web3 "acc is" account)
     (hegex-nft/my-hegic-options web3 account db)))
+
+(re-frame/reg-fx
+ ::reboot!
+ (fn []
+   (js/location.reload)))
