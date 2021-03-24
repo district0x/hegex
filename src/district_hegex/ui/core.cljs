@@ -50,10 +50,7 @@
   interceptors
   (fn [{:keys [:db]} arg2]
     (println "dbg init2route" arg2)
-    {:async-flow {:rules ['(comment
-                             "NOTE active-account-changed listener triggers
-                              an infinite loop")
-                          #_{:when :seen-any-of?
+    {:async-flow {:rules [#_{:when :seen-any-of?
                            :events [::web3-accounts-events/active-account-changed]
                            :dispatch [::events/reboot]}
                           {:when :seen-any-of?
