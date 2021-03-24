@@ -583,7 +583,7 @@
                  :fn :exerciseHegic
                  :args [hegex-id]
                  :tx-opts {:from (account-queries/active-account db)}
-                 :tx-id {:exercise {:hegex hegex-id}}
+                 :tx-id :exercise-hegic
                  :on-tx-success [::exercise-success]
                  :on-tx-error [::logging/error [::exercise!]]}]}))
 

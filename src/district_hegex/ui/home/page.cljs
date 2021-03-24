@@ -149,22 +149,6 @@
         (and expr
              (expr row)))))
 
-(defn- wrap-hegic [id]
-  [:span
-   {:outlined true
-    :small true
-    :intent :primary
-    :on-click #(dispatch [::hegex-nft/wrap! id])}
-   "Wrap"])
-
-(defn- exercise-badge [hegex-id]
-  [:span
-   {:outlined true
-    :small true
-    :intent :primary
-    :on-click #(dispatch [::hegex-nft/exercise! hegex-id])}
-   "Exercise"])
-
 (defn- sell-hegex [open? id]
   (println "open? in sell-hegex is" open?)
   [:span
@@ -525,16 +509,19 @@
                        ;;NOTE not in design, just add another field
                        :expires 24})]
     (fn []
-     (let [active-option (:option @(subscribe [::home-subs/my-active-option]))]
-       [:div
+      (let [exercise-pending? @(subscribe [::tx-id-subs/tx-pending? :exercise-hegic])
+            active-option (:option @(subscribe [::home-subs/my-active-option]))]
+       [:div [:div.hloader]
         #_(str active-option)
         [:div.box-grid
          [:div.box.e
           [:button.primary
            {:className (when-not active-option "disabled")
-            :disabled  (not active-option)
+            :disabled  (or exercise-pending? (not active-option))
             :on-click #(dispatch [::hegex-nft/exercise! (:hegex-id active-option)])}
-           "Exercise"]]
+           "Exercise"
+           [inputs/loader {:color :black
+                           :on? exercise-pending?}]]]
          [:div.box.d
           [inputs/select
            {:disabled true}
