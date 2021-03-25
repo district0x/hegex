@@ -24,7 +24,7 @@
     [oops.core :refer [oget oset! ocall oapply ocall! oapply!
                        gget
                        oget+ oset!+ ocall+ oapply+ ocall!+ oapply!+]]
-    [district-hegex.shared.utils :refer [debounce]]
+    [district-hegex.shared.utils :refer [to-simple-time debounce]]
     [cljs-web3.eth :as web3-eth]
     [cljs.spec.alpha :as s]
     [district.format :as format]
@@ -41,7 +41,6 @@
     [re-frame.core :as re-frame :refer [dispatch reg-event-fx]]))
 
 (def interceptors [re-frame/trim-v])
-(def ^:private simple-date-format (tf/formatter "MM/dd/YY"))
 
 ;;should be moved away, determined based on netID at compile time
 (def ^:private erc721-0x-proxy "0xe654aac058bfbf9f83fcaee7793311dd82f6ddb4")
@@ -165,7 +164,6 @@
 (defn- ->hegic-info [[state holder strike amount
                       locked-amount premium expiration
                       option-type asset] id]
-  (println "hegicinfoasset" asset)
   (let [amount-hr (some->> amount
                            bn/number
                            (*  0.001))]
@@ -183,8 +181,7 @@
                             bn/number
                             (*  0.00000001)
                             (gstring/format "%.3f"))
-    :expiration    (tf/unparse simple-date-format
-                               (web3-utils/web3-time->local-date-time expiration))
+    :expiration    (to-simple-time expiration)
     :asset         asset
     ;;NOTE a bit cryptic model, P&L is fetched later via (price+-strike(+-premium*price))
     ;;NOTE P&L with premium is inaccurate since we _can't_ fetch historical price for premium

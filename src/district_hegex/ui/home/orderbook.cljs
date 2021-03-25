@@ -3,6 +3,7 @@
    [re-frame.core :refer [subscribe dispatch]]
     [district-hegex.ui.trading.events :as trading-events]
    [district-hegex.ui.external.subs :as external-subs]
+    [district-hegex.shared.utils :refer [to-simple-time debounce]]
    [district-hegex.ui.components.inputs :as inputs]
    [district.format :as format]
    [district-hegex.ui.home.subs :as home-subs]
@@ -54,7 +55,7 @@
                         {:path   [:sra-order :metaData :createdAt]
                          :header "Offered"
                          :attrs  (fn [data] {:style {:text-align "left"}})
-                         ;; :format (fn [v] (some-> v (format/time-ago ) str))
+                         :format (fn [v] (when v (to-simple-time v)))
                          :key    :created-at}
                         #_{:path   [:actions]
                          :header "Actions"
