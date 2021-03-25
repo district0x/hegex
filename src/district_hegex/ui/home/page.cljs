@@ -510,15 +510,15 @@
                        :expires 24})]
     (fn []
       (let [exercise-pending? @(subscribe [::tx-id-subs/tx-pending? :exercise-hegic])
-            active-option (:option @(subscribe [::home-subs/my-active-option]))]
+            active-option (:option @(subscribe [::home-subs/my-active-option]))
+            hegic-asset (:asset active-option)]
        [:div [:div.hloader]
-        #_(str active-option)
         [:div.box-grid
          [:div.box.e
           [:button.primary
            {:className (when-not active-option "disabled")
             :disabled  (or exercise-pending? (not active-option))
-            :on-click #(dispatch [::hegex-nft/exercise! (:hegex-id active-option)])}
+            :on-click #(dispatch [::hegex-nft/exercise! hegic-asset (:hegex-id active-option)])}
            "Exercise"
            [inputs/loader {:color :black
                            :on? exercise-pending?}]]]

@@ -577,11 +577,11 @@
 (re-frame/reg-event-fx
   ::exercise!
   interceptors
-  (fn [{:keys [db]} [hegex-id]]
+  (fn [{:keys [db]} [option-type hegex-id]]
     {:dispatch [::tx-events/send-tx
                 {:instance (contract-queries/instance db :optionchef)
                  :fn :exerciseHegic
-                 :args [hegex-id]
+                 :args [option-type hegex-id]
                  :tx-opts {:from (account-queries/active-account db)}
                  :tx-id :exercise-hegic
                  :on-tx-success [::exercise-success]
