@@ -17,10 +17,18 @@ contract Hegexoption is ERC721, Ownable  {
     //storage
     IOptionChef public optionChef;
 
-    constructor(IOptionChef _optionChef, string memory _base) ERC721("Hegexoption", "UOPT") public {
-        optionChef = _optionChef;
-        transferOwnership(address(_optionChef));
+    constructor(address payable _optionChef, string memory _base) ERC721("Hegex", "HEGEX") public {
+        migrateChef(_optionChef);
         _setBaseURI(_base);
+    }
+
+    /**
+     * @notice  Migrate chef (timelocked in optionChef - effective after 72 hours)
+     * @param _optionChef new chef owner address
+     */
+    function migrateChef(address payable _optionChef) public onlyOwner {
+        optionChef = IOptionChef(_optionChef);
+        transferOwnership(_optionChef);
     }
 
     /**

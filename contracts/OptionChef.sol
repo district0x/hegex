@@ -117,12 +117,22 @@ contract OptionChef is Ownable {
         emit Exercised(_tokenId, profit);
     }
 
-    function transferHegexOwnership (address _newOwner) public onlyOwner {
-        hegexoption.transferOwnership(_newOwner);
-    }
+    uint256 public migrationLock = 0;
+    address payable public newChef;
 
-    function transferDataOwnership (address _newOwner) public onlyOwner {
-        chefData.transferOwnership(_newOwner);
+    /**
+     * @notice  Migrate chef (effective after 72 hours)
+     * @param _newChef chef address
+     */
+    function migrateChefWithTimelock(address payable _newChef) public onlyOwner {
+        if (migrationLock != 0 && (block.timestamp > migrationLock + 72 hours)) {
+            chefData.transferOwnership(newChef);
+            hegexoption.migrateChef(newChef);
+            migrationLock = 0;
+        } else {
+            migrationLock = block.timestamp;
+            newChef = _newChef;
+        }
     }
 
     function getUnderlyingOptionId(uint _tokenId) public view returns (uint) {
