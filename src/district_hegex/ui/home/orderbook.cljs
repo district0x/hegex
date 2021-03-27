@@ -215,6 +215,7 @@
    :row-key         row-key-fn
    :render-cell     cell-fn
    :sort            sort-fn})
+
 (defn- convert-weth []
   (let [form-data (r/atom {:weth/type :wrap})]
     (fn []
@@ -235,8 +236,15 @@
       [:div {:style {:max-width "250px"}}
        [:span
         {:vertical false}
-        [:span
-         {:on-change (fn [e]
+        #_[inputs/text-input
+         {:type :number
+          :color "yellow"
+          :disabled true
+          :min 0
+          :placeholder (str (-> active-option :option (:eth-price 0)) " ETH")}]
+        [inputs/select
+         {:color :secondary
+          :on-change (fn [e]
                        (js/e.persist)
                        ((debounce #(swap! form-data
                                           assoc
@@ -283,18 +291,14 @@
           :disabled true
           :min 0
           :placeholder (str (-> active-option :option (:eth-price 0)) " ETH")}]
-[:div {:style {:text-align "center"}}
-      [:p "You need some WETH to buy Hegex NFTs"]
-      [:span
-       {:intent "primary"
-        :minimal true}
-       eth-bal " ETH"]
-      " "
-      [:span
-       {:intent "success"
-        :minimal true}
-       weth-bal " WETH"]]
-        ]]
+        [:div {:style {:text-align "center"}}
+         [:span.caption "You need some " [:b.hyellow " WETH "] " to buy Hegex NFTs"]
+         [:br]
+      [:span.caption
+       [:b eth-bal] " ETH" " |  "]
+      [:span.caption
+       [:b weth-bal] " WETH"]
+         [convert-weth]]]]
       [:div.box.e
        [:button.yellow
         {:className (when-not active-option "disabled")
