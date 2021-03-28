@@ -504,6 +504,9 @@
    :render-cell     cell-fn
    :sort            sort-fn})
 
+(defn- offer-err [{:keys [s]}]
+  [:p.red.caption.bold s])
+
 (defn- my-hegic-option-controls []
   (let [offer (r/atom {:total 0
                        ;;NOTE not in design, just add another field
@@ -551,7 +554,11 @@
              :disabled  (not active-option)
              :on-click #(dispatch [::trading-events/create-offer
                                    (assoc @offer :id (:hegex-id active-option)) false])}
-            "Offer"])]]]))))
+             "Offer"])]]
+        (doall (map (fn [s]
+                      ^{:key s}
+                      [offer-err {:s s}])
+                    @(subscribe [::trading-subs/hegic-ui-errors])))]))))
 
 (defn- my-hegic-options []
   (let [opts (subscribe [::subs/hegic-full-options])
