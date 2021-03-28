@@ -12,6 +12,7 @@
         c (case color
             :primary :select.primary
             :secondary :select.secondary
+            :yellow :select.yellow
             :select.primary)]
     [:div.hegex-select
     [little-arrow color]

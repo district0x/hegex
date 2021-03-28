@@ -220,11 +220,11 @@
   (let [form-data (r/atom {:weth/type :wrap})]
     (fn []
     (let [form-res (case (some-> @form-data :weth/type keyword)
-                    :wrap {:btn "Wrap"
+                    :wrap {:btn "Convert to WETH"
                            :evt ::weth-events/wrap}
-                    :unwrap {:btn "Unwrap"
+                    :unwrap {:btn "Convert to ETH"
                              :evt ::weth-events/unwrap}
-                    {:btn "Wrap"
+                    {:btn "To WETH"
                      :evt ::weth-events/wrap})]
      (println "form-data is" @form-data)
      [:div {:style {:max-width "250px"
@@ -235,15 +235,8 @@
       [:br]
       [:div {:style {:max-width "250px"}}
        [:span
-        {:vertical false}
-        #_[inputs/text-input
-         {:type :number
-          :color "yellow"
-          :disabled true
-          :min 0
-          :placeholder (str (-> active-option :option (:eth-price 0)) " ETH")}]
         [inputs/select
-         {:color :secondary
+         {:color :yellow
           :on-change (fn [e]
                        (js/e.persist)
                        ((debounce #(swap! form-data
@@ -251,23 +244,24 @@
                                           :weth/type
                                           (oget e ".?target.?value"))
                                   500)))}
-         [:option {:value :wrap}
+         [:option {:value :wrap
+                   :selected true}
           "Wrap"]
          [:option {:value :unwrap}
           "Unwrap"]]
-        [:span
-         {:fill true
-          :left-lable "WETH"
+        [inputs/text-input
+         {:type :number
+          :color "yellow"
+          :min 0
+          :placeholder 0
           :on-change  (fn [e]
                         (js/e.persist)
                         ((debounce #(swap! form-data assoc
                                            :weth/amount
                                            (oget e ".?target.?value"))
-                                   500)))
-          :placeholder "Amount"}]
-        [:span
-         {:outlined true
-          :on-click #(dispatch [(:evt form-res) @form-data])}
+                                   500)))}]
+        [:button.yellow
+         {:on-click #(dispatch [(:evt form-res) @form-data])}
          (:btn form-res)]]]]))))
 
 (defn controls []
@@ -290,18 +284,25 @@
           :color "yellow"
           :disabled true
           :min 0
-          :placeholder (str (-> active-option :option (:eth-price 0)) " ETH")}]
-        [:div {:style {:text-align "center"}}
-         [:span.caption "You need some " [:b.hyellow " WETH "] " to buy Hegex NFTs"]
-         [:br]
-      [:span.caption
-       [:b eth-bal] " ETH" " |  "]
-      [:span.caption
-       [:b weth-bal] " WETH"]
-         [convert-weth]]]]
+          :placeholder (str (-> active-option :option (:eth-price 0)) " ETH")}]]]
       [:div.box.e
        [:button.yellow
         {:className (when-not active-option "disabled")
          :on-click #(dispatch [::trading-events/fill-offer (:option active-option)])
          :disabled  (not active-option)}
-        "Buy"]]]]))
+        "Buy"]]]
+     [:br]
+     [:div {:style {:text-align "center"}}
+      [:h3  [:b.hyellow " WETH "] "Station"]
+      [:br]
+      [:span {:style {:opacity "0.6"}} "You need some "  " WETH " " to buy Hegex NFTs"]
+         [:br]]
+
+     [:br]
+     [:span.caption "Current Balances"]
+     [:br]
+     [:span.caption
+      [:b eth-bal] " ETH" " |  "]
+     [:span.caption
+      [:b weth-bal] " WETH"]
+     [convert-weth]]))
