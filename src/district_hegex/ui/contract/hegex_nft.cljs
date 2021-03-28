@@ -120,32 +120,16 @@
                "then"
            (fn [evs]
              (let [ids-raw (map (fn [e] (-> e bean :topics second)) evs)]
+               (when (zero? (count ids-raw))
+                 (dispatch [::hide-loader]))
                (dispatch [::hegic-options (map (partial ->from-topic-pad web3js)
                                                ids-raw)]))))))
 
-
-
-
-#_(defn get-event
-  "a rewrite using web3-cljs lib [ROPSTEN] - disfunctional
-
-   other reason not to use 0.2.x is that decoding logs is tricky
-   perhaps cljs-web3-next/return-values->clj etc can be leveraged when refactoring"
-  [oldweb3]
-  (let [logparams {:fromBlock 0
-                   :toBlock "latest"
-                   :address "0x77041D13e0B9587e0062239d083b51cB6d81404D"
-                   :topics ["0x9acccf962da4ed9c3db3a1beedb70b0d4c3f6a69c170baca7198a74548b5ef4e", nil, "0x000000000000000000000000b95fe51930ddfc546ff766d59288b50170244b4a"]}]
-
-    (println  (.get (web3-eth/filter oldweb3 logparams)
-                    (fn [lgs] (println "dbg filters......" lgs) )))
-
-    #_(web3-eth/contract-get-data
-    (contract-queries/instance db :district)
-    :stake-for
-    (account-queries/active-account db)
-    amount)))
-
+(re-frame/reg-event-fx
+  ::hide-loader
+  interceptors
+  (fn [{:keys [db]} ]
+    (assoc-in db [:initial-state-loaded?] true)))
 
 ;; TODO - look into batching for this web3 fx
 (re-frame/reg-event-fx
