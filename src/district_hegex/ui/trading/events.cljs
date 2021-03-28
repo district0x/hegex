@@ -76,7 +76,7 @@
 ;;TODO
 ;;swap for ::contract-address sub when out of testing
 ;;(contract-queries/contract-address db :hegexoption)
-(def ^:private nft-address "0x0866faaec29710398cc5ced40081515018d18c21")
+(def ^:private nft-address "0x42b49d4b14411c40243d02dee86abb7157b28e34")
 
 
 ;; const zrxTokenAddress = contractWrappers.contractAddresses.zrxToken;
