@@ -47,6 +47,6 @@
 
 
 (re-frame/reg-sub
-  ::hegex-nft-owner
+  ::initial-state-loaded?
   (fn [db _]
     (get-in db [:initial-state-loaded?])))

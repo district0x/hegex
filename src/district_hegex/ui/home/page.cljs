@@ -554,7 +554,8 @@
             "Offer"])]]]))))
 
 (defn- my-hegic-options []
-  (let [opts (subscribe [::subs/hegic-full-options])]
+  (let [opts (subscribe [::subs/hegic-full-options])
+        #_init-loaded? #_(subscribe [::tx-id-subs/tx-pending? :get-balance])]
     [:div
      [:div {:style {:display "flex"
                     :align-items "flex-start"
@@ -564,6 +565,7 @@
                               :text-align "center"
                               :justify-content "center"
                               :align-items "center"}}
+      #_[:div "init loaded?" (if @init-loaded? "yes " "no")]
       (if-not (zero? (count @opts))
         [:div {:className "my-option-table"
                :style {:margin-left "auto"

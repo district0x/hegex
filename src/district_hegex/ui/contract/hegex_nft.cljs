@@ -120,7 +120,8 @@
                "then"
            (fn [evs]
              (let [ids-raw (map (fn [e] (-> e bean :topics second)) evs)]
-               (when (zero? (count ids-raw))
+               (println "ids-raw" ids-raw)
+               #_(when (zero? (count ids-raw))
                  (dispatch [::hide-loader]))
                (dispatch [::hegic-options (map (partial ->from-topic-pad web3js)
                                                ids-raw)]))))))
@@ -129,7 +130,7 @@
   ::hide-loader
   interceptors
   (fn [{:keys [db]} ]
-    (assoc-in db [:initial-state-loaded?] true)))
+    {:db (assoc-in db [:initial-state-loaded?] true)}))
 
 ;; TODO - look into batching for this web3 fx
 (re-frame/reg-event-fx
@@ -229,7 +230,6 @@
   ::my-hegex-options-count
   interceptors
   (fn [{:keys [db]} _]
-    (println "dbg getting my hegex options count" (account-queries/active-account db))
     {:web3/call
      {:web3 (web3-queries/web3 db)
       :fns [{:instance (contract-queries/instance db :hegexoption)
@@ -243,7 +243,6 @@
   ::my-hegex-options
   interceptors
   (fn [_ [hg-count]]
-    (println "dbg hg-count is" hg-count)
     (when hg-count
       {:dispatch-n (mapv (fn [id] [::my-hegex-option id]) (range (bn/number hg-count)))})))
 
@@ -266,7 +265,8 @@
   interceptors
   (fn [{:keys [db]} [approved?]]
     (println "dbgexchange evt" approved?)
-    {:db (assoc-in db [::hegic-options :approved-for-exchange?] approved?)}))
+    {
+     :db (assoc-in db [::hegic-options :approved-for-exchange?] approved?)}))
 
 
 (re-frame/reg-event-fx
