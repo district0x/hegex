@@ -76,7 +76,7 @@
 ;;TODO
 ;;swap for ::contract-address sub when out of testing
 ;;(contract-queries/contract-address db :hegexoption)
-(def ^:private nft-address "0x0866faaec29710398cc5ced40081515018d18c21")
+(def ^:private nft-address "0x42b49d4b14411c40243d02dee86abb7157b28e34")
 
 
 ;; const zrxTokenAddress = contractWrappers.contractAddresses.zrxToken;
@@ -369,10 +369,29 @@
                     raw-price
                     order]}))))
 
+(re-frame/reg-event-fx
+  ::assoc-errors
+  interceptors
+  (fn [{:keys [db]}  [errs]]
+    ;;TODO
+    ;;dispatch snackbar effect
+    {:db (assoc-in db [::hegex-nft/hegic-options :ui-errors] errs)}))
+
+(defn- validate-offer [params]
+  (if-not (> (:total params) 0)
+    ["Price can't be 0"]
+    []))
+
 (re-frame/reg-fx
   ::create-offer!
   (fn [params]
-    (order! params (:open? params))))
+    (let [errs (validate-offer params)]
+      (if (pos? (count errs))
+        (dispatch [::assoc-errors errs])
+
+        (do
+          (dispatch [::assoc-errors []])
+          (order! params (:open? params)))))))
 
 (re-frame/reg-event-fx
   ::create-offer

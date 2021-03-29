@@ -7,6 +7,7 @@
 @import "input.less";
 @import "button.less";
 @import "typo.less";
+@import "loader.less";
 
 
 /*! VARIABLES */
@@ -27,6 +28,8 @@ body {
   height: 100%;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  // [NOTE] font
+    // font-family: roc-grotesk,sans-serif;
 }
 
 html,
@@ -156,7 +159,7 @@ a {
 }
 
 .hegexlogo {
-  height: 4em;
+  height: 3em;
 }
 
 .special {
@@ -2476,4 +2479,24 @@ tr:first-of-type > td:first-of-type {
       color: black !important;
     }
   }
+}
+
+.hyellow {
+  color:@hegexorange;
+}
+
+.caption {
+  font-size: 0.8em;
+}
+
+.bold {
+  font-weight: bold;
+}
+
+p.caption {
+  font-size: 0.8em !important;
+}
+
+.red {
+  color:@danger;
 }

@@ -112,7 +112,7 @@ module.exports = {
       provider: function() {
         return new HDWalletProvider(`${process.env.MNEMONIC}`, `https://ropsten.infura.io/v3/${process.env.INFURA_API_KEY}`)
       },
-      // confirmations: 2,
+      confirmations: 2,
       network_id: 3,
       skipDryRun: true
     },

@@ -1,8 +1,14 @@
 (ns district-hegex.ui.home.orderbook
   (:require
    [re-frame.core :refer [subscribe dispatch]]
+   [district.web3-utils :as web3-utils]
+   [district.ui.web3-account-balances.subs :as account-balances-subs]
+   [district-hegex.ui.weth.subs :as weth-subs]
+   [oops.core :refer [oget]]
     [district-hegex.ui.trading.events :as trading-events]
+   [district-hegex.ui.weth.events :as weth-events]
    [district-hegex.ui.external.subs :as external-subs]
+    [district-hegex.shared.utils :refer [to-simple-time debounce]]
    [district-hegex.ui.components.inputs :as inputs]
    [district.format :as format]
    [district-hegex.ui.home.subs :as home-subs]
@@ -54,7 +60,7 @@
                         {:path   [:sra-order :metaData :createdAt]
                          :header "Offered"
                          :attrs  (fn [data] {:style {:text-align "left"}})
-                         ;; :format (fn [v] (some-> v (format/time-ago ) str))
+                         :format (fn [v] (when v (to-simple-time v)))
                          :key    :created-at}
                         #_{:path   [:actions]
                          :header "Actions"
@@ -210,23 +216,93 @@
    :render-cell     cell-fn
    :sort            sort-fn})
 
+(defn- convert-weth []
+  (let [form-data (r/atom {:weth/type :wrap})]
+    (fn []
+    (let [form-res (case (some-> @form-data :weth/type keyword)
+                    :wrap {:btn "Convert to WETH"
+                           :evt ::weth-events/wrap}
+                    :unwrap {:btn "Convert to ETH"
+                             :evt ::weth-events/unwrap}
+                    {:btn "To WETH"
+                     :evt ::weth-events/wrap})]
+     (println "form-data is" @form-data)
+     [:div {:style {:max-width "250px"
+                    :margin-left "auto"
+                    :margin-right "auto"
+                    :text-align "center"}}
+      [:br]
+      [:br]
+      [:div {:style {:max-width "250px"}}
+       [:span
+        [inputs/select
+         {:color :yellow
+          :on-change (fn [e]
+                       (js/e.persist)
+                       ((debounce #(swap! form-data
+                                          assoc
+                                          :weth/type
+                                          (oget e ".?target.?value"))
+                                  500)))}
+         [:option {:value :wrap
+                   :selected true}
+          "Wrap"]
+         [:option {:value :unwrap}
+          "Unwrap"]]
+        [inputs/text-input
+         {:type :number
+          :color "yellow"
+          :min 0
+          :placeholder 0
+          :on-change  (fn [e]
+                        (js/e.persist)
+                        ((debounce #(swap! form-data assoc
+                                           :weth/amount
+                                           (oget e ".?target.?value"))
+                                   500)))}]
+        [:button.yellow
+         {:on-click #(dispatch [(:evt form-res) @form-data])}
+         (:btn form-res)]]]]))))
+
 (defn controls []
-  (let [active-option @(subscribe [::home-subs/my-orderbook-option])]
+  (let [active-option @(subscribe [::home-subs/my-orderbook-option])
+        weth-bal @(subscribe [::weth-subs/balance])
+        eth-bal (some-> (subscribe
+                          [::account-balances-subs/active-account-balance :ETH])
+                         deref
+                         web3-utils/wei->eth-number
+                         (format/format-number {:max-fraction-digits 5}))]
     (println "active option is" active-option)
     [:div {:style {:max-width "500px"
                    :margin-left "auto"}}
      #_(str active-option)
      [:div.box-grid
       [:div.box.e
-       [inputs/text-input
-        {:type :number
-         :color "yellow"
-         :disabled true
-         :min 0
-         :placeholder (str (-> active-option :option (:eth-price 0)) " ETH")}]]
+       [:div
+        [inputs/text-input
+         {:type :number
+          :color "yellow"
+          :disabled true
+          :min 0
+          :placeholder (str (-> active-option :option (:eth-price 0)) " WETH")}]]]
       [:div.box.e
        [:button.yellow
         {:className (when-not active-option "disabled")
          :on-click #(dispatch [::trading-events/fill-offer (:option active-option)])
          :disabled  (not active-option)}
-        "Buy"]]]]))
+        "Buy"]]]
+     [:br]
+     [:div {:style {:text-align "center"}}
+      [:h3  [:b.hyellow " WETH "] "Station"]
+      [:br]
+      [:span {:style {:opacity "0.6"}} "You need some "  " WETH " " to buy Hegex NFTs"]
+         [:br]]
+
+     [:br]
+     [:span.caption "Current Balances"]
+     [:br]
+     [:span.caption
+      [:b eth-bal] " ETH" " |  "]
+     [:span.caption
+      [:b weth-bal] " WETH"]
+     [convert-weth]]))

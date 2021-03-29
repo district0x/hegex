@@ -24,7 +24,7 @@
     [oops.core :refer [oget oset! ocall oapply ocall! oapply!
                        gget
                        oget+ oset!+ ocall+ oapply+ ocall!+ oapply!+]]
-    [district-hegex.shared.utils :refer [debounce]]
+    [district-hegex.shared.utils :refer [to-simple-time debounce]]
     [cljs-web3.eth :as web3-eth]
     [cljs.spec.alpha :as s]
     [district.format :as format]
@@ -41,7 +41,6 @@
     [re-frame.core :as re-frame :refer [dispatch reg-event-fx]]))
 
 (def interceptors [re-frame/trim-v])
-(def ^:private simple-date-format (tf/formatter "MM/dd/YY"))
 
 ;;should be moved away, determined based on netID at compile time
 (def ^:private erc721-0x-proxy "0xe654aac058bfbf9f83fcaee7793311dd82f6ddb4")
@@ -121,32 +120,17 @@
                "then"
            (fn [evs]
              (let [ids-raw (map (fn [e] (-> e bean :topics second)) evs)]
+               (println "ids-raw" ids-raw)
+               #_(when (zero? (count ids-raw))
+                 (dispatch [::hide-loader]))
                (dispatch [::hegic-options (map (partial ->from-topic-pad web3js)
                                                ids-raw)]))))))
 
-
-
-
-#_(defn get-event
-  "a rewrite using web3-cljs lib [ROPSTEN] - disfunctional
-
-   other reason not to use 0.2.x is that decoding logs is tricky
-   perhaps cljs-web3-next/return-values->clj etc can be leveraged when refactoring"
-  [oldweb3]
-  (let [logparams {:fromBlock 0
-                   :toBlock "latest"
-                   :address "0x77041D13e0B9587e0062239d083b51cB6d81404D"
-                   :topics ["0x9acccf962da4ed9c3db3a1beedb70b0d4c3f6a69c170baca7198a74548b5ef4e", nil, "0x000000000000000000000000b95fe51930ddfc546ff766d59288b50170244b4a"]}]
-
-    (println  (.get (web3-eth/filter oldweb3 logparams)
-                    (fn [lgs] (println "dbg filters......" lgs) )))
-
-    #_(web3-eth/contract-get-data
-    (contract-queries/instance db :district)
-    :stake-for
-    (account-queries/active-account db)
-    amount)))
-
+(re-frame/reg-event-fx
+  ::hide-loader
+  interceptors
+  (fn [{:keys [db]} ]
+    {:db (assoc-in db [:initial-state-loaded?] true)}))
 
 ;; TODO - look into batching for this web3 fx
 (re-frame/reg-event-fx
@@ -165,7 +149,6 @@
 (defn- ->hegic-info [[state holder strike amount
                       locked-amount premium expiration
                       option-type asset] id]
-  (println "hegicinfoasset" asset)
   (let [amount-hr (some->> amount
                            bn/number
                            (*  0.001))]
@@ -183,8 +166,7 @@
                             bn/number
                             (*  0.00000001)
                             (gstring/format "%.3f"))
-    :expiration    (tf/unparse simple-date-format
-                               (web3-utils/web3-time->local-date-time expiration))
+    :expiration    (to-simple-time expiration)
     :asset         asset
     ;;NOTE a bit cryptic model, P&L is fetched later via (price+-strike(+-premium*price))
     ;;NOTE P&L with premium is inaccurate since we _can't_ fetch historical price for premium
@@ -248,7 +230,6 @@
   ::my-hegex-options-count
   interceptors
   (fn [{:keys [db]} _]
-    (println "dbg getting my hegex options count" (account-queries/active-account db))
     {:web3/call
      {:web3 (web3-queries/web3 db)
       :fns [{:instance (contract-queries/instance db :hegexoption)
@@ -262,7 +243,6 @@
   ::my-hegex-options
   interceptors
   (fn [_ [hg-count]]
-    (println "dbg hg-count is" hg-count)
     (when hg-count
       {:dispatch-n (mapv (fn [id] [::my-hegex-option id]) (range (bn/number hg-count)))})))
 
@@ -284,7 +264,9 @@
   ::approved-for-exchange-success
   interceptors
   (fn [{:keys [db]} [approved?]]
-    {:db (assoc-in db [::hegic-options :approved-for-exchange?] approved?)}))
+    (println "dbgexchange evt" approved?)
+    {
+     :db (assoc-in db [::hegic-options :approved-for-exchange?] approved?)}))
 
 
 (re-frame/reg-event-fx
@@ -576,13 +558,13 @@
 (re-frame/reg-event-fx
   ::exercise!
   interceptors
-  (fn [{:keys [db]} [hegex-id]]
+  (fn [{:keys [db]} [option-type hegex-id]]
     {:dispatch [::tx-events/send-tx
                 {:instance (contract-queries/instance db :optionchef)
                  :fn :exerciseHegic
-                 :args [hegex-id]
+                 :args [option-type hegex-id]
                  :tx-opts {:from (account-queries/active-account db)}
-                 :tx-id {:exercise {:hegex hegex-id}}
+                 :tx-id :exercise-hegic
                  :on-tx-success [::exercise-success]
                  :on-tx-error [::logging/error [::exercise!]]}]}))
 

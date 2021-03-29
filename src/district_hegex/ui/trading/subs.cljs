@@ -16,3 +16,8 @@
   ::hegic-book
   (fn [db _]
     (vals (get-in db [::hegex-nft/hegic-options :orderbook :full]))))
+
+(re-frame/reg-sub
+  ::hegic-ui-errors
+  (fn [db _]
+    (get-in db [::hegex-nft/hegic-options :ui-errors])))

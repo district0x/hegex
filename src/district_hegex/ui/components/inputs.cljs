@@ -12,6 +12,7 @@
         c (case color
             :primary :select.primary
             :secondary :select.secondary
+            :yellow :select.yellow
             :select.primary)]
     [:div.hegex-select
     [little-arrow color]
@@ -29,3 +30,12 @@
      ;;NOTE ideally  should be set via less inheritance
      [:div.hinput-label
       label])])
+
+(defn loader "pure css loader" [{:keys [on? color]}]
+  (let [c :div.hloader]
+    [:span {:style {:display (if on? "initial" "none")}}
+    [(or (some->> color name (str (name c) ".") keyword) c)
+     [:div]
+     [:div]
+     [:div]
+     [:div]]]))

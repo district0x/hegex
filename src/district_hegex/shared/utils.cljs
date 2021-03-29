@@ -1,6 +1,14 @@
 (ns district-hegex.shared.utils
-  (:require [clojure.set :as set])
+  (:require [clojure.set :as set]
+            [district.web3-utils :as web3-utils]
+            [cljs-time.format :as tf])
   (:import [goog.async Debouncer]))
+
+(def ^:private simple-date-format (tf/formatter "MM/dd/YY"))
+
+(defn to-simple-time [s]
+  (tf/unparse simple-date-format
+              (web3-utils/web3-time->local-date-time s)))
 
 (def vote-option->kw
   {0 :vote-option/neither
@@ -35,3 +43,6 @@
                   (clj->js [content])
                   (clj->js {:type (or mime-type (str "application/plain;charset=UTF-8"))}))
              filename))
+
+(tf/unparse simple-date-format
+                               (web3-utils/web3-time->local-date-time expiration))
