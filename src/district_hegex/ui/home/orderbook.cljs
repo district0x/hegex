@@ -284,7 +284,7 @@
           :color "yellow"
           :disabled true
           :min 0
-          :placeholder (str (-> active-option :option (:eth-price 0)) " ETH")}]]]
+          :placeholder (str (-> active-option :option (:eth-price 0)) " WETH")}]]]
       [:div.box.e
        [:button.yellow
         {:className (when-not active-option "disabled")
