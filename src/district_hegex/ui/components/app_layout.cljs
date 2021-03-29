@@ -22,7 +22,9 @@
 
 (defn- logo []
   [:div.header-logo
-   [:img.hegexlogo {:src "/images/hegexLogo.png"}]
+   [:img.hegexlogo {:src (if @(subscribe [::home-subs/dark-mode?])
+                           "/images/logo-dark.png"
+                           "/images/logo-light.png")}]
    [tabs/tab {:caption "Hegex"}]])
 
 (defn- night-mode []

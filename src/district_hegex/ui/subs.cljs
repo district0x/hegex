@@ -44,3 +44,9 @@
   ::new-hegic-cost
   (fn [db _]
     (get-in db [::hegex-nft/hegic-options :new :total-cost])))
+
+
+(re-frame/reg-sub
+  ::initial-state-loaded?
+  (fn [db _]
+    (get-in db [:initial-state-loaded?])))

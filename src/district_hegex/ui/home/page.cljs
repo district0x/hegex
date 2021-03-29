@@ -504,6 +504,9 @@
    :render-cell     cell-fn
    :sort            sort-fn})
 
+(defn- offer-err [{:keys [s]}]
+  [:p.red.caption.bold s])
+
 (defn- my-hegic-option-controls []
   (let [offer (r/atom {:total 0
                        ;;NOTE not in design, just add another field
@@ -551,10 +554,15 @@
              :disabled  (not active-option)
              :on-click #(dispatch [::trading-events/create-offer
                                    (assoc @offer :id (:hegex-id active-option)) false])}
-            "Offer"])]]]))))
+             "Offer"])]]
+        (doall (map (fn [s]
+                      ^{:key s}
+                      [offer-err {:s s}])
+                    @(subscribe [::trading-subs/hegic-ui-errors])))]))))
 
 (defn- my-hegic-options []
-  (let [opts (subscribe [::subs/hegic-full-options])]
+  (let [opts (subscribe [::subs/hegic-full-options])
+        #_init-loaded? #_(subscribe [::tx-id-subs/tx-pending? :get-balance])]
     [:div
      [:div {:style {:display "flex"
                     :align-items "flex-start"
@@ -564,6 +572,7 @@
                               :text-align "center"
                               :justify-content "center"
                               :align-items "center"}}
+      #_[:div "init loaded?" (if @init-loaded? "yes " "no")]
       (if-not (zero? (count @opts))
         [:div {:className "my-option-table"
                :style {:margin-left "auto"
@@ -726,56 +735,12 @@
           [:h3.stats "$" break-even]]
          [:div.box.e
           [:button.secondary
-           {:on-click #(dispatch [::hegex-nft/mint-hegex @form-data])}
-           (if @tx-pending? "Pending..." "Buy")]]]
+           {:disabled @tx-pending?
+            :on-click #(dispatch [::hegex-nft/mint-hegex @form-data])}
+           (if @tx-pending? [:span "Pending..." [inputs/loader {:color :black :on? @tx-pending?}]] "Buy")]]]
         [:div [:br] [:br] [:br]]]))))
 
-(defn- convert-weth []
-  (let [form-data (r/atom {:weth/type :wrap})]
-    (fn []
-    (let [form-res (case (some-> @form-data :weth/type keyword)
-                    :wrap {:btn "Wrap"
-                           :evt ::weth-events/wrap}
-                    :unwrap {:btn "Unwrap"
-                             :evt ::weth-events/unwrap}
-                    {:btn "Wrap"
-                     :evt ::weth-events/wrap})]
-     (println "form-data is" @form-data)
-     [:div {:style {:max-width "250px"
-                    :margin-left "auto"
-                    :margin-right "auto"
-                    :text-align "center"}}
-      [:br]
-      [:br]
-      [:div {:style {:max-width "250px"}}
-       [:span
-        {:vertical false}
-        [:span
-         {:on-change (fn [e]
-                       (js/e.persist)
-                       ((debounce #(swap! form-data
-                                          assoc
-                                          :weth/type
-                                          (oget e ".?target.?value"))
-                                  500)))}
-         [:option {:value :wrap}
-          "Wrap"]
-         [:option {:value :unwrap}
-          "Unwrap"]]
-        [:span
-         {:fill true
-          :left-lable "WETH"
-          :on-change  (fn [e]
-                        (js/e.persist)
-                        ((debounce #(swap! form-data assoc
-                                           :weth/amount
-                                           (oget e ".?target.?value"))
-                                   500)))
-          :placeholder "Amount"}]
-        [:span
-         {:outlined true
-          :on-click #(dispatch [(:evt form-res) @form-data])}
-         (:btn form-res)]]]]))))
+
 
 #_(defn- my-hegic-options []
   (let [opts (subscribe [::subs/hegic-full-options])]
@@ -800,13 +765,7 @@
       [my-hegic-option-controls]]]))
 
 (defn- orderbook-section []
-  (let [weth-bal @(subscribe [::weth-subs/balance])
-        book (subscribe [::trading-subs/hegic-book])
-        eth-bal (some-> (subscribe
-                          [::account-balances-subs/active-account-balance :ETH])
-                         deref
-                         web3-utils/wei->eth-number
-                         (format/format-number {:max-fraction-digits 5}))]
+  (let [book (subscribe [::trading-subs/hegic-book])]
     [:span
      [:div {:style {:display "flex"
                     :align-items "flex-start"
@@ -850,17 +809,6 @@
         :intent :primary}
        "Force orderbook update"]]
      [:br]
-     #_[:div {:style {:text-align "center"}}
-      [:p "You need some WETH to buy Hegex NFTs"]
-      [:span
-       {:intent "primary"
-        :minimal true}
-       eth-bal " ETH"]
-      " "
-      [:span
-       {:intent "success"
-        :minimal true}
-       weth-bal " WETH"]]
      #_[convert-weth]
      ;; [:br]
      ;; [:br]
