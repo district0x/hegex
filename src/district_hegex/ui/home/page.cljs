@@ -207,12 +207,6 @@
     :on-click #(dispatch [::weth-events/approve-staking])}
    "Approve WETH Staking"])
 
-(defn- nft-badge
-  "WIP, should be a fun metadata pic"
-  [id]
-  [:span
-   (str "NFT#" id)])
-
 (defn- cell-fn
 "Return the cell hiccup form for rendering.
  - render-info the specific column from :column-model
@@ -447,7 +441,7 @@
          [maker-input {:open? open?
                        :id id}]]]])))
 
-(defn orderbook-hegex-option [offer]
+(defn- orderbook-hegex-option [offer]
   (let [chef-address  @(subscribe [::contracts-subs/contract-address :optionchef])
         weth-approved? @(subscribe [::weth-subs/exchange-approved?])
         staking-approved? @(subscribe [::weth-subs/staking-approved?])
@@ -509,8 +503,8 @@
 
 (defn- my-hegic-option-controls []
   (let [offer (r/atom {:total 0
-                       ;;NOTE not in design, just add another field
-                       :expires 24})]
+                       ;;NOTE use a reasonable default instead - 1 month
+                       :expires 730})]
     (fn []
       (let [exercise-pending? @(subscribe [::tx-id-subs/tx-pending? :exercise-hegic])
             active-option (:option @(subscribe [::home-subs/my-active-option]))
@@ -740,30 +734,6 @@
            (if @tx-pending? [:span "Pending..." [inputs/loader {:color :black :on? @tx-pending?}]] "Buy")]]]
         [:div [:br] [:br] [:br]]]))))
 
-
-
-#_(defn- my-hegic-options []
-  (let [opts (subscribe [::subs/hegic-full-options])]
-    [:div
-     [:div {:style {:display "flex"
-                    :align-items "flex-start"
-                    :justify-content "flex-start"}}
-      [:h1 "My Option Contracts"]]
-     [:div.container {:style {:font-size 16
-                              :text-align "center"
-                              :justify-content "center"
-                              :align-items "center"}}
-      (if-not (zero? (count @opts))
-        [:div {:className "my-option-table"
-               :style {:margin-left "auto"
-                      :margin-right "auto"
-                      :overflow-x "auto"}}
-         [dt/reagent-table opts table-props]]
-
-        [:h5.dim-icon.gap-top
-         "You don't own any Hegic options or Hegex NFTs. Mint one now!"])
-      [my-hegic-option-controls]]]))
-
 (defn- orderbook-section []
   (let [book (subscribe [::trading-subs/hegic-book])]
     [:span
@@ -771,7 +741,7 @@
                     :align-items "flex-start"
                     :justify-content "flex-start"}}
       [:h1 "Option Contracts Offers"]]
-[:div.container {:style {:font-size 16
+     [:div.container {:style {:font-size 16
                               :text-align "center"
                               :justify-content "center"
                          :align-items "center"}}
@@ -785,44 +755,9 @@
         [:h5.dim-icon.gap-top
          "There are no active orderbook offers"])
       [orderbook/controls]]
-
      [:br]
-     #_[:div {:style {:display "flex"
-                    :flex-direction "horizontal"
-                    :align-items "center"
-                    :justify-content "center"}}
-      [c/i {:i "exchange"
-            :size "25"
-            :class "primary"}]
-      [:h3.dim-icon.primary {:style {:display "flex"
-                             :align-items "center"
-                             :margin-left "10px"}} "Trade"
-       [:h3.primary {:style {:margin-left "5px"}} "Hegex" ]
-       [:span {:style {:margin-left "5px"}}"NFTs"]]]
-
      [:br]
-     #_[:div {:style {:text-align "center"}}
-      [:span
-       {:outlined true
-        :small true
-        :on-click #(dispatch [::trading-events/load-orderbook])
-        :intent :primary}
-       "Force orderbook update"]]
-     [:br]
-     #_[convert-weth]
-     ;; [:br]
-     ;; [:br]
-     ;; [:br]
-     #_[:div.container {:style {:font-size 16
-                              :text-align "center"
-                              :justify-content "center"
-                              :align-items "center"}}
-      [:div#hegex-wrapper
-       [:div#hegex-container (doall (map (fn [offer]
-                      ^{:key (:hegex-id offer)}
-                      [orderbook-hegex-option offer])
-                    book))]
-       [:div {:style {:clear "both"}}]]]]))
+     [:br]]))
 
 (defmethod page :route/home []
   [app-layout
@@ -835,5 +770,4 @@
      [:hr]
      [:br]
      [:br]
-     #_[my-hegex-options]
      [orderbook-section]]]])

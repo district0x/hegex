@@ -1,6 +1,8 @@
 (ns district-hegex.ui.home.orderbook
   (:require
    [re-frame.core :refer [subscribe dispatch]]
+   [clojure.string :as cs]
+   [district.ui.web3-accounts.subs :as account-subs]
    [district.web3-utils :as web3-utils]
    [district.ui.web3-account-balances.subs :as account-balances-subs]
    [district-hegex.ui.weth.subs :as weth-subs]
@@ -264,6 +266,43 @@
          {:on-click #(dispatch [(:evt form-res) @form-data])}
          (:btn form-res)]]]]))))
 
+(defn- approve-weth-exchange []
+  [:button.yellow
+   {:on-click #(dispatch [::weth-events/approve-exchange])}
+   "Approve WETH"])
+
+(defn- approve-weth-staking []
+  [:button.yellow
+   {:on-click #(dispatch [::weth-events/approve-staking])}
+   "Approve WETH Staking"])
+
+(defn- buy-nft-button [active-option]
+  [:button.yellow
+    {:className (when-not active-option "disabled")
+     :on-click #(dispatch [::trading-events/fill-offer (:option active-option)])
+     :disabled  (not active-option)}
+    "Buy"])
+
+(defn- cancel-nft-button [active-option]
+  [:button.yellow
+    {:className (when-not active-option "disabled")
+     :on-click #(dispatch [::trading-events/cancel-offer active-option])
+     :disabled  (not active-option)}
+    "Cancel"])
+
+(defn- buy-nft [active-option]
+  (let [weth-approved? @(subscribe [::weth-subs/exchange-approved?])
+        staking-approved? @(subscribe [::weth-subs/staking-approved?])
+        active-account @(subscribe [::account-subs/active-account])
+        my-offer? (= (some-> active-account cs/lower-case)
+                     (some-> active-option :sra-order
+                             :order :makerAddress cs/lower-case))]
+    (cond
+        my-offer? [cancel-nft-button active-option]
+        (not weth-approved?) [approve-weth-exchange]
+        (not staking-approved?) [approve-weth-staking]
+        :else [buy-nft-button active-option])))
+
 (defn controls []
   (let [active-option @(subscribe [::home-subs/my-orderbook-option])
         weth-bal @(subscribe [::weth-subs/balance])
@@ -286,11 +325,7 @@
           :min 0
           :placeholder (str (-> active-option :option (:eth-price 0)) " WETH")}]]]
       [:div.box.e
-       [:button.yellow
-        {:className (when-not active-option "disabled")
-         :on-click #(dispatch [::trading-events/fill-offer (:option active-option)])
-         :disabled  (not active-option)}
-        "Buy"]]]
+       [buy-nft active-option]]]
      [:br]
      [:div {:style {:text-align "center"}}
       [:h3  [:b.hyellow " WETH "] "Station"]
