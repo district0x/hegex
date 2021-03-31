@@ -1,6 +1,7 @@
 (ns district-hegex.ui.home.orderbook
   (:require
    [re-frame.core :refer [subscribe dispatch]]
+   [district.ui.web3-tx-id.subs :as tx-id-subs]
    [clojure.string :as cs]
    [district.ui.web3-accounts.subs :as account-subs]
    [district.web3-utils :as web3-utils]
@@ -266,15 +267,17 @@
          {:on-click #(dispatch [(:evt form-res) @form-data])}
          (:btn form-res)]]]]))))
 
-(defn- approve-weth-exchange []
+(defn- approve-weth-exchange [tx-pending?]
   [:button.yellow
-   {:on-click #(dispatch [::weth-events/approve-exchange])}
-   "Approve WETH"])
+   {:on-click #(dispatch [::weth-events/approve-exchange])
+    :disabled @tx-pending?}
+   "Approve WETH" (when @tx-pending? [inputs/loader {:color :black :on? @tx-pending?}])])
 
-(defn- approve-weth-staking []
+(defn- approve-weth-staking [tx-pending?]
   [:button.yellow
-   {:on-click #(dispatch [::weth-events/approve-staking])}
-   "Approve WETH Staking"])
+   {:on-click #(dispatch [::weth-events/approve-staking])
+    :disabled @tx-pending?}
+   "Approve WETH Staking" (when @tx-pending? [inputs/loader {:color :black :on? @tx-pending?}])])
 
 (defn- buy-nft-button [active-option]
   [:button.yellow
@@ -294,13 +297,15 @@
   (let [weth-approved? @(subscribe [::weth-subs/exchange-approved?])
         staking-approved? @(subscribe [::weth-subs/staking-approved?])
         active-account @(subscribe [::account-subs/active-account])
+        approving-staking? (subscribe [::tx-id-subs/tx-pending? :approve-weth-staking])
+        approving-exchange? (subscribe [::tx-id-subs/tx-pending? :approve-weth-exchange])
         my-offer? (= (some-> active-account cs/lower-case)
                      (some-> active-option :sra-order
                              :order :makerAddress cs/lower-case))]
     (cond
         my-offer? [cancel-nft-button active-option]
-        (not weth-approved?) [approve-weth-exchange]
-        (not staking-approved?) [approve-weth-staking]
+        (not weth-approved?) [approve-weth-exchange approving-exchange?]
+        (not staking-approved?) [approve-weth-staking approving-staking?]
         :else [buy-nft-button active-option])))
 
 (defn controls []
