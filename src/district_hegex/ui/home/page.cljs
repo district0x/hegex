@@ -563,6 +563,7 @@
                     :justify-content "flex-start"}}
       [:h1 "My Option Contracts"]]
      [:div.container {:style {:font-size 16
+                              :margin-top "2em"
                               :text-align "center"
                               :justify-content "center"
                               :align-items "center"}}
@@ -658,7 +659,7 @@
                        :align-items "flex-start"
                        :justify-content "flex-start"}}
          [:h1 "Buy New Option Contract"]]
-        [:div.box-grid
+         [:div.box-grid {:style {:margin-top "2em"}}
          [:div.box.a
           [:div.hover-label "Currency"]
           [inputs/select

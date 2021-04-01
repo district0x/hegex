@@ -228,7 +228,10 @@
                     :unwrap {:btn "To ETH"
                              :evt ::weth-events/unwrap}
                     {:btn "To WETH"
-                     :evt ::weth-events/wrap})]
+                     :evt ::weth-events/wrap})
+          wrap-tx-pending? (subscribe [::tx-id-subs/tx-pending? :wrap-eth])
+          unwrap-tx-pending? (subscribe [::tx-id-subs/tx-pending? :unwrap-eth])
+          any-tx-pending? (or @wrap-tx-pending? @unwrap-tx-pending?)]
       [:div.box-grid
       [:div.box.e
        [:div
@@ -263,8 +266,11 @@
                                      500)))}]]]]
        [:div.box.e
         [:button.yellow
-           {:on-click #(dispatch [(:evt form-res) @form-data])}
-           (:btn form-res)]]]))))
+         {:disabled any-tx-pending?
+          :on-click #(dispatch [(:evt form-res) @form-data])}
+         (:btn form-res)
+         (when any-tx-pending?
+           [inputs/loader {:color :black :on? any-tx-pending?}])]]]))))
 
 (defn- approve-weth-exchange [tx-pending?]
   [:button.yellow
