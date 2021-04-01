@@ -749,6 +749,7 @@
                     :justify-content "flex-start"}}
       [:h1 "Option Contracts Offers"]]
      [:div.container {:style {:font-size 16
+                              :margin-top "2em"
                               :text-align "center"
                               :justify-content "center"
                          :align-items "center"}}
@@ -761,6 +762,7 @@
 
         [:h5.dim-icon.gap-top
          "There are no active orderbook offers"])
+      [:br]
       [orderbook/controls]]
      [:br]
      [:br]
