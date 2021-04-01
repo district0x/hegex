@@ -562,7 +562,8 @@
 
 (defn- my-hegic-options []
   (let [opts (subscribe [::subs/hegic-full-options])
-        local-opts (r/atom @opts)
+        local-opts opts
+        #_local-opts #_(r/atom @opts)
 
         #_init-loaded? #_(subscribe [::tx-id-subs/tx-pending? :get-balance])]
     [:div
