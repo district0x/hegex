@@ -330,18 +330,20 @@
    [:div.danger-space
     [:span.danger-caption "Delegate Hegic to enable trading"]]])
 
-(defn- approve-exchange-hegex []
-  [:div
-   [:span
-   {:outlined true
-    :small true
-    :intent :primary
-    :on-click #(dispatch [::hegex-nft/approve-for-exchange!])}
-    "Approve"]
-   [:div.danger-space
-    [:span.danger-caption "Approve Hegex to enable trading"]]])
+#_(defn- approve-exchange-hegex []
+  (let [tx-pending? (subscribe [::tx-id-subs/tx-pending? :exercise-hegic])]
+    [:div
+    [:span
+     {:outlined true
+      :small true
+      :intent :primary
+      :on-click #(dispatch [::hegex-nft/approve-for-exchange!])}
+     "Approve"
+     (when @tx-pending? [inputs/loader {:color :black :on? @tx-pending?}])]
+    [:div.danger-space
+     [:span.danger-caption "Approve Hegex to enable trading"]]]))
 
-(defn my-hegex-option [{:keys [id open? selling?]}]
+#_(defn- my-hegex-option [{:keys [id open? selling?]}]
   (let [chef-address  @(subscribe [::contracts-subs/contract-address :optionchef])
         approved? @(subscribe [::trading-subs/approved-for-exchange?])
         hegic @(subscribe [::subs/hegic-by-hegex id])
@@ -423,7 +425,7 @@
          :intent :primary}
         "Place Offer"]]])))
 
-(defn- my-hegex-option-wrapper []
+#_(defn- my-hegex-option-wrapper []
   (let [open? (r/atom false)]
     (fn [{:keys [id]}]
       (println "open? " @open?)
@@ -441,7 +443,7 @@
          [maker-input {:open? open?
                        :id id}]]]])))
 
-(defn- orderbook-hegex-option [offer]
+#_(defn- orderbook-hegex-option [offer]
   (let [chef-address  @(subscribe [::contracts-subs/contract-address :optionchef])
         weth-approved? @(subscribe [::weth-subs/exchange-approved?])
         staking-approved? @(subscribe [::weth-subs/staking-approved?])
@@ -503,11 +505,13 @@
 
 (defn- my-hegic-option-controls []
   (let [offer (r/atom {:total 0
-                       ;;NOTE use a reasonable default instead - 1 month
+                       ;;NOTE reasonable default of 1 month
                        :expires 730})]
     (fn []
       (let [exercise-pending? @(subscribe [::tx-id-subs/tx-pending? :exercise-hegic])
             active-option (:option @(subscribe [::home-subs/my-active-option]))
+            approval-pending? (subscribe [::tx-id-subs/tx-pending?
+                                          :approve-for-exchange!])
             hegic-asset (:asset active-option)]
        [:div [:div.hloader]
         [:div.box-grid
@@ -539,9 +543,11 @@
           (if-not @(subscribe [::trading-subs/approved-for-exchange?])
             [:button.primary
             {:className (when-not active-option "disabled")
-             :disabled  (not active-option)
+             :disabled  (or (not active-option) @approval-pending?)
              :on-click #(dispatch [::hegex-nft/approve-for-exchange!])}
-            "Approve"]
+             "Approve"
+             (when @approval-pending? [inputs/loader {:color :black
+                                                      :on? @approval-pending?}])]
 
             [:button.primary
             {:className (when-not active-option "disabled")
