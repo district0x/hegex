@@ -562,6 +562,8 @@
 
 (defn- my-hegic-options []
   (let [opts (subscribe [::subs/hegic-full-options])
+        local-opts (r/atom @opts)
+
         #_init-loaded? #_(subscribe [::tx-id-subs/tx-pending? :get-balance])]
     [:div
      [:div {:style {:display "flex"
@@ -579,7 +581,7 @@
                :style {:margin-left "auto"
                       :margin-right "auto"
                       :overflow-x "auto"}}
-         [dt/reagent-table opts table-props]]
+         [dt/reagent-table local-opts table-props]]
 
         [:h5.dim-icon.gap-top
          "You don't own any Hegic options or Hegex NFTs. Mint one now!"])
