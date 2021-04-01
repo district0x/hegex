@@ -9,27 +9,33 @@
 
 (defn select [& children]
   (let [color (some-> children first :color)
+        size (some-> children first :size)
         c (case color
             :primary :select.primary
             :secondary :select.secondary
             :yellow :select.yellow
-            :select.primary)]
-    [:div.hegex-select
+            :select.primary)
+        s (case size
+            :small :div.hegex-select.small
+            :div.hegex-select)]
+    [s
     [little-arrow color]
     [:div.select
      (into [c] children)]]))
 
-(defn text-input [{:keys [type min max on-change label color ] :as props}]
-  [:div.hinput-wrapper
-   [:input.hegex-input (merge props {:type      type
-                                     :className (or color "primary")
-                                     :on-change on-change
-                                     :min       min
-                                     :max       max})]
-   (when label
-     ;;NOTE ideally  should be set via less inheritance
-     [:div.hinput-label
-      label])])
+(defn text-input [{:keys [type min max on-change label color size] :as props}]
+  (let [el :div.hinput-wrapper
+        ->sized #(keyword (str (name %) "." (name size)))]
+    [(if-not size el (->sized el))
+    [:input.hegex-input (merge props {:type      type
+                                      :className (or color "primary")
+                                      :on-change on-change
+                                      :min       min
+                                      :max       max})]
+    (when label
+      ;;NOTE ideally  should be set via less inheritance
+      [:div.hinput-label
+       label])]))
 
 (defn loader "pure css loader" [{:keys [on? color]}]
   (let [c :div.hloader]

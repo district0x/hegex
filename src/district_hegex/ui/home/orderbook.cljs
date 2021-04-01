@@ -223,49 +223,48 @@
   (let [form-data (r/atom {:weth/type :wrap})]
     (fn []
     (let [form-res (case (some-> @form-data :weth/type keyword)
-                    :wrap {:btn "Convert to WETH"
+                    :wrap {:btn "To WETH"
                            :evt ::weth-events/wrap}
-                    :unwrap {:btn "Convert to ETH"
+                    :unwrap {:btn "To ETH"
                              :evt ::weth-events/unwrap}
                     {:btn "To WETH"
                      :evt ::weth-events/wrap})]
-     (println "form-data is" @form-data)
-     [:div {:style {:max-width "250px"
-                    :margin-left "auto"
-                    :margin-right "auto"
-                    :text-align "center"}}
-      [:br]
-      [:br]
-      [:div {:style {:max-width "250px"}}
-       [:span
-        [inputs/select
-         {:color :yellow
-          :on-change (fn [e]
-                       (js/e.persist)
-                       ((debounce #(swap! form-data
-                                          assoc
-                                          :weth/type
-                                          (oget e ".?target.?value"))
-                                  500)))}
-         [:option {:value :wrap
-                   :selected true}
-          "Wrap"]
-         [:option {:value :unwrap}
-          "Unwrap"]]
-        [inputs/text-input
-         {:type :number
-          :color "yellow"
-          :min 0
-          :placeholder 0
-          :on-change  (fn [e]
-                        (js/e.persist)
-                        ((debounce #(swap! form-data assoc
-                                           :weth/amount
-                                           (oget e ".?target.?value"))
-                                   500)))}]
+      [:div.box-grid
+      [:div.box.e
+       [:div
+        [:div {:style {:display "flex"
+                       :justify-content "space-between"}}
+          [inputs/select
+           {:size :small
+            :color :yellow
+            :on-change (fn [e]
+                         (js/e.persist)
+                         ((debounce #(swap! form-data
+                                            assoc
+                                            :weth/type
+                                            (oget e ".?target.?value"))
+                                    500)))}
+           [:option {:value :wrap
+                     :selected true}
+            "Wrap"]
+           [:option {:value :unwrap}
+            "Unwrap"]]
+          [inputs/text-input
+           {:size :small
+            :type :number
+            :color "yellow"
+            :min 0
+            :placeholder 0
+            :on-change  (fn [e]
+                          (js/e.persist)
+                          ((debounce #(swap! form-data assoc
+                                             :weth/amount
+                                             (oget e ".?target.?value"))
+                                     500)))}]]]]
+       [:div.box.e
         [:button.yellow
-         {:on-click #(dispatch [(:evt form-res) @form-data])}
-         (:btn form-res)]]]]))))
+           {:on-click #(dispatch [(:evt form-res) @form-data])}
+           (:btn form-res)]]]))))
 
 (defn- approve-weth-exchange [tx-pending?]
   [:button.yellow
@@ -331,18 +330,17 @@
           :placeholder (str (-> active-option :option (:eth-price 0)) " WETH")}]]]
       [:div.box.e
        [buy-nft active-option]]]
-     [:br]
-     [:div {:style {:text-align "center"}}
-      [:h3  [:b.hyellow " WETH "] "Station"]
-      [:br]
-      [:span {:style {:opacity "0.6"}} "You need some "  " WETH " " to buy Hegex NFTs"]
-         [:br]]
 
-     [:br]
+     [:div.box-grid
+      [:div.box.e
+       [:h4  [:b.hyellow " WETH "] "Station"]
+       [:span.xs {:style {:opacity "0.6"}} "You need some "  " WETH " " to buy Hegex NFTs"]]
+      [:div.box.e
+       [:div
      [:span.caption "Current Balances"]
      [:br]
      [:span.caption
       [:b eth-bal] " ETH" " |  "]
      [:span.caption
-      [:b weth-bal] " WETH"]
+      [:b weth-bal] " WETH"]]]]
      [convert-weth]]))
