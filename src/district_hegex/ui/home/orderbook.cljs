@@ -1,6 +1,9 @@
 (ns district-hegex.ui.home.orderbook
   (:require
    [re-frame.core :refer [subscribe dispatch]]
+   [district.ui.web3-tx-id.subs :as tx-id-subs]
+   [clojure.string :as cs]
+   [district.ui.web3-accounts.subs :as account-subs]
    [district.web3-utils :as web3-utils]
    [district.ui.web3-account-balances.subs :as account-balances-subs]
    [district-hegex.ui.weth.subs :as weth-subs]
@@ -220,49 +223,95 @@
   (let [form-data (r/atom {:weth/type :wrap})]
     (fn []
     (let [form-res (case (some-> @form-data :weth/type keyword)
-                    :wrap {:btn "Convert to WETH"
+                    :wrap {:btn "To WETH"
                            :evt ::weth-events/wrap}
-                    :unwrap {:btn "Convert to ETH"
+                    :unwrap {:btn "To ETH"
                              :evt ::weth-events/unwrap}
                     {:btn "To WETH"
-                     :evt ::weth-events/wrap})]
-     (println "form-data is" @form-data)
-     [:div {:style {:max-width "250px"
-                    :margin-left "auto"
-                    :margin-right "auto"
-                    :text-align "center"}}
-      [:br]
-      [:br]
-      [:div {:style {:max-width "250px"}}
-       [:span
-        [inputs/select
-         {:color :yellow
-          :on-change (fn [e]
-                       (js/e.persist)
-                       ((debounce #(swap! form-data
-                                          assoc
-                                          :weth/type
-                                          (oget e ".?target.?value"))
-                                  500)))}
-         [:option {:value :wrap
-                   :selected true}
-          "Wrap"]
-         [:option {:value :unwrap}
-          "Unwrap"]]
-        [inputs/text-input
-         {:type :number
-          :color "yellow"
-          :min 0
-          :placeholder 0
-          :on-change  (fn [e]
-                        (js/e.persist)
-                        ((debounce #(swap! form-data assoc
-                                           :weth/amount
-                                           (oget e ".?target.?value"))
-                                   500)))}]
+                     :evt ::weth-events/wrap})
+          wrap-tx-pending? (subscribe [::tx-id-subs/tx-pending? :wrap-eth])
+          unwrap-tx-pending? (subscribe [::tx-id-subs/tx-pending? :unwrap-eth])
+          any-tx-pending? (or @wrap-tx-pending? @unwrap-tx-pending?)]
+      [:div.box-grid
+      [:div.box.e
+       [:div
+        [:div {:style {:display "flex"
+                       :justify-content "space-between"}}
+          [inputs/select
+           {:size :small
+            :color :yellow
+            :on-change (fn [e]
+                         (js/e.persist)
+                         ((debounce #(swap! form-data
+                                            assoc
+                                            :weth/type
+                                            (oget e ".?target.?value"))
+                                    500)))}
+           [:option {:value :wrap
+                     :selected true}
+            "Wrap"]
+           [:option {:value :unwrap}
+            "Unwrap"]]
+          [inputs/text-input
+           {:size :small
+            :type :number
+            :color "yellow"
+            :min 0
+            :placeholder 0
+            :on-change  (fn [e]
+                          (js/e.persist)
+                          ((debounce #(swap! form-data assoc
+                                             :weth/amount
+                                             (oget e ".?target.?value"))
+                                     500)))}]]]]
+       [:div.box.e
         [:button.yellow
-         {:on-click #(dispatch [(:evt form-res) @form-data])}
-         (:btn form-res)]]]]))))
+         {:disabled any-tx-pending?
+          :on-click #(dispatch [(:evt form-res) @form-data])}
+         (:btn form-res)
+         (when any-tx-pending?
+           [inputs/loader {:color :black :on? any-tx-pending?}])]]]))))
+
+(defn- approve-weth-exchange [tx-pending?]
+  [:button.yellow
+   {:on-click #(dispatch [::weth-events/approve-exchange])
+    :disabled @tx-pending?}
+   "Approve WETH" (when @tx-pending? [inputs/loader {:color :black :on? @tx-pending?}])])
+
+(defn- approve-weth-staking [tx-pending?]
+  [:button.yellow
+   {:on-click #(dispatch [::weth-events/approve-staking])
+    :disabled @tx-pending?}
+   "Approve WETH Staking" (when @tx-pending? [inputs/loader {:color :black :on? @tx-pending?}])])
+
+(defn- buy-nft-button [active-option]
+  [:button.yellow
+    {:className (when-not active-option "disabled")
+     :on-click #(dispatch [::trading-events/fill-offer (:option active-option)])
+     :disabled  (not active-option)}
+    "Buy"])
+
+(defn- cancel-nft-button [active-option]
+  [:button.yellow
+    {:className (when-not active-option "disabled")
+     :on-click #(dispatch [::trading-events/cancel-offer active-option])
+     :disabled  (not active-option)}
+    "Cancel"])
+
+(defn- buy-nft [active-option]
+  (let [weth-approved? @(subscribe [::weth-subs/exchange-approved?])
+        staking-approved? @(subscribe [::weth-subs/staking-approved?])
+        active-account @(subscribe [::account-subs/active-account])
+        approving-staking? (subscribe [::tx-id-subs/tx-pending? :approve-weth-staking])
+        approving-exchange? (subscribe [::tx-id-subs/tx-pending? :approve-weth-exchange])
+        my-offer? (= (some-> active-account cs/lower-case)
+                     (some-> active-option :sra-order
+                             :order :makerAddress cs/lower-case))]
+    (cond
+        my-offer? [cancel-nft-button active-option]
+        (not weth-approved?) [approve-weth-exchange approving-exchange?]
+        (not staking-approved?) [approve-weth-staking approving-staking?]
+        :else [buy-nft-button active-option])))
 
 (defn controls []
   (let [active-option @(subscribe [::home-subs/my-orderbook-option])
@@ -286,23 +335,18 @@
           :min 0
           :placeholder (str (-> active-option :option (:eth-price 0)) " WETH")}]]]
       [:div.box.e
-       [:button.yellow
-        {:className (when-not active-option "disabled")
-         :on-click #(dispatch [::trading-events/fill-offer (:option active-option)])
-         :disabled  (not active-option)}
-        "Buy"]]]
-     [:br]
-     [:div {:style {:text-align "center"}}
-      [:h3  [:b.hyellow " WETH "] "Station"]
-      [:br]
-      [:span {:style {:opacity "0.6"}} "You need some "  " WETH " " to buy Hegex NFTs"]
-         [:br]]
+       [buy-nft active-option]]]
 
-     [:br]
+     [:div.box-grid
+      [:div.box.e
+       [:h4  [:b.hyellow " WETH "] "Station"]
+       [:span.xs {:style {:opacity "0.6"}} "You need some "  " WETH " " to buy Hegex NFTs"]]
+      [:div.box.e
+       [:div
      [:span.caption "Current Balances"]
      [:br]
      [:span.caption
       [:b eth-bal] " ETH" " |  "]
      [:span.caption
-      [:b weth-bal] " WETH"]
+      [:b weth-bal] " WETH"]]]]
      [convert-weth]]))

@@ -207,3 +207,9 @@
  ::reboot!
  (fn []
    (js/location.reload)))
+
+(re-frame/reg-event-fx
+  ::set-hegic-ui-options
+  interceptors
+  (fn [{:keys [db]} [options]]
+    {:db (assoc-in db [::hegex-nft/hegic-options :full-ui] options)}))

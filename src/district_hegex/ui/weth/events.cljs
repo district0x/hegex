@@ -161,7 +161,7 @@
                  :args [erc20-proxy (web3-utils/eth->wei-number
                                      (+ most-expensive-purchase 1))]
                  :tx-opts {:from (account-queries/active-account db)}
-                 :tx-id :approve-weth
+                 :tx-id :approve-weth-exchange
                  :on-tx-success [::approve-exchange-success]
                  :on-tx-error [::logging/error [::approve-exchange]]}]}))
 

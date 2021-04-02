@@ -17,3 +17,8 @@
   ::my-orderbook-option
   (fn [db]
     (get-in db [:hegic-options/orderbook-option])))
+
+(re-frame/reg-sub
+  ::my-option-sorting
+  (fn [db]
+    (get-in db [:hegic-options/my-sorting])))
