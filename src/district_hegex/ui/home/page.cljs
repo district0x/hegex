@@ -3,6 +3,7 @@
   (:require
    [clojure.string :as cs]
    [district-hegex.ui.home.events :as home-events]
+   [district-hegex.ui.events :as events]
    [district-hegex.ui.home.orderbook :as orderbook]
    [district-hegex.ui.home.subs :as home-subs]
    [district-hegex.ui.components.inputs :as inputs]
@@ -80,7 +81,9 @@
            [:div.wheel [:img {:src "/images/svg/fan-spokes.svg"}]]]]]]])))
 
 
-(def ^:private table-state (r/atom {:draggable false}))
+(def ^:private table-state (r/atom {:active-bg "#4FFF7C"
+                                    :default-sorting :p&l
+                                    :draggable false}))
 
 
 (def ^:private columns [{:path   [:option-type]
@@ -302,6 +305,7 @@
   "Generic sort function for tabular data. Sort rows using data resolved from
   the specified columns in the column model."
   [rows column-model sorting]
+  (dispatch [::home-events/set-my-option-sorting sorting])
   (sort (fn [row-x row-y]
           (reduce
             (fn [_ sort]
@@ -319,6 +323,7 @@
             sorting))
         rows))
 
+;; TODO implement this funciton in new UI shall we need wrapping/unwrapping
 (defn- unlock-hegex [uid]
   [:div
    [:span
@@ -562,9 +567,9 @@
 
 (defn- my-hegic-options []
   (let [opts (subscribe [::subs/hegic-full-options])
-        local-opts opts
-        #_local-opts #_(r/atom @opts)
-
+        resetter (fn [v]
+                   (println "sorted options are" v)
+                   (dispatch [::events/set-hegic-ui-options v]))
         #_init-loaded? #_(subscribe [::tx-id-subs/tx-pending? :get-balance])]
     [:div
      [:div {:style {:display "flex"
@@ -577,65 +582,17 @@
                               :justify-content "center"
                               :align-items "center"}}
       #_[:div "init loaded?" (if @init-loaded? "yes " "no")]
+      ;;NOTE loader can be detected simpler on a difference between [] and nil
       (if-not (zero? (count @opts))
         [:div {:className "my-option-table"
                :style {:margin-left "auto"
                       :margin-right "auto"
                       :overflow-x "auto"}}
-         [dt/reagent-table local-opts table-props]]
+         [dt/reagent-table opts table-props resetter]]
 
         [:h5.dim-icon.gap-top
          "You don't own any Hegic options or Hegex NFTs. Mint one now!"])
       [my-hegic-option-controls]]]))
-
-(defn- my-hegex-options []
-  (let [ids (subscribe [::subs/my-hegex-ids])]
-[:div
-     [:div {:style {:display "flex"
-                    :align-items "flex-start"
-                    :justify-content "flex-start"}}
-      [:h1 "My Option Contracts"]]
-     [:div.container {:style {:font-size 16
-                              :text-align "center"
-                              :justify-content "center"
-                              :align-items "center"}}
-      (if-not (zero? (count @ids))
-        [:div {:style {:margin-left "auto"
-                      :margin-right "auto"
-                      :overflow-x "auto"}}
-     #_    [dt/reagent-table @ids table-props]]
-
-        [:h5.dim-icon.gap-top
-         "You don't own any Hegic options or Hegex NFTs. Mint one now!"])]]
-
-    #_[:span
-     {:elevation 5
-      :class-name "my-nfts-bg"}
-     [:br]
-     [:div {:style {:display "flex"
-                    :flex-direction "horizontal"
-                    :align-items "center"
-                    :justify-content "center"}}
-      [c/i {:i "person"
-            :size "13"
-            :class "special"}]
-      [:h3.dim-icon.special {:style {:display "flex"
-                             :align-items "baseline"
-                             :margin-left "10px"}} "My Hegex NFTs"]]
-
-     [:br]
-     [:div.container {:style {:font-size 16
-                              :text-align "center"
-                              :justify-content "center"
-                              :align-items "center"}}
-      (when (zero? (count @ids))
-        [:h5.dim-icon "You don't own Hegex NFTs yet. Mint one now!"])
-      [:div#hegex-wrapper
-       [:div#hegex-container (doall (map (fn [id]
-                      ^{:key id}
-                      [my-hegex-option-wrapper {:id id}])
-                    @ids))]
-       [:div {:style {:clear "both"}}]]]]))
 
 (defn- upd-new-hegex [form-data e key]
   ((debounce (fn []

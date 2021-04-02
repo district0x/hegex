@@ -45,6 +45,10 @@
 ;;should be moved away, determined based on netID at compile time
 (def ^:private erc721-0x-proxy "0xe654aac058bfbf9f83fcaee7793311dd82f6ddb4")
 
+(defn- ui-options-model [db]
+  (assoc-in db [::hegic-options :full-ui]
+            (vals (get-in db [::hegic-options :full]))))
+
 (re-frame/reg-event-fx
   ::owner
   interceptors
@@ -182,8 +186,9 @@
   interceptors
   (fn [{:keys [db]} [id hegic-info-raw]]
     ;; NOTE move formatting to view, store raw data in re-frame db
-    {:db (assoc-in db [::hegic-options :full id]
-                   (->hegic-info hegic-info-raw id))}))
+    (let [upd-db (assoc-in db [::hegic-options :full id]
+                        (->hegic-info hegic-info-raw id))]
+      {:db (ui-options-model upd-db)})))
 
 (re-frame/reg-event-fx
   ::wrap!
@@ -327,9 +332,10 @@
     (when-let [uid (bn/number uid-raw)]
       (let [with-uid (assoc-in db [::hegic-options :full uid :hegex-id] hg-id)
             with-option-type (assoc-in with-uid [::hegic-options :full uid :asset]
-                                       (bn/number option-type-raw))]
+                                       (bn/number option-type-raw))
+            with-ui (ui-options-model with-option-type)]
         (println "uhegex1 with option-type is" with-option-type)
-        (cond->  {:db with-option-type}
+        (cond->  {:db with-ui}
          ;;query full when full hegic option is not in db (e.g. created by chef)
          (not (get-in db [::hegic-options :full uid :holder]))
          (assoc :web3/call
@@ -345,8 +351,9 @@
   interceptors
   (fn [{:keys [db]} [hg-id uid option-type hegic-info-raw]]
     (println "dbg____________" ::my-uhegex-option-full-success hg-id uid hegic-info-raw)
-    {:db (update-in db [::hegic-options :full uid] merge
-                    (->hegic-info  (conj hegic-info-raw option-type) uid))}))
+    {:db (ui-options-model
+          (update-in db [::hegic-options :full uid] merge
+                     (->hegic-info  (conj hegic-info-raw option-type) uid)))}))
 
 
 (re-frame/reg-event-fx
@@ -371,8 +378,9 @@
   interceptors
   (fn [{:keys [db]} [uid]]
     (println "dbg delegated option" uid " ::successfully")
-    {:db (assoc-in db [::hegic-options :full uid :holder]
-                   (contract-queries/contract-address db :optionchef))}))
+    {:db (ui-options-model
+          (assoc-in db [::hegic-options :full uid :holder]
+                    (contract-queries/contract-address db :optionchef)))}))
 
 (re-frame/reg-event-fx
   ::estimate-mint-hegex
@@ -497,33 +505,17 @@
   ::uhegex-option-full
   interceptors
   (fn [{:keys [db]} [hegex-id eth-price raw-price order hegic]]
-   #_ (println "dbguhegex -full db is"
-             (get-in db [::hegic-options :orderbook :full hegex-id]))
-
     (when-let [uid (bn/number hegic)]
-    (println "dbguhegex uid is" uid)
-    {:db (update-in db [::hegic-options :orderbook :full hegex-id] merge
-                      {:hegic-id uid})
-     :web3/call
-      {:web3 (web3-queries/web3 db)
-       :fns [{:instance (contract-queries/instance db :optionchefdata)
-              :fn :optionType
-              :args [uid]
-              :on-success [::uhegex-option-full-fetch hegex-id uid eth-price
-                           raw-price order]
-              :on-error [::logging/error [::my-uhegex-option-full]]}]}})
-
-    #_(when-let [uid (bn/number hegic)]
       {:db (update-in db [::hegic-options :orderbook :full hegex-id] merge
                       {:hegic-id uid})
-       :web3/call {:web3 (web3-queries/web3 db)
-                  :fns [{:instance (contract-queries/instance db :optionchef)
-                         :fn :getUnderlyingOptionParams
-                         :args [hegex-id]
-                         :on-success [::uhegex-option-full-fetch
-                                      hegex-id uid eth-price
-                                      raw-price order]
-                         :on-error [::logging/error [::uhegex-option-full]]}]}})))
+       :web3/call
+       {:web3 (web3-queries/web3 db)
+        :fns [{:instance (contract-queries/instance db :optionchefdata)
+               :fn :optionType
+               :args [uid]
+               :on-success [::uhegex-option-full-fetch hegex-id uid eth-price
+                            raw-price order]
+               :on-error [::logging/error [::my-uhegex-option-full]]}]}})))
 
 (re-frame/reg-event-fx
   ::uhegex-option-full-fetch

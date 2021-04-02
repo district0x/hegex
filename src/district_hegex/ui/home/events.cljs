@@ -22,3 +22,10 @@
   interceptors
   (fn [db [option row-num]]
     (assoc-in db [:hegic-options/orderbook-option] {:option option :row-num row-num})))
+
+
+(re-frame/reg-event-db
+  ::set-my-option-sorting
+  interceptors
+  (fn [db [sorting]]
+    (assoc-in db [:hegic-options/my-sorting] (some-> sorting first))))

@@ -8,6 +8,9 @@
 ;;; Does it work? Yup! (contributor: by and large)
 ;;; Do I have time to clean it up? Not really... (contributor: let's have a go)
 
+(defn- deref-vals [d]
+  (if (some-> d deref map?) (vals @d) @d))
+
 (defn- drag-move-fn [on-drag]
   (fn [evt]
     (.preventDefault evt) ;; otherwise we select text while resizing
@@ -202,7 +205,8 @@
                        model-col
                        config
                        state-atom
-                       data-atom]
+                       data-atom
+                       resetter]
   (let [state         @state-atom
         col-hidden    (:col-hidden state)
         {:keys [draggable]} state
@@ -210,41 +214,40 @@
         column-model  (:column-model config)
         sortable      (not (false? (:sortable render-info)))
         sort-click-fn (fn [append]
-                        (when sort-fn
-                          (reset! data-atom (sort-fn @data-atom
+                        (when (and sort-fn resetter)
+                          (resetter (sort-fn (deref-vals data-atom)
                                                      column-model
                                                      (:sorting (update-sort-columns! model-col state-atom append))))))]
     [:th
      (recursive-merge
       (:th config)
-      {:draggable draggable
-       :on-drag-start #(do (doto (.-dataTransfer %)
-                             (.setData "text/plain" "")) ;; for Firefox
-                           (swap! state-atom assoc :col-reordering true))
-       :on-drag-over #(swap! state-atom assoc :col-hover view-col)
-       :on-drag-end #(let [col-hover (:col-hover @state-atom)
-                           col-sorting (first (get @state-atom :sorting))]
-                       (when-not (= view-col col-hover) ;; if dropped on another column
-                         (reorder-column-index-to-model! view-col col-hover state-atom))
-                       (swap! state-atom assoc
-                              :col-hover nil
-                              :col-reordering nil))
+      {:draggable false
+       :on-click #(sort-click-fn (.-ctrlKey %))
        :style (merge (get-in config [:th :style])
-                     {:position "relative"
-                      :cursor (if draggable "move" nil)
-                      :display (when (get col-hidden model-col) "none")}
+                     (cond->
+                         {:position "relative"
+                          :cursor "pointer"
+                          :border-radius "5px 5px 0px 0px"
+                          :display (when (get col-hidden model-col) "none")}
+
+                       (or (is-sorting (:sorting state) render-info model-col)
+                           (and
+                            (= (:key render-info) (get @state-atom :default-sorting))
+                            (not (:sorting state))))
+
+                       (merge {:background-color (get @state-atom :active-bg)
+                               :color "white"}))
                      (when (and (:col-reordering state)
                                 (= view-col (:col-hover state)))
                        {:border-right "6px solid #3366CC"}))})
-     [:span {:style {:padding-right 50}} (:header render-info)]
+     [:span {:style {:padding-right 50}}  (:header render-info)]
      (when (and sort-fn sortable)
        [:span {:style {:position "absolute"
                        :text-align "center"
                        :height "1.5em"
                        :width "1.5em"
                        :right "15px"
-                       :cursor "pointer"}
-               :on-click #(sort-click-fn (.-ctrlKey %))}
+                       :cursor "pointer"}}
         (condp = (is-sorting (:sorting state) render-info model-col)
           :asc " ▲"
           :desc " ▼"
@@ -254,13 +257,13 @@
      [resize-widget (r/current-component)]]))
 
 
-(defn- header-row-fn [column-model config data-atom state-atom]
+(defn- header-row-fn [column-model config data-atom state-atom resetter]
   [:tr
    (doall (map-indexed (fn [view-col _]
                          (let [model-col (column-index-to-model state-atom view-col)
                                render-info (column-model model-col)]
                            ^{:key (or (:key render-info) model-col)}
-                           [header-cell-fn render-info view-col model-col config state-atom data-atom]))
+                           [header-cell-fn render-info view-col model-col config state-atom data-atom resetter]))
                        column-model))])
 
 
@@ -317,7 +320,7 @@
   (into [] (map-indexed (fn [idx _] idx) headers)))
 
 (defn- the-table
-  [config column-model data-atom state-atom]
+  [config column-model data-atom state-atom resetter]
   (let [scroll-height   (:scroll-height config)
         table-container (:table-container config)]
     (r/create-class {:reagent-render         (fn [] [:div.reagent-table-container
@@ -334,12 +337,13 @@
                                                        (header-row-fn column-model
                                                                       config
                                                                       data-atom
-                                                                      state-atom)]
+                                                                      state-atom
+                                                                      resetter)]
                                                       [:tr  [:td {:style {:height "30px"
                                                                           :background-color "transparent"}}]]
                                                       [:tbody (:tbody config)
 
-                                                       (rows-fn @data-atom state-atom config)]]])})))
+                                                       (rows-fn (deref-vals data-atom) state-atom config)]]])})))
 
 (defn reagent-table
   "Create a table, rendering the vector held in data-atom and
@@ -398,7 +402,7 @@
   :column-selection optional attributes to display visibly column toggles
   for example {:ul {:li {:class \"btn\"}}}
   "
-  [data-atom config]
+  [data-atom config resetter]
   (let [config (recursive-merge default-config config)
         state-atom (or (:table-state config) (r/atom {})) ;; a place for the table local state
         {:keys [render-cell column-model]} config]
@@ -412,4 +416,4 @@
                       "overflow: hidden;text-overflow: ellipsis;white-space: nowrap;}")]
          (when-let [selector-config (:column-selection config)]
            [column-selector state-atom selector-config column-model])
-         [the-table config column-model data-atom state-atom]])))
+         [the-table config column-model data-atom state-atom resetter]])))
