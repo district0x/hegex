@@ -12,14 +12,13 @@ RUN chmod a+x /bin/solc-static-linux /usr/bin/solc /bin/lein
 
 
 WORKDIR /build
-RUN npm set progress=false && npm i -s -y
+RUN npm set progress=false && npm i -y
 
 RUN  npm i -g -y -s truffle http-server
 RUN truffle compile
 RUN cp resources/external-abi/* resources/public/contracts/build/
 
-RUN npx webpack --mode development
-RUN lein build-css
+RUN npx webpack
 RUN lein build-prod-ui
 ENV PORT=80
 EXPOSE 80

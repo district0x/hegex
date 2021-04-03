@@ -43,6 +43,3 @@
                   (clj->js [content])
                   (clj->js {:type (or mime-type (str "application/plain;charset=UTF-8"))}))
              filename))
-
-(tf/unparse simple-date-format
-                               (web3-utils/web3-time->local-date-time expiration))

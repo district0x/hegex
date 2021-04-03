@@ -12,7 +12,7 @@ https://github.com/stacksideflow/contracts-v888
 
 Install npm deps and compile webpack:
 ```bash
-npm i && npx webpack --mode development
+npm i && npx webpack 
 ```
 
 Compile contracts (assumes you have `solc` installed):
