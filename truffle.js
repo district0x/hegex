@@ -104,7 +104,8 @@ module.exports = {
   networks: {
     develop: {
       host: 'localhost',
-      port: 9545,
+      port: 8548,
+      confirmations: 2,
       network_id: '*',
       skipDryRun: true
     },
