@@ -20,7 +20,7 @@ const Migrations = artifacts.require("Migrations");
 const chefData = artifacts.require('OptionChefData');
 const chef = artifacts.require('OptionChef');
 const token = artifacts.require('Hegexoption.sol');
-const METADATA_BASE = "https://stacksideflow.github.io/hegexoption-nft/meta/"
+const METADATA_BASE = "https://nft.hegex.io/meta/"
 
 module.exports = async (deployer, network) => {
   console.log("Migrating Hegex to " + network);

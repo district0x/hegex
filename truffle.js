@@ -5,6 +5,7 @@ require('dotenv').config()  // Store environment-specific variable from '.env' t
 
 const DISTRICT_HEGEX_ENV = process.env.DISTRICT_HEGEX_ENV || "dev";
 
+
 const smartContractsPaths = {
   "dev": '/src/district_hegex/shared/smart_contracts_dev.cljs',
   "qa": '/src/district_hegex/shared/smart_contracts_qa.cljs',
