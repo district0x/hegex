@@ -5,6 +5,7 @@ require('dotenv').config()  // Store environment-specific variable from '.env' t
 
 const DISTRICT_HEGEX_ENV = process.env.DISTRICT_HEGEX_ENV || "dev";
 
+console.log("____________________________________HEGEX_ENV", process.env);
 
 const smartContractsPaths = {
   "dev": '/src/district_hegex/shared/smart_contracts_dev.cljs',
@@ -87,6 +88,7 @@ let parameters = {
 const contractPathByNet = (netID) => {
   const netToEnv = {
     "ropsten": "qa",
+    "develop": "dev",
     "mainnet": "prod",
     "live": "prod",
     "main": "prod"
@@ -105,7 +107,7 @@ module.exports = {
   networks: {
     develop: {
       host: 'localhost',
-      port: 8548,
+      port: 8545,
       confirmations: 2,
       network_id: '*',
       skipDryRun: true
