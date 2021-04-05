@@ -30,9 +30,9 @@ jobs:
           ECR_REPOSITORY: "hegex"
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          echo "Building on ${GITHUB_HEAD_REF} branch"
+          echo "Building on ${GITHUB_REF} branch"
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f Dockerfile .
-          if [[ ${GITHUB_HEAD_REF} == "refs/heads/master" ]]; then
+          if [[ ${GITHUB_REF} == "refs/heads/master" ]]; then
             echo "On the default branch will push to the registry with latest and ${IMAGE_TAG} tags"
             docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
             docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
