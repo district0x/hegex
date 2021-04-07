@@ -108,7 +108,6 @@ module.exports = {
     develop: {
       host: 'localhost',
       port: 8545,
-      confirmations: 2,
       network_id: '*',
       skipDryRun: true
     },
