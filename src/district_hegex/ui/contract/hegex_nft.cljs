@@ -40,6 +40,10 @@
     [print.foo :refer [look] :include-macros true]
     [re-frame.core :as re-frame :refer [dispatch reg-event-fx]]))
 
+(defn- hegic-eth-options []
+  ;;NOTE district-hegex.shared.macros/get-environment
+  )
+
 (def interceptors [re-frame/trim-v])
 
 ;;should be moved away, determined based on netID at compile time

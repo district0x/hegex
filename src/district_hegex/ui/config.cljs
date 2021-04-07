@@ -6,19 +6,28 @@
     [mount.core :refer [defstate]])
   (:require-macros [district-hegex.shared.macros :refer [get-environment]]))
 
-(def contracts-to-load [:optionchef
-                        :optionchefdata
-                        :hegexoption
-                        :weth
-                        :wbtcoptions
-                        :brokenethoptions])
+(def contracts-to-load-mainnet
+  [:optionchef
+   :optionchefdata
+   :hegexoption
+   :weth
+   :hegicethoptions
+   :wbtcoptions])
+
+(def contracts-to-load-qa
+  [:optionchef
+   :optionchefdata
+   :hegexoption
+   :weth
+   :wbtcoptions
+   :brokenethoptions])
 
 (def development-config
   {:debug? true
    :logging {:level :debug
              :console? true}
    :time-source :js-date
-   :smart-contracts {:contracts (select-keys smart-contracts-qa/smart-contracts contracts-to-load)}
+   :smart-contracts {:contracts (select-keys smart-contracts-qa/smart-contracts contracts-to-load-mainnet)}
    :web3-accounts {:eip55? true}
    :web3-balances {:contracts (select-keys smart-contracts-qa/smart-contracts [:DNT])}
    :web3 {:url "http://localhost:8545"}
@@ -37,7 +46,7 @@
              :sentry {:dsn "https://2388a41ba9c54e06a6373d47a69aa887@sentry.io/1494135"
                       :environment "QA"}}
    :time-source :js-date
-   :smart-contracts {:contracts (select-keys smart-contracts-qa/smart-contracts contracts-to-load)}
+   :smart-contracts {:contracts (select-keys smart-contracts-qa/smart-contracts contracts-to-load-qa)}
    :web3-accounts {:eip55? true}
    :web3-balances {:contracts (select-keys smart-contracts-qa/smart-contracts [:DNT])}
    :web3 {:url "https://rinkeby.infura.io"}
@@ -62,7 +71,7 @@
              :sentry {:dsn "https://2388a41ba9c54e06a6373d47a69aa887@sentry.io/1494135"
                       :environment "PRODUCTION"}}
    :time-source :js-date
-   :smart-contracts {:contracts (select-keys smart-contracts-prod/smart-contracts contracts-to-load)}
+   :smart-contracts {:contracts (select-keys smart-contracts-prod/smart-contracts contracts-to-load-mainnet)}
    :web3-accounts {:eip55? true}
    :web3-balances {:contracts (select-keys smart-contracts-prod/smart-contracts [:DNT])}
    :web3 {:url "https://mainnet.infura.io"}
