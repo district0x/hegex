@@ -101,6 +101,7 @@
   ;; (println "->topic-pad" (oget web3js ".?version"))
   (ocall w3 ".?utils.?hexToNumber" s))
 
+;; NOTE topic can remain hardcoded, static for all nets
 (def ^:private creation-topic
   "0x9acccf962da4ed9c3db3a1beedb70b0d4c3f6a69c170baca7198a74548b5ef4e")
 
