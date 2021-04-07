@@ -73,12 +73,6 @@
 
 (def ^:private decimals 18)
 
-;;TODO
-;;swap for ::contract-address sub when out of testing
-;;(contract-queries/contract-address db :hegexoption)
-(def ^:private nft-address "0x42b49d4b14411c40243d02dee86abb7157b28e34")
-
-
 ;; const zrxTokenAddress = contractWrappers.contractAddresses.zrxToken;
 ;; const etherTokenAddress = contractWrappers.contractAddresses.etherToken;
 
@@ -92,7 +86,7 @@
 ;;NOTE
 ;;won't work until approval to proxy
 ;;submits a new 0x order in async code golf
-(defn order! [{:keys [id total expires]} form-open?]
+(defn order! [{:keys [id total expires db]} form-open?]
   ;;placing an order for 1 Hegex
   ;; TODO
   ;; to-big-number *NFT ID*, swap for dynamic
@@ -122,7 +116,7 @@
                                    "encodeERC721AssetData"
 
                                    ;;to-bignumber not working here, type mimatch
-                                   nft-address
+                                   (contract-queries/contract-address db :hegexoption)
                                    nft-id)
                                   "callAsync"))
            taker-asset-data (<p! (ocall
@@ -385,7 +379,7 @@
 (re-frame/reg-fx
   ::create-offer!
   (fn [params]
-    (let [errs (validate-offer params)]
+    (let [errs (validate-offer (dissoc params :db))]
       (if (pos? (count errs))
         (dispatch [::assoc-errors errs])
 
@@ -396,8 +390,8 @@
 (re-frame/reg-event-fx
   ::create-offer
   interceptors
-  (fn [_ [params open?]]
-    {::create-offer! (assoc params :open? open?)}))
+  (fn [{:keys [db]} [params open?]]
+    {::create-offer! (assoc params :open? open? :db db)}))
 
 
 (re-frame/reg-fx
