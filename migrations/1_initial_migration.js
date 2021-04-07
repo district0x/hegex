@@ -44,6 +44,7 @@ module.exports = async (deployer, network) => {
 
   assignContract(chefd, "OptionChef", "optionchef");
   assignContract(tokend, "Hegexoption", "hegexoption");
+  assignContract(chefdatad, "OptionChefData", "optionchefdata");
   writeSmartContracts(contractPathByNet(network), smartContractsList, env)
 };
 
