@@ -27,9 +27,9 @@
    :logging {:level :debug
              :console? true}
    :time-source :js-date
-   :smart-contracts {:contracts (select-keys smart-contracts-qa/smart-contracts contracts-to-load-mainnet)}
+   :smart-contracts {:contracts (select-keys smart-contracts-dev/smart-contracts contracts-to-load-mainnet)}
    :web3-accounts {:eip55? true}
-   :web3-balances {:contracts (select-keys smart-contracts-qa/smart-contracts [:DNT])}
+   :web3-balances {:contracts (select-keys smart-contracts-dev/smart-contracts [:DNT])}
    :web3 {:url "http://localhost:8545"}
    :web3-tx {:disable-loading-recommended-gas-prices? true
              :eip55? true}
