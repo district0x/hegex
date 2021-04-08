@@ -404,7 +404,7 @@
                     2)
           period-secs (some-> period (* 86400))
           strike-wei (some-> strike-price (* 100000000))
-          option-args [0 period-secs amount strike-wei opt-dir]]
+          option-args [period-secs amount strike-wei opt-dir]]
       (println "cdbg" (hegic-eth-options))
       (println "cdbg2"(contract-queries/contract-address db :optionchef)  #_ :brokenethoptions)
       (println "cdbg3")
