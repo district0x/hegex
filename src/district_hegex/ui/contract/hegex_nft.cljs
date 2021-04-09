@@ -404,15 +404,19 @@
                     2)
           period-secs (some-> period (* 86400))
           strike-wei (some-> strike-price (* 100000000))
-          option-args [period-secs amount strike-wei opt-dir]]
+          option-args [period-secs amount strike-wei opt-dir]
+          web3-instance (oset! (web3-queries/web3 db)  "eth.defaultAccount" "0xE74c326e7227730b1f4A1F4E164e6B3003Ca25B5")]
+;; web3.eth.defaultAccount = web3.eth.accounts[0];
       (println "cdbg" (hegic-eth-options))
-      (println "cdbg2"(contract-queries/contract-address db :optionchef)  #_ :brokenethoptions)
-      (println "cdbg3")
+      (println "cdbg2"(contract-queries/contract-address db (hegic-eth-options))  #_ :brokenethoptions)
+      (println "cdbg3" option-args)
+      (js/console.log "web3 is" (web3-queries/web3 db))
       {:web3/call
-       {:web3 (web3-queries/web3 db)
+       {:web3 web3-instance
         :fns [{:instance (contract-queries/instance db (hegic-eth-options))
                :fn :fees
                :args option-args
+               ;; :tx-opts {:chainId "1337"}
                :on-success [::estimate-mint-hegex-success option-args]
                :on-error [::logging/error [::estimate-mint-hegex]]}]}})))
 
@@ -421,6 +425,7 @@
   interceptors
   ;;NOTE first is total
   (fn [{:keys [db]} [_ fees]]
+    (println "cdbg success" fees)
     {:db (assoc-in db [::hegic-options :new :total-cost]
                    (some-> fees first bn/number))}))
 
@@ -439,12 +444,13 @@
                     2)
           period-secs (some-> period (* 86400))
           strike-wei (some-> strike-price (* 100000000))
-          option-args [hegic-type period-secs amount strike-wei opt-dir]]
+          option-args [period-secs amount strike-wei opt-dir]]
       #_(println "mint-hegex dbg args are" [period amount strike-price opt-dir])
       {:web3/call
        {:web3 (web3-queries/web3 db)
         :fns [{:instance (contract-queries/instance db (hegic-eth-options))
                :fn :fees
+               :tx-opts {:from "0xE74c326e7227730b1f4A1F4E164e6B3003Ca25B5"}
                :args option-args
                :on-success [::mint-hegex! option-args]
                :on-error [::logging/error [::mint-hegex]]}]}})))
