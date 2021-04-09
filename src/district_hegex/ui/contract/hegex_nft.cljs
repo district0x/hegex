@@ -450,9 +450,8 @@
        {:web3 (web3-queries/web3 db)
         :fns [{:instance (contract-queries/instance db (hegic-eth-options))
                :fn :fees
-               :tx-opts {:from "0xE74c326e7227730b1f4A1F4E164e6B3003Ca25B5"}
                :args option-args
-               :on-success [::mint-hegex! option-args]
+               :on-success [::mint-hegex! (vec (cons hegic-type option-args))]
                :on-error [::logging/error [::mint-hegex]]}]}})))
 
 
