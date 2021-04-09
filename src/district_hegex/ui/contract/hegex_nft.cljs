@@ -38,7 +38,15 @@
     [district.web3-utils :as web3-utils]
     [goog.string :as gstring]
     [print.foo :refer [look] :include-macros true]
-    [re-frame.core :as re-frame :refer [dispatch reg-event-fx]]))
+    [re-frame.core :as re-frame :refer [dispatch reg-event-fx]])
+  (:require-macros [district-hegex.shared.macros :refer [get-environment]]))
+
+(defn- hegic-eth-options []
+  (case (get-environment)
+    "dev" :hegicethoptions
+    "prod" :hegicethoptions
+    "qa" :brokenethoptions
+    :hegicethoptions))
 
 (def interceptors [re-frame/trim-v])
 
@@ -97,6 +105,7 @@
   ;; (println "->topic-pad" (oget web3js ".?version"))
   (ocall w3 ".?utils.?hexToNumber" s))
 
+;; NOTE topic can remain hardcoded, static for all nets
 (def ^:private creation-topic
   "0x9acccf962da4ed9c3db3a1beedb70b0d4c3f6a69c170baca7198a74548b5ef4e")
 
@@ -110,7 +119,7 @@
     (println "mho"  (oget web3js ".?version"))
     (js-invoke (oget web3js ".?eth")
                "getPastLogs"
-               (clj->js {:address  (contract-queries/contract-address db :brokenethoptions)
+               (clj->js {:address  (contract-queries/contract-address db (hegic-eth-options))
                          :topics [creation-topic,
                                   nil,
                                   ;;NOTE now includes options minted directly +
@@ -144,7 +153,7 @@
     (println "dbg fetching full data for option id " id "..." )
     {:web3/call
      {:web3 (web3-queries/web3 db)
-      :fns [{:instance (contract-queries/instance db :brokenethoptions)
+      :fns [{:instance (contract-queries/instance db (hegic-eth-options))
              :fn :options
              :args [id]
              :on-success [::hegic-option-success id]
@@ -361,10 +370,10 @@
   interceptors
   (fn [{:keys [db]} [uid]]
     (println "dbg delegating Hegic option with id.." uid
-             "for contract" (contract-queries/instance db :brokenethoptions)
+             "for contract" (contract-queries/instance db (hegic-eth-options))
              "with args" [uid (contract-queries/contract-address db :optionchef)])
     {:dispatch [::tx-events/send-tx
-                {:instance (contract-queries/instance db :brokenethoptions)
+                {:instance (contract-queries/instance db (hegic-eth-options))
                  :fn :transfer
                  :args [uid (contract-queries/contract-address db :optionchef)]
                  :tx-opts {:from (account-queries/active-account db)}
@@ -395,12 +404,19 @@
                     2)
           period-secs (some-> period (* 86400))
           strike-wei (some-> strike-price (* 100000000))
-          option-args [0 period-secs amount strike-wei opt-dir]]
+          option-args [period-secs amount strike-wei opt-dir]
+          web3-instance (oset! (web3-queries/web3 db)  "eth.defaultAccount" "0xE74c326e7227730b1f4A1F4E164e6B3003Ca25B5")]
+;; web3.eth.defaultAccount = web3.eth.accounts[0];
+      (println "cdbg" (hegic-eth-options))
+      (println "cdbg2"(contract-queries/contract-address db (hegic-eth-options))  #_ :brokenethoptions)
+      (println "cdbg3" option-args)
+      (js/console.log "web3 is" (web3-queries/web3 db))
       {:web3/call
-       {:web3 (web3-queries/web3 db)
-        :fns [{:instance (contract-queries/instance db :brokenethoptions)
+       {:web3 web3-instance
+        :fns [{:instance (contract-queries/instance db (hegic-eth-options))
                :fn :fees
                :args option-args
+               ;; :tx-opts {:chainId "1337"}
                :on-success [::estimate-mint-hegex-success option-args]
                :on-error [::logging/error [::estimate-mint-hegex]]}]}})))
 
@@ -409,6 +425,7 @@
   interceptors
   ;;NOTE first is total
   (fn [{:keys [db]} [_ fees]]
+    (println "cdbg success" fees)
     {:db (assoc-in db [::hegic-options :new :total-cost]
                    (some-> fees first bn/number))}))
 
@@ -427,14 +444,14 @@
                     2)
           period-secs (some-> period (* 86400))
           strike-wei (some-> strike-price (* 100000000))
-          option-args [hegic-type period-secs amount strike-wei opt-dir]]
+          option-args [period-secs amount strike-wei opt-dir]]
       #_(println "mint-hegex dbg args are" [period amount strike-price opt-dir])
       {:web3/call
        {:web3 (web3-queries/web3 db)
-        :fns [{:instance (contract-queries/instance db :brokenethoptions)
+        :fns [{:instance (contract-queries/instance db (hegic-eth-options))
                :fn :fees
                :args option-args
-               :on-success [::mint-hegex! option-args]
+               :on-success [::mint-hegex! (vec (cons hegic-type option-args))]
                :on-error [::logging/error [::mint-hegex]]}]}})))
 
 

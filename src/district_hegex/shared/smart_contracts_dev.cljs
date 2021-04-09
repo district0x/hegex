@@ -1,6 +1,13 @@
 (ns district-hegex.shared.smart-contracts-dev)
 
 (def smart-contracts
-  {:optionchef {:name "OptionChef" :address "0xc57a0cfab5d84d7fd22c95c2f5c5a91c4415eed1"}
-   :weth {:name "WETH" :address "0xc778417E063141139Fce010982780140Aa0cD5Ab"}
-   :hegexoption {:name "Hegexoption" :address "0xd1fdf18aaea9a9c6da1ce5336640f38de78baeed"}})
+  {:optionchef {:name "OptionChef" :address "0x9c6849af85ec10c385728da68be00aa7a9fd1bdd"}
+   :hegexoption {:name "Hegexoption" :address "0x7d51ae46716c96ee46bd4be7a9ff65026d1ac08e"}
+   :optionchefdata {:name "OptionChefData" :address "0x9a2eafa10a076751e2ad1493a6178dc4876cffd8"}
+   ;; NOTE external contracts down below
+   :weth {:name "WETH"
+          :address "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"}
+   :wbtcoptions {:name "HegicWBTCOptions"
+                 :address "0x3961245DB602eD7c03eECcda33eA3846bD8723BD"}
+   :hegicethoptions {:name "HegicETHOptions"
+                     :address "0xEfC0eEAdC1132A12c9487d800112693bf49EcfA2"}})

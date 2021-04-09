@@ -86,6 +86,7 @@ let parameters = {
 const contractPathByNet = (netID) => {
   const netToEnv = {
     "ropsten": "qa",
+    "develop": "dev",
     "mainnet": "prod",
     "live": "prod",
     "main": "prod"
@@ -104,7 +105,7 @@ module.exports = {
   networks: {
     develop: {
       host: 'localhost',
-      port: 9545,
+      port: 8545,
       network_id: '*',
       skipDryRun: true
     },

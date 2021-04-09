@@ -698,7 +698,7 @@
           [:button.secondary
            {:disabled @tx-pending?
             :on-click #(dispatch [::hegex-nft/mint-hegex @form-data])}
-           (if @tx-pending? [:span "Pending..." [inputs/loader {:color :black :on? @tx-pending?}]] "Buy")]]]
+           (if @tx-pending? [:span "Buy" [inputs/loader {:color :black :on? @tx-pending?}]] "Buy")]]]
         [:div [:br] [:br] [:br]]]))))
 
 (defn- orderbook-section []

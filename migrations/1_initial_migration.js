@@ -8,11 +8,13 @@ let smartContractsList = [];
 const hegicETHFactory = {
   "ropsten": "0x77041D13e0B9587e0062239d083b51cB6d81404D",
   "mainnet": "0xefc0eeadc1132a12c9487d800112693bf49ecfa2",
+  "develop": "0xefc0eeadc1132a12c9487d800112693bf49ecfa2"
 }
 
 const hegicWBTCFactory = {
   "ropsten": "0x3aD466588F5f8f1Ce896645d5322db3F25810639",
   "mainnet": "0x3961245db602ed7c03eeccda33ea3846bd8723bd",
+  "develop": "0x3961245db602ed7c03eeccda33ea3846bd8723bd"
 }
 
 
@@ -20,7 +22,7 @@ const Migrations = artifacts.require("Migrations");
 const chefData = artifacts.require('OptionChefData');
 const chef = artifacts.require('OptionChef');
 const token = artifacts.require('Hegexoption.sol');
-const METADATA_BASE = "https://stacksideflow.github.io/hegexoption-nft/meta/"
+const METADATA_BASE = "https://nft.hegex.io/meta/"
 
 module.exports = async (deployer, network) => {
   console.log("Migrating Hegex to " + network);
@@ -42,6 +44,7 @@ module.exports = async (deployer, network) => {
 
   assignContract(chefd, "OptionChef", "optionchef");
   assignContract(tokend, "Hegexoption", "hegexoption");
+  assignContract(chefdatad, "OptionChefData", "optionchefdata");
   writeSmartContracts(contractPathByNet(network), smartContractsList, env)
 };
 
