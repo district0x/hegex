@@ -321,7 +321,6 @@
                          deref
                          web3-utils/wei->eth-number
                          (format/format-number {:max-fraction-digits 5}))]
-    (println "active option is" active-option)
     [:div {:style {:max-width "500px"
                    :margin-left "auto"}}
      #_(str active-option)

@@ -695,7 +695,7 @@
           [:div.hover-label "Break-even"]
           [:h3.stats "$" break-even]]
          [:div.box.e
-          [:button.secondary
+          [:button.secondary.line-btn
            {:disabled @tx-pending?
             :on-click #(dispatch [::hegex-nft/mint-hegex @form-data])}
            (if @tx-pending? [:span "Buy" [inputs/loader {:color :black :on? @tx-pending?}]] "Buy")]]]
