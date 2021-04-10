@@ -23,13 +23,19 @@
 
 /*! - GLOBAL: 0 SETUP */
 
+@font-face {
+  font-family: 'thasadithbold';
+  src: url('/fonts/thasadith-bold-webfont.woff2') format('woff2'), url('/fonts/thasadith-bold-webfont.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
+
 html,
 body {
   height: 100%;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  // [NOTE] font
-    // font-family: roc-grotesk,sans-serif;
+  font-family: roc-grotesk,sans-serif;
 }
 
 html,
@@ -861,7 +867,6 @@ form {
     margin-top: 30px;
     fieldset {
       position: relative;
-      font-family: 'proxima-soft', sans-serif;
       .cur {
         position: absolute;
         right: 0px;
@@ -1062,7 +1067,6 @@ nav.subnav {
       margin-right: 215px;
       padding-bottom: 2px;
       position: relative;
-      font-family: 'proxima-soft', sans-serif;
       .cur {
         position: absolute;
         right: 0px;
