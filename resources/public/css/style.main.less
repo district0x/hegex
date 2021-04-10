@@ -2506,3 +2506,38 @@ tr:first-of-type > td:first-of-type {
 .red {
   color:@danger;
 }
+
+
+.bt-about {
+  display: inline-flex;
+  align-items: center;
+  line-height: 32px;
+}
+.bt-about span {
+  width: 32px;
+  height: 32px;
+  display: inline-block;
+  background-color: @bg-toggler;
+  border-radius: 100%;
+  position: relative;
+  transition: all 0.3s ease-in-out;
+}
+.bt-about span:before,
+.bt-about span:after {
+  content: "";
+  background: @btabout-color;
+  display: block;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  transition: all 0.3s ease-in-out;
+}
+.bt-about span:before {
+  width: 14px;
+  height: 2px;
+}
+.bt-about span:after {
+  width: 2px;
+  height: 14px;
+}
