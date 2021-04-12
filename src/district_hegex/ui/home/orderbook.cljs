@@ -265,7 +265,7 @@
                                              (oget e ".?target.?value"))
                                      500)))}]]]]
        [:div.box.e
-        [:button.yellow
+        [:button.yellow.line-btn
          {:disabled any-tx-pending?
           :on-click #(dispatch [(:evt form-res) @form-data])}
          (:btn form-res)
@@ -285,7 +285,7 @@
    "Approve WETH Staking" (when @tx-pending? [inputs/loader {:color :black :on? @tx-pending?}])])
 
 (defn- buy-nft-button [active-option]
-  [:button.yellow
+  [:button.yellow.line-btn
     {:className (when-not active-option "disabled")
      :on-click #(dispatch [::trading-events/fill-offer (:option active-option)])
      :disabled  (not active-option)}

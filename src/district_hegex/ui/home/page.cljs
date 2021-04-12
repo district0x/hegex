@@ -521,7 +521,7 @@
        [:div [:div.hloader]
         [:div.box-grid
          [:div.box.e
-          [:button.primary
+          [:button.primary.line-btn
            {:className (when-not active-option "disabled")
             :disabled  (or exercise-pending? (not active-option))
             :on-click #(dispatch [::hegex-nft/exercise! hegic-asset (:hegex-id active-option)])}
@@ -554,7 +554,7 @@
              (when @approval-pending? [inputs/loader {:color :black
                                                       :on? @approval-pending?}])]
 
-            [:button.primary
+            [:button.primary.line-btn
             {:className (when-not active-option "disabled")
              :disabled  (not active-option)
              :on-click #(dispatch [::trading-events/create-offer
