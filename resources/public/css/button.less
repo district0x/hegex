@@ -21,3 +21,24 @@ button.yellow {
     color: black;
     background-color: @hegexorange;
 }
+
+.line-btn {
+  transition: all 0.3s ease-in-out;
+  background-image: url('/images/bg-button-1.png'), url('/images/bg-button-2.png');
+  background-position: 12px center, calc(100% - 12px) center;
+  background-repeat: no-repeat, no-repeat;
+  background-size: 30px auto, 30px auto;
+  text-transform: none;
+  border-radius: 5px;
+}
+
+button.primary:hover,button.secondary:hover,button.yellow:hover  {
+    background-color: @btn-hover;
+    color: white;
+}
+.night {
+button.primary:hover,button.secondary:hover,button.yellow:hover  {
+    background-color: white;
+    color: @btn-hover;
+}
+}
