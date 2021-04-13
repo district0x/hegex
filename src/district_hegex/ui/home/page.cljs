@@ -133,7 +133,7 @@
                          :key    :actions}
                         {:path   [:hegex-id]
                          :header "NFT"
-                         :format (fn [v] (if (pos? (count (str v))) (str "Yes, #" v) "No"))
+                         :format (fn [v] (if (pos? (count (str v))) (str "#" v) "None"))
                          :attrs  (fn [data] {:style {:text-align     "left"}})
                          :key    :hegex-id}])
 
