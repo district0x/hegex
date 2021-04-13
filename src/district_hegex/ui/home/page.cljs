@@ -575,7 +575,7 @@
      [:div {:style {:display "flex"
                     :align-items "flex-start"
                     :justify-content "flex-start"}}
-      [:h1 "My Option Contracts"]]
+      [:h2 "My Option Contracts"]]
      [:div.container {:style {:font-size 16
                               :margin-top "2em"
                               :text-align "center"
@@ -624,7 +624,7 @@
                        :margin-top "30px"
                        :align-items "flex-start"
                        :justify-content "flex-start"}}
-         [:h1 "Buy New Option Contract"]]
+         [:h2 "Buy New Option Contract"]]
          [:div.box-grid {:style {:margin-top "2em"}}
          [:div.box.a
           [:div.hover-label "Currency"]
@@ -707,7 +707,7 @@
      [:div {:style {:display "flex"
                     :align-items "flex-start"
                     :justify-content "flex-start"}}
-      [:h1 "Option Contracts Offers"]]
+      [:h2 "Option Contracts Offers"]]
      [:div.container {:style {:font-size 16
                               :margin-top "2em"
                               :text-align "center"
