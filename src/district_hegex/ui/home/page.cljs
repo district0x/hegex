@@ -621,7 +621,7 @@
         (println "tx-pending" @tx-pending?)
         [:div
         [:div {:style {:display "flex"
-                       :margin-top "30px"
+                       :margin-top "70px"
                        :align-items "flex-start"
                        :justify-content "flex-start"}}
          [:h2 "Buy New Option Contract"]]
@@ -706,6 +706,7 @@
     [:span
      [:div {:style {:display "flex"
                     :align-items "flex-start"
+                    :margin-top "50px"
                     :justify-content "flex-start"}}
       [:h2 "Option Contracts Offers"]]
      [:div.container {:style {:font-size 16
