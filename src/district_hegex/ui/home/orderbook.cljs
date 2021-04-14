@@ -322,7 +322,8 @@
                          web3-utils/wei->eth-number
                          (format/format-number {:max-fraction-digits 5}))]
     [:div {:style {:max-width "500px"
-                   :margin-left "auto"}}
+                   :margin-left "auto"
+                   :margin-right "auto"}}
      #_(str active-option)
      [:div.box-grid
       [:div.box.e
