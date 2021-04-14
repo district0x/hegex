@@ -57,7 +57,7 @@
 
 (def ^:private relayer-client
   (let [HttpClient  (oget connect0x "HttpClient")]
-    (HttpClient. "https://0xapi.qa.district0x.io/sra/v3/")))
+    (HttpClient. "https://0xapi.qa.district0x.io/sra/v4/")))
 
 
 ;;hegex dedicated ropsten relay
