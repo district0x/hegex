@@ -65,4 +65,4 @@ external ABIs (generated for contracts outside of the scope of this project) is 
 
 ## NB - 0x relay for ropsten 
 
-http://138.68.106.185:3000/sra/v3/
+https://0xapi.qa.district0x.io/

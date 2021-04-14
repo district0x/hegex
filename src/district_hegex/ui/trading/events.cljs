@@ -57,7 +57,7 @@
 
 (def ^:private relayer-client
   (let [HttpClient  (oget connect0x "HttpClient")]
-    (HttpClient. "http://138.68.106.185:3000/sra/v3/")))
+    (HttpClient. "https://0xapi.qa.district0x.io/sra/v3/")))
 
 
 ;;hegex dedicated ropsten relay
@@ -427,7 +427,8 @@
 #_(load-orderbook 7)
 
 
-;;verify orders @ http://138.68.106.185:3000/sra/v3/orders
+;;verify orders @ https://0xapi.qa.district0x.io/sra/v3/orders
+
 
 #_[{:order {:signature "0x1cdbc53a31c61413cd53693e4ded51017e1d145421510b79beff5a5c1881475e4c35de128c5f1a7ea6554e470356a9065a33a7b61a7926863adbca67f959a78a2702",
             :senderAddress "0x0000000000000000000000000000000000000000",
