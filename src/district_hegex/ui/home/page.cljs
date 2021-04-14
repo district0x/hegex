@@ -133,7 +133,7 @@
                          :key    :actions}
                         {:path   [:hegex-id]
                          :header "NFT"
-                         :format (fn [v] (if (pos? (count (str v))) (str "Yes, #" v) "No"))
+                         :format (fn [v] (if (pos? (count (str v))) (str "#" v) "None"))
                          :attrs  (fn [data] {:style {:text-align     "left"}})
                          :key    :hegex-id}])
 
@@ -575,7 +575,7 @@
      [:div {:style {:display "flex"
                     :align-items "flex-start"
                     :justify-content "flex-start"}}
-      [:h1 "My Option Contracts"]]
+      [:h2 "My Option Contracts"]]
      [:div.container {:style {:font-size 16
                               :margin-top "2em"
                               :text-align "center"
@@ -621,10 +621,10 @@
         (println "tx-pending" @tx-pending?)
         [:div
         [:div {:style {:display "flex"
-                       :margin-top "30px"
+                       :margin-top "70px"
                        :align-items "flex-start"
                        :justify-content "flex-start"}}
-         [:h1 "Buy New Option Contract"]]
+         [:h2 "Buy New Option Contract"]]
          [:div.box-grid {:style {:margin-top "2em"}}
          [:div.box.a
           [:div.hover-label "Currency"]
@@ -706,8 +706,9 @@
     [:span
      [:div {:style {:display "flex"
                     :align-items "flex-start"
+                    :margin-top "50px"
                     :justify-content "flex-start"}}
-      [:h1 "Option Contracts Offers"]]
+      [:h2 "Option Contracts Offers"]]
      [:div.container {:style {:font-size 16
                               :margin-top "2em"
                               :text-align "center"

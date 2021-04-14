@@ -1,5 +1,7 @@
 .hegex-select {
     position: relative;
+    background-color: white;
+    border-radius: 5px;
 /* Reset Select */
 select {
   -webkit-appearance: none;
@@ -51,6 +53,8 @@ select {
 .night {
   .hegex-select {
     color: white;
+    background-color: inherit;
+    border-radius: 5px;
   }
 }
 
@@ -94,13 +98,17 @@ select {
 }
 
 .little-arrow.primary {
-  background-color: @hegexgreen;
+	background: transparent url('/images/select-green.png') no-repeat left top;
+	background-size: 100% auto;
 }
 
 .little-arrow.secondary {
-  background-color: @hegexseablue;
+	background: transparent url('/images/select-blue.png') no-repeat left top;
+	background-size: 100% auto;
 }
 
 .little-arrow.yellow {
-  background-color: @hegexorange;
+	background: transparent url('/images/select-yellow.png') no-repeat left top;
+	background-size: 100% auto;
 }
+
