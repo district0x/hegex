@@ -41,7 +41,7 @@
    [:div.header-space
     [logo]
     [night-mode]
-    [:h4 {:style {:font-weight "100"}} "About"]
+    [:h4.about {:style {:font-weight "100"}} "About"]
     [:span.about-section [:a.bt-about [:span]]]]])
 
 (defn footer []

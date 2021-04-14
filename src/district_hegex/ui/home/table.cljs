@@ -217,7 +217,11 @@
                         (when (and sort-fn resetter)
                           (resetter (sort-fn (deref-vals data-atom)
                                                      column-model
-                                                     (:sorting (update-sort-columns! model-col state-atom append))))))]
+                                                     (:sorting (update-sort-columns! model-col state-atom append))))))
+        active-tab? (or (is-sorting (:sorting state) render-info model-col)
+                           (and
+                            (= (:key render-info) (get @state-atom :default-sorting))
+                            (not (:sorting state))))]
     [:th
      (recursive-merge
       (:th config)
@@ -230,22 +234,21 @@
                           :border-radius "5px 5px 0px 0px"
                           :display (when (get col-hidden model-col) "none")}
 
-                       (or (is-sorting (:sorting state) render-info model-col)
-                           (and
-                            (= (:key render-info) (get @state-atom :default-sorting))
-                            (not (:sorting state))))
+                       active-tab?
 
-                       (merge {:background-color (get @state-atom :active-bg)
-                               :color "white"}))
+                       (merge {:background-color (get @state-atom :active-bg)}))
                      (when (and (:col-reordering state)
                                 (= view-col (:col-hover state)))
                        {:border-right "6px solid #3366CC"}))})
-     [:span {:style {:padding-right 50}}  (:header render-info)]
+     [:span {:style (cond-> {:padding-right 50} active-tab? (assoc :color "#00183C"))}  (:header render-info)]
      (when (and sort-fn sortable)
        [:span {:style {:position "absolute"
                        :text-align "center"
-                       :height "1.5em"
-                       :width "1.5em"
+                       :height "7px"
+                       :font-size "0.8em"
+                       :color "#00183C"
+                       :width "10px"
+                       :bottom "20px"
                        :right "15px"
                        :cursor "pointer"}}
         (condp = (is-sorting (:sorting state) render-info model-col)
