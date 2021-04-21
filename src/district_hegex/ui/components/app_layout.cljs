@@ -48,8 +48,35 @@
   [:footer#globalFooter
    [:div {:style {:margin-top "5em"}}]])
 
+
+        ;; <section id="about">
+        ;;     <div class="containerAbout">
+        ;;         <div class="contentAbout">
+        ;;             <div class="container">
+        ;;                 <header>
+        ;;                     <h2>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea con sedujal.</h2>
+        ;;                 </header>
+        ;;                 <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+        ;;             </div>
+        ;;         </div>
+        ;;     </div>
+        ;; </section>
+
+(defn- about []
+  [:section#about
+   [:div.containerAbout
+    [:div.contentAbout
+     [:div.container
+      [:header [:h2
+                "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea con sedujal."
+                ]
+       [:p "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea con sedujal."
+        ]
+       ]]]]])
+
 (defn app-layout [& children]
-  (let [dark? @(subscribe [::home-subs/dark-mode?])]
+  (let [dark? @(subscribe [::home-subs/dark-mode?])
+        about? @(subscribe [::home-subs/open-about?])]
     [:div (cond-> {:id (case :route/home
                     :route/about "page-about"
                     :route/detail "page-details"
@@ -61,7 +88,8 @@
                     :route/not-found "not-found")}
             (not dark?) (assoc :className "day")
             dark? (assoc :className "night bp3-dark dark-overlay") )
-     [:div.app-layout
+     [:div {:className "app-layout"}
+      [about]
       [header :route/home]
       (into [:div#page-content]
             children)

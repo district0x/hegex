@@ -2266,7 +2266,7 @@ input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
   /* display: none; <- Crashes Chrome on hover */
   -webkit-appearance: none;
-  margin: 0; /* <-- Apparently some margin are still there even though it's hidden */
+  margin: 0; /* <@ Apparently some margin are still there even though it's hidden */
 }
 
 input[type=number] {
@@ -2549,8 +2549,8 @@ button {
 }
 
 // .sectionHome .btn:hover {
-//   background-color: var(--btn-hover) !important;
-//   color: var(--btn-color);
+//   background-color: var(@btn-hover) !important;
+//   color: var(@btn-color);
 // }
 
 h4.about{
@@ -2568,4 +2568,91 @@ h4.about{
 .bt-about span:after {
   background: @bg-toggler;
 }
+}
+
+#about {
+  position: absolute;
+  width: 100%;
+  overflow: hidden;
+  top: 0;
+  left: 0;
+  z-index: 999;
+  background-color: var(@bgabout-color);
+  background-image: var(@bgabout-url);
+  background-position: right bottom;
+  background-repeat: no-repeat;
+  background-size: 362px auto;
+  color: var(@textabout-color);
+  transform: translateY(-100%);
+  transition: all 0.5s ease-in-out;
+}
+#about .container {
+  padding: 110px 0 75px;
+}
+#about header {
+  margin-bottom: 27px;
+  max-width: 921px;
+}
+#about h2 {
+  font-size: 38px;
+  letter-spacing: 0;
+  line-height: 52px;
+}
+#about p {
+  font-size: 20px;
+  letter-spacing: 0;
+  line-height: 35px;
+  width: 70%;
+  max-width: 625px;
+}
+@media (max-width: 992px) {
+  #about .container {
+    padding: 174px 0 336px;
+  }
+  #about p {
+    width: 100%;
+  }
+}
+@media (max-width: 767px) {
+  #about h2 {
+    font-size: 26px;
+    line-height: 40px;
+  }
+}
+.openAbout #about {
+  transform: translateY(0);
+}
+.openAbout #headerSite {
+  background: @bgabout-color;
+}
+.openAbout #headerSite .brand-logo {
+  background: @brandabout-url;
+  background-size: 100%;
+}
+.openAbout #headerSite nav a {
+  color: @linkabout-color;
+}
+.openAbout #headerSite nav a.nav-item.selected:after,
+.openAbout #headerSite nav a.nav-item:hover:after {
+  background: @linkabout-color;
+}
+.openAbout #headerSite nav .bt-about span {
+  background: @bgabout-toggler;
+}
+.openAbout #headerSite nav .bt-about span:before {
+  background: @bgabout-color;
+}
+.openAbout #headerSite nav .bt-about span:after {
+  opacity: 0;
+}
+.openAbout #headerSite .btn-toggle {
+  display: none;
+}
+@media (max-width: 992px) {
+  .openAbout #headerSite nav .nav-item {
+    display: block;
+    position: absolute;
+    top: 97px;
+    left: 20px;
+  }
 }
