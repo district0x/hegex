@@ -36,31 +36,27 @@
     [:div]]])
 
 ;;TODO clear up whether active account belong under "+"
-(defn header [active-page-name]
-  [:header
-   [:div.header-space
-    [logo]
-    [night-mode]
-    [:h4.about {:style {:font-weight "100"}} "About"]
-    [:span.about-section [:a.bt-about [:span]]]]])
+(defn- header [active-page-name about?]
+  (let [open-about #(dispatch [::home-events/toggle-open-about])]
+    [:header
+     {:style {:position "absolute"
+              :top "0px"
+              :left "0px"
+              :width "100%"
+              :max-width "980px"
+              :z-index "99999"}}
+    [:div.header-space
+     [logo]
+     [night-mode]
+     [:h4.about {:on-click open-about
+                 :style {:cursor "pointer"
+                         :font-weight "100"}} "About"]
+     [:span.about-section {:on-click open-about}
+      [:a.bt-about [:span]]]]]))
 
-(defn footer []
+(defn- footer []
   [:footer#globalFooter
    [:div {:style {:margin-top "5em"}}]])
-
-
-        ;; <section id="about">
-        ;;     <div class="containerAbout">
-        ;;         <div class="contentAbout">
-        ;;             <div class="container">
-        ;;                 <header>
-        ;;                     <h2>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea con sedujal.</h2>
-        ;;                 </header>
-        ;;                 <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
-        ;;             </div>
-        ;;         </div>
-        ;;     </div>
-        ;; </section>
 
 (defn- about []
   [:section#about
@@ -77,6 +73,7 @@
 (defn app-layout [& children]
   (let [dark? @(subscribe [::home-subs/dark-mode?])
         about? @(subscribe [::home-subs/open-about?])]
+    (println "about is" about?)
     [:div (cond-> {:id (case :route/home
                     :route/about "page-about"
                     :route/detail "page-details"
@@ -88,9 +85,9 @@
                     :route/not-found "not-found")}
             (not dark?) (assoc :className "day")
             dark? (assoc :className "night bp3-dark dark-overlay") )
-     [:div {:className "app-layout"}
+     [:div {:className (cond-> "app-layout" about? (str " openAbout"))}
       [about]
-      [header :route/home]
+      [header :route/home about?]
       (into [:div#page-content]
             children)
       [footer]]]))

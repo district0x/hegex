@@ -33,6 +33,7 @@
 html,
 body {
   height: 100%;
+  overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-family: roc-grotesk,sans-serif;
@@ -2452,6 +2453,8 @@ body {
 .app-layout {
   margin-top: 20px;
   max-width: 980px;
+  position: relative;
+  padding-top: 70px;
   margin: auto;
 
 }
@@ -2572,17 +2575,17 @@ h4.about{
 
 #about {
   position: absolute;
-  width: 100%;
+  width: 100vw;
   overflow: hidden;
   top: 0;
   left: 0;
   z-index: 999;
-  background-color: var(@bgabout-color);
-  background-image: var(@bgabout-url);
+  background-color: @bgabout-color;
+  background-image: @bgabout-url;
   background-position: right bottom;
   background-repeat: no-repeat;
   background-size: 362px auto;
-  color: var(@textabout-color);
+  color: @textabout-color;
   transform: translateY(-100%);
   transition: all 0.5s ease-in-out;
 }
@@ -2600,6 +2603,7 @@ h4.about{
 }
 #about p {
   font-size: 20px;
+  color: inherit !important;
   letter-spacing: 0;
   line-height: 35px;
   width: 70%;
@@ -2655,4 +2659,96 @@ h4.about{
     top: 97px;
     left: 20px;
   }
+}
+
+.night {
+
+#about {
+  position: absolute;
+  width: 100%;
+  overflow: hidden;
+  top: 0;
+  left: 0;
+  z-index: 999;
+  background-color: @bgabout-color-n;
+  background-image: @bgabout-url-n;
+  background-position: right bottom;
+  background-repeat: no-repeat;
+  background-size: 362px auto;
+  color: @textabout-color-n;
+  transform: translateY(-100%);
+  transition: all 0.5s ease-in-out;
+}
+#about .container {
+  padding: 110px 0 75px;
+}
+#about header {
+  margin-bottom: 27px;
+  max-width: 921px;
+}
+#about h2 {
+  font-size: 38px;
+  letter-spacing: 0;
+  line-height: 52px;
+}
+#about p {
+  font-size: 20px;
+  letter-spacing: 0;
+  line-height: 35px;
+  color: inherit !important;
+  width: 70%;
+  max-width: 625px;
+}
+@media (max-width: 992px) {
+  #about .container {
+    padding: 174px 0 336px;
+  }
+  #about p {
+    width: 100%;
+  }
+}
+@media (max-width: 767px) {
+  #about h2 {
+    font-size: 26px;
+    line-height: 40px;
+  }
+}
+.openAbout #about {
+  transform: translateY(0);
+}
+.openAbout #headerSite {
+  background: @bgabout-color-n;
+}
+.openAbout #headerSite .brand-logo {
+  background: @brandabout-url-n;
+  background-size: 100%;
+}
+.openAbout #headerSite nav a {
+  color: @linkabout-color-n;
+}
+.openAbout #headerSite nav a.nav-item.selected:after,
+.openAbout #headerSite nav a.nav-item:hover:after {
+  background: @linkabout-color-n;
+}
+.openAbout #headerSite nav .bt-about span {
+  background: @bgabout-toggler-n;
+}
+.openAbout #headerSite nav .bt-about span:before {
+  background: @bgabout-color-n;
+}
+.openAbout #headerSite nav .bt-about span:after {
+  opacity: 0;
+}
+.openAbout #headerSite .btn-toggle {
+  display: none;
+}
+@media (max-width: 992px) {
+  .openAbout #headerSite nav .nav-item {
+    display: block;
+    position: absolute;
+    top: 97px;
+    left: 20px;
+  }
+}
+
 }

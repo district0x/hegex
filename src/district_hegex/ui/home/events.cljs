@@ -11,6 +11,12 @@
     (update-in db [::dark-mode?] not)))
 
 (re-frame/reg-event-db
+  ::toggle-open-about
+  interceptors
+  (fn [db _]
+    (update-in db [::open-about?] not)))
+
+(re-frame/reg-event-db
   ::set-my-active-option
   interceptors
   (fn [db [option row-num]]
