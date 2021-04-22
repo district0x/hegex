@@ -22,7 +22,8 @@
 
 (defn- logo []
   [:div.header-logo
-   [:img.hegexlogo {:src (if @(subscribe [::home-subs/dark-mode?])
+   [:img.hegexlogo {:src (if (and  @(subscribe [::home-subs/dark-mode?])
+                                   (not @(subscribe [::home-subs/open-about?])))
                            "/images/logo-dark.png"
                            "/images/logo-light.png")}]
    [tabs/tab {:caption "Hegex"}]])
@@ -63,10 +64,8 @@
    [:div.containerAbout
     [:div.contentAbout
      [:div.container
-      [:header [:h2
-                "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea con sedujal."
-                ]
-       [:p "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea con sedujal."
+      [:header [:h2 "Welcome to Hegex"]
+       [:p "Mint & trade synthetic options-as-NFTs on our aggregated liquidity platform"
         ]
        ]]]]])
 
@@ -83,10 +82,11 @@
                     :route/my-account "page-my-account"
                     :route/terms "page-terms"
                     :route/not-found "not-found")}
-            (not dark?) (assoc :className "day")
-            dark? (assoc :className "night bp3-dark dark-overlay") )
-     [:div {:className (cond-> "app-layout" about? (str " openAbout"))}
+            (not dark?) (update :className str " day")
+            dark? (update :className str " night bp3-dark dark-overlay")
+            about? (update :className str " openAbout"))
       [about]
+     [:div {:className "app-layout" }
       [header :route/home about?]
       (into [:div#page-content]
             children)

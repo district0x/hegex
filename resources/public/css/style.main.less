@@ -2454,7 +2454,7 @@ body {
   margin-top: 20px;
   max-width: 980px;
   position: relative;
-  padding-top: 70px;
+  padding-top: 50px;
   margin: auto;
 
 }
@@ -2573,6 +2573,32 @@ h4.about{
 }
 }
 
+.openAbout.night {
+  h4.about{
+    color: @bgabout-toggler-n;
+  }
+}
+
+.openAbout {
+  h4.about{
+    color: @linkabout-color;
+  }
+}
+
+.openAbout.night {
+  .tab {
+    color: @bgabout-toggler-n;
+    border-bottom:2px solid @bgabout-toggler-n;
+  }
+}
+
+.openAbout {
+  .tab {
+    color: @linkabout-color;
+    border-bottom:2px solid @linkabout-color;
+  }
+}
+
 #about {
   position: absolute;
   width: 100vw;
@@ -2626,34 +2652,34 @@ h4.about{
 .openAbout #about {
   transform: translateY(0);
 }
-.openAbout #headerSite {
+.openAbout .app-layout header {
   background: @bgabout-color;
 }
-.openAbout #headerSite .brand-logo {
+.openAbout .app-layout header .brand-logo {
   background: @brandabout-url;
   background-size: 100%;
 }
-.openAbout #headerSite nav a {
+.openAbout .app-layout header a {
   color: @linkabout-color;
 }
-.openAbout #headerSite nav a.nav-item.selected:after,
-.openAbout #headerSite nav a.nav-item:hover:after {
+.openAbout .app-layout header a.nav-item.selected:after,
+.openAbout .app-layout header a.nav-item:hover:after {
   background: @linkabout-color;
 }
-.openAbout #headerSite nav .bt-about span {
+.openAbout .app-layout header .bt-about span {
   background: @bgabout-toggler;
 }
-.openAbout #headerSite nav .bt-about span:before {
+.openAbout .app-layout header .bt-about span:before {
   background: @bgabout-color;
 }
-.openAbout #headerSite nav .bt-about span:after {
+.openAbout .app-layout header .bt-about span:after {
   opacity: 0;
 }
-.openAbout #headerSite .btn-toggle {
+.openAbout .app-layout header .btn-toggle {
   display: none;
 }
 @media (max-width: 992px) {
-  .openAbout #headerSite nav .nav-item {
+  .openAbout .app-layout header .nav-item {
     display: block;
     position: absolute;
     top: 97px;
@@ -2713,42 +2739,47 @@ h4.about{
     line-height: 40px;
   }
 }
-.openAbout #about {
+
+}
+
+.night.openAbout {
+
+#about {
   transform: translateY(0);
 }
-.openAbout #headerSite {
+.app-layout header {
   background: @bgabout-color-n;
 }
-.openAbout #headerSite .brand-logo {
+.app-layout header .brand-logo {
   background: @brandabout-url-n;
   background-size: 100%;
 }
-.openAbout #headerSite nav a {
+.app-layout header a {
   color: @linkabout-color-n;
 }
-.openAbout #headerSite nav a.nav-item.selected:after,
-.openAbout #headerSite nav a.nav-item:hover:after {
+.openAbout .app-layout header a.nav-item.selected:after,
+.app-layout header a.nav-item:hover:after {
   background: @linkabout-color-n;
 }
-.openAbout #headerSite nav .bt-about span {
+.app-layout header .bt-about span {
   background: @bgabout-toggler-n;
 }
-.openAbout #headerSite nav .bt-about span:before {
+.app-layout header .bt-about span:before {
   background: @bgabout-color-n;
 }
-.openAbout #headerSite nav .bt-about span:after {
+.app-layout header .bt-about span:after {
   opacity: 0;
 }
-.openAbout #headerSite .btn-toggle {
+.app-layout header .btn-toggle {
   display: none;
 }
+}
+
 @media (max-width: 992px) {
-  .openAbout #headerSite nav .nav-item {
+  .night.openAbout .app-layout header .nav-item {
     display: block;
     position: absolute;
     top: 97px;
     left: 20px;
   }
-}
-
 }
