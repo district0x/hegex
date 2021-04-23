@@ -521,21 +521,13 @@
        [:div [:div.hloader]
         [:div.box-grid
          [:div.box.e
-          [:button.primary.line-btn
+          [:button.primary
            {:className (when-not active-option "disabled")
             :disabled  (or exercise-pending? (not active-option))
             :on-click #(dispatch [::hegex-nft/exercise! hegic-asset (:hegex-id active-option)])}
            "Exercise"
            [inputs/loader {:color :black
                            :on? exercise-pending?}]]]
-         [:div.box.d
-          [inputs/select
-           {:disabled true}
-           [:option {:selected true
-                     :value :eth}
-            "ETH"]
-           [:option {:value :wbtc}
-            "WBTC"]]]
          [:div.box.e
           [inputs/text-input
            {:type :number
@@ -544,6 +536,14 @@
             :on-change  (fn [e]
                           (js/e.persist)
                           (swap! offer assoc :total (oget e ".?target.?value")))}]]
+         [:div.box.d
+          [inputs/select
+           {:disabled true}
+           [:option {:selected true
+                     :value :eth}
+            "ETH"]
+           [:option {:value :wbtc}
+            "WBTC"]]]
          [:div.box.e
           (if-not @(subscribe [::trading-subs/approved-for-exchange?])
             [:button.primary

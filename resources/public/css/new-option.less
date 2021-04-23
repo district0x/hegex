@@ -6,9 +6,8 @@
   // grid-template-rows: repeat(2, 100px);
   // grid-gap: 10px;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  grid-template-columns: 18% 10% 18% auto;
   grid-gap: 1rem;
-  color: #444;
 }
 
 // media query @ mobile
@@ -25,4 +24,20 @@
   padding-left: 0px;
   padding-right: 0px;
   font-size: 150%;
+}
+
+
+@media (max-width: 784px) {
+.box-grid {
+
+
+  grid-auto-flow: dense;
+
+  // grid-template-columns: auto 50px 100px auto ;
+  // add more cols in a nutshell, static resize at single breakpoint
+  // grid-template-rows: auto 50px 50px ;
+
+
+grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+  }
 }
