@@ -232,7 +232,7 @@
           wrap-tx-pending? (subscribe [::tx-id-subs/tx-pending? :wrap-eth])
           unwrap-tx-pending? (subscribe [::tx-id-subs/tx-pending? :unwrap-eth])
           any-tx-pending? (or @wrap-tx-pending? @unwrap-tx-pending?)]
-      [:div.box-grid
+      [:div.box-grid-weth
       [:div.box.e
        [:div
         [:div {:style {:display "flex"
@@ -321,32 +321,36 @@
                          deref
                          web3-utils/wei->eth-number
                          (format/format-number {:max-fraction-digits 5}))]
-    [:div {:style {:max-width "500px"
-                   :margin-left "auto"
-                   :margin-right "auto"}}
-     #_(str active-option)
-     [:div.box-grid
-      [:div.box.e
+    [:div
+     [:div {:style {:margin-left "auto"}}
+      [:div#buy-order
+       [:div.box.e
+        [:div {:style {:margin-right "20px"}}
+         [inputs/text-input
+          {:type :number
+           :color "yellow"
+           :disabled true
+           :min 0
+           :placeholder (str (-> active-option :option (:eth-price 0)) " WETH")}]]]
+       [:div.box.e
+        [buy-nft active-option]]]]
+     [:div {:style {:max-width "500px"
+                    :margin-left "auto"
+                    :margin-right "auto"}}
+      [:div.weth-wrapper
+       [:br]
+       [:br]
        [:div
-        [inputs/text-input
-         {:type :number
-          :color "yellow"
-          :disabled true
-          :min 0
-          :placeholder (str (-> active-option :option (:eth-price 0)) " WETH")}]]]
-      [:div.box.e
-       [buy-nft active-option]]]
+        [:h3  [:b.hyellow " WETH "] "Station"]
+        [:span.xs {:style {:opacity "0.6"}} "You need some "  " WETH " " to buy Hegex NFTs"]]
 
-     [:div.box-grid
-      [:div.box.e
-       [:h4  [:b.hyellow " WETH "] "Station"]
-       [:span.xs {:style {:opacity "0.6"}} "You need some "  " WETH " " to buy Hegex NFTs"]]
-      [:div.box.e
+        [:br]
        [:div
-     [:span.caption "Current Balances"]
-     [:br]
-     [:span.caption
-      [:b eth-bal] " ETH" " |  "]
-     [:span.caption
-      [:b weth-bal] " WETH"]]]]
-     [convert-weth]]))
+        [:div
+         [:span.caption "Current Balances"]
+         [:br]
+         [:span.caption
+          [:b eth-bal] " ETH" " |  "]
+         [:span.caption
+          [:b weth-bal] " WETH"]]]]
+      [convert-weth]]]))

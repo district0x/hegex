@@ -1,23 +1,8 @@
-
 .box-grid {
-  // display: grid;
-  // grid-auto-flow: dense;
-  // grid-template-columns: repeat(3 , 1fr);
-  // grid-template-rows: repeat(2, 100px);
-  // grid-gap: 10px;
   display: grid;
   grid-template-columns: 18% 10% 18% auto;
   grid-gap: 1rem;
 }
-
-// media query @ mobile
-//
-//
-//
-  // grid-template-columns: repeat(2 , 1fr);
-  // add more cols in a nutshell, static resize at single breakpoint
-  // grid-template-rows: repeat(4, 100px);
-
 .box {
   border-radius: 5px;
   padding: 20px;
@@ -25,19 +10,62 @@
   padding-right: 0px;
   font-size: 150%;
 }
-
-
 @media (max-width: 784px) {
 .box-grid {
-
-
-  grid-auto-flow: dense;
-
-  // grid-template-columns: auto 50px 100px auto ;
-  // add more cols in a nutshell, static resize at single breakpoint
-  // grid-template-rows: auto 50px 50px ;
-
-
+grid-auto-flow: dense;
 grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
   }
+}
+.box-grid-new {
+  display: grid;
+  grid-template-columns: 18% 10% 18% auto 15%;
+  grid-gap: 1rem;
+}
+
+#buy-order {
+display: flex;
+margin-left: auto;
+justify-content: flex-end;
+align-items: flex-end;
+}
+@media (max-width: 784px) {
+.box-grid-new {
+grid-auto-flow: dense;
+grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+  }
+}
+
+
+@media (max-width: 500px) {
+#buy-order {
+display: block;
+}
+
+#buy-order * {
+width: 100%;
+margin-right: 0px;
+
+}
+}
+
+
+.box-grid-weth {
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+}
+@media (max-width: 784px) {
+.box-grid-weth {
+grid-auto-flow: dense;
+grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+  }
+}
+
+.weth-wrapper {
+.xs {
+font-size: 0.8em;
+}
+
+.caption {
+  font-size: 0.9em;
+}
 }

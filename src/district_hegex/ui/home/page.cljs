@@ -625,7 +625,7 @@
                        :align-items "flex-start"
                        :justify-content "flex-start"}}
          [:h2 "Buy New Option Contract"]]
-         [:div.box-grid {:style {:margin-top "2em"}}
+         [:div.box-grid-new {:style {:margin-top "2em"}}
          [:div.box.a
           [:div.hover-label "Currency"]
           [inputs/select
@@ -723,7 +723,6 @@
 
         [:h5.dim-icon.gap-top
          "There are no active orderbook offers"])
-      [:br]
       [orderbook/controls]]
      [:br]
      [:br]
