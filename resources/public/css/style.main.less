@@ -33,6 +33,7 @@
 html,
 body {
   height: 100%;
+  overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-family: roc-grotesk,sans-serif;
@@ -2266,7 +2267,7 @@ input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
   /* display: none; <- Crashes Chrome on hover */
   -webkit-appearance: none;
-  margin: 0; /* <-- Apparently some margin are still there even though it's hidden */
+  margin: 0; /* <@ Apparently some margin are still there even though it's hidden */
 }
 
 input[type=number] {
@@ -2452,6 +2453,8 @@ body {
 .app-layout {
   margin-top: 20px;
   max-width: 980px;
+  position: relative;
+  padding-top: 50px;
   margin: auto;
 
 }
@@ -2498,13 +2501,7 @@ tr:first-of-type > td:first-of-type {
   font-weight: bold;
 }
 
-.caption {
-  font-size: 0.6em !important;
-}
 
-.xs {
-  font-size: 0.5em !important;
-}
 
 .red {
   color:@danger;
@@ -2549,8 +2546,8 @@ button {
 }
 
 // .sectionHome .btn:hover {
-//   background-color: var(--btn-hover) !important;
-//   color: var(--btn-color);
+//   background-color: var(@btn-hover) !important;
+//   color: var(@btn-color);
 // }
 
 h4.about{
@@ -2568,4 +2565,215 @@ h4.about{
 .bt-about span:after {
   background: @bg-toggler;
 }
+}
+
+.openAbout.night {
+  h4.about{
+    color: @bgabout-toggler-n;
+  }
+}
+
+.openAbout {
+  h4.about{
+    color: @linkabout-color;
+  }
+}
+
+.openAbout.night {
+  .tab {
+    color: @bgabout-toggler-n;
+    border-bottom:2px solid @bgabout-toggler-n;
+  }
+}
+
+.openAbout {
+  .tab {
+    color: @linkabout-color;
+    border-bottom:2px solid @linkabout-color;
+  }
+}
+
+#about {
+  position: absolute;
+  width: 100vw;
+  overflow: hidden;
+  top: 0;
+  left: 0;
+  z-index: 999;
+  background-color: @bgabout-color;
+  background-image: @bgabout-url;
+  background-position: right bottom;
+  background-repeat: no-repeat;
+  background-size: 362px auto;
+  color: @textabout-color;
+  transform: translateY(-100%);
+  transition: all 0.5s ease-in-out;
+}
+#about .container {
+  padding: 110px 0 75px;
+}
+#about header {
+  margin-bottom: 27px;
+  max-width: 921px;
+}
+#about h2 {
+  font-size: 38px;
+  letter-spacing: 0;
+  line-height: 52px;
+}
+#about p {
+  font-size: 20px;
+  color: inherit !important;
+  letter-spacing: 0;
+  line-height: 35px;
+  width: 70%;
+  max-width: 625px;
+}
+@media (max-width: 992px) {
+  #about .container {
+    padding: 174px 0 336px;
+  }
+  #about p {
+    width: 100%;
+  }
+}
+@media (max-width: 767px) {
+  #about h2 {
+    font-size: 26px;
+    line-height: 40px;
+  }
+}
+.openAbout #about {
+  transform: translateY(0);
+}
+.openAbout .app-layout header {
+  background: @bgabout-color;
+}
+.openAbout .app-layout header .brand-logo {
+  background: @brandabout-url;
+  background-size: 100%;
+}
+.openAbout .app-layout header a {
+  color: @linkabout-color;
+}
+.openAbout .app-layout header a.nav-item.selected:after,
+.openAbout .app-layout header a.nav-item:hover:after {
+  background: @linkabout-color;
+}
+.openAbout .app-layout header .bt-about span {
+  background: @bgabout-toggler;
+}
+.openAbout .app-layout header .bt-about span:before {
+  background: @bgabout-color;
+}
+.openAbout .app-layout header .bt-about span:after {
+  opacity: 0;
+}
+.openAbout .app-layout header .btn-toggle {
+  display: none;
+}
+@media (max-width: 992px) {
+  .openAbout .app-layout header .nav-item {
+    display: block;
+    position: absolute;
+    top: 97px;
+    left: 20px;
+  }
+}
+
+.night {
+
+#about {
+  position: absolute;
+  width: 100%;
+  overflow: hidden;
+  top: 0;
+  left: 0;
+  z-index: 999;
+  background-color: @bgabout-color-n;
+  background-image: @bgabout-url-n;
+  background-position: right bottom;
+  background-repeat: no-repeat;
+  background-size: 362px auto;
+  color: @textabout-color-n;
+  transform: translateY(-100%);
+  transition: all 0.5s ease-in-out;
+}
+#about .container {
+  padding: 110px 0 75px;
+}
+#about header {
+  margin-bottom: 27px;
+  max-width: 921px;
+}
+#about h2 {
+  font-size: 38px;
+  letter-spacing: 0;
+  line-height: 52px;
+}
+#about p {
+  font-size: 20px;
+  letter-spacing: 0;
+  line-height: 35px;
+  color: inherit !important;
+  width: 70%;
+  max-width: 625px;
+}
+@media (max-width: 992px) {
+  #about .container {
+    padding: 174px 0 336px;
+  }
+  #about p {
+    width: 100%;
+  }
+}
+@media (max-width: 767px) {
+  #about h2 {
+    font-size: 26px;
+    line-height: 40px;
+  }
+}
+
+}
+
+.night.openAbout {
+
+#about {
+  transform: translateY(0);
+}
+.app-layout header {
+  background: @bgabout-color-n;
+}
+.app-layout header .brand-logo {
+  background: @brandabout-url-n;
+  background-size: 100%;
+}
+.app-layout header a {
+  color: @linkabout-color-n;
+}
+.openAbout .app-layout header a.nav-item.selected:after,
+.app-layout header a.nav-item:hover:after {
+  background: @linkabout-color-n;
+}
+.app-layout header .bt-about span {
+  background: @bgabout-toggler-n;
+}
+.app-layout header .bt-about span:before {
+  background: @bgabout-color-n;
+}
+.app-layout header .bt-about span:after {
+  opacity: 0;
+}
+.app-layout header .btn-toggle {
+  display: none;
+}
+}
+
+@media (max-width: 992px) {
+  .night.openAbout .app-layout header .nav-item {
+    display: block;
+    position: absolute;
+    top: 97px;
+    left: 20px;
+  }
 }

@@ -9,6 +9,11 @@
     (get-in db [::events/dark-mode?])))
 
 (re-frame/reg-sub
+  ::open-about?
+  (fn [db]
+    (get-in db [::events/open-about?])))
+
+(re-frame/reg-sub
   ::my-active-option
   (fn [db]
     (get-in db [:hegic-options/active-option])))

@@ -63,11 +63,6 @@
     right: 20px;
 }
 
-.night {
-  .hinput-label {
-    color: white;
-  }
-}
 
 .hegex-input:focus + .hinput-label {
   display: none;
@@ -82,13 +77,25 @@
   background: transparent;
   color: inherit;
   position: relative;
-  padding-top: 5px;
+  padding-top: 3px;
   display: inline-block;
   min-height: 1em;
   font-size: 12px;
   padding-left: 15px;
-  line-height: 2.55;
+  line-height: 2.85;
+  background-color: white;
   overflow: hidden;
   border-radius: .25em;
+}
+}
+
+.night {
+  .hinput-label {
+    color: white;
+  }
+.hinput-wrapper.small {
+.hegex-input {
+  background-color: inherit;
+}
 }
 }

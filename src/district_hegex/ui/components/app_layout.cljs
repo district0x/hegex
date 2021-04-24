@@ -22,7 +22,8 @@
 
 (defn- logo []
   [:div.header-logo
-   [:img.hegexlogo {:src (if @(subscribe [::home-subs/dark-mode?])
+   [:img.hegexlogo {:src (if (and  @(subscribe [::home-subs/dark-mode?])
+                                   (not @(subscribe [::home-subs/open-about?])))
                            "/images/logo-dark.png"
                            "/images/logo-light.png")}]
    [tabs/tab {:caption "Hegex"}]])
@@ -36,20 +37,42 @@
     [:div]]])
 
 ;;TODO clear up whether active account belong under "+"
-(defn header [active-page-name]
-  [:header
-   [:div.header-space
-    [logo]
-    [night-mode]
-    [:h4.about {:style {:font-weight "100"}} "About"]
-    [:span.about-section [:a.bt-about [:span]]]]])
+(defn- header [active-page-name about?]
+  (let [open-about #(dispatch [::home-events/toggle-open-about])]
+    [:header
+     {:style {:position "absolute"
+              :top "0px"
+              :left "0px"
+              :width "100%"
+              :max-width "980px"
+              :z-index "99999"}}
+    [:div.header-space
+     [logo]
+     [night-mode]
+     [:h4.about {:on-click open-about
+                 :style {:cursor "pointer"
+                         :font-weight "100"}} "About"]
+     [:span.about-section {:on-click open-about}
+      [:a.bt-about [:span]]]]]))
 
-(defn footer []
+(defn- footer []
   [:footer#globalFooter
    [:div {:style {:margin-top "5em"}}]])
 
+(defn- about []
+  [:section#about
+   [:div.containerAbout
+    [:div.contentAbout
+     [:div.container
+      [:header [:h2 "Welcome to Hegex"]
+       [:p "Mint & trade synthetic options-as-NFTs on our aggregator marketplace district"
+        ]
+       ]]]]])
+
 (defn app-layout [& children]
-  (let [dark? @(subscribe [::home-subs/dark-mode?])]
+  (let [dark? @(subscribe [::home-subs/dark-mode?])
+        about? @(subscribe [::home-subs/open-about?])]
+    (println "about is" about?)
     [:div (cond-> {:id (case :route/home
                     :route/about "page-about"
                     :route/detail "page-details"
@@ -59,10 +82,12 @@
                     :route/my-account "page-my-account"
                     :route/terms "page-terms"
                     :route/not-found "not-found")}
-            (not dark?) (assoc :className "day")
-            dark? (assoc :className "night bp3-dark dark-overlay") )
-     [:div.app-layout
-      [header :route/home]
+            (not dark?) (update :className str " day")
+            dark? (update :className str " night bp3-dark dark-overlay")
+            about? (update :className str " openAbout"))
+      [about]
+     [:div {:className "app-layout" }
+      [header :route/home about?]
       (into [:div#page-content]
             children)
       [footer]]]))
