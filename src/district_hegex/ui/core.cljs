@@ -60,7 +60,8 @@
                            :dispatch [::hegex-nft/hide-loader]}
                           {:when :seen-any-of?
                            :events [::web3-accounts-events/set-accounts]
-                           :dispatch [::events/load-my-hegic-options]}]}}))
+                           :dispatch-n [[::events/add-contract-wrappers]
+                                        [::events/load-my-hegic-options]]}]}}))
 
 
 (re-frame/reg-event-fx
