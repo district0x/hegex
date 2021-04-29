@@ -65,7 +65,7 @@
     [:div.contentAbout
      [:div.container
       [:header [:h2 "Welcome to Hegex"]
-       [:p "Mint & trade synthetic options-as-NFTs on our aggregator marketplace district"
+       [:p "Mint & trade synthetic options-as-NFTs on our aggregator-marketplace district"
         ]
        ]]]]])
 

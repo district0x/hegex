@@ -42,7 +42,7 @@
                          :key    :strike}
                         {:path   [:eth-price]
                          :header "Price"
-                         :format (fn [v] (str v " ETH"))
+                         :format (fn [v] (str v " WETH"))
                          :attrs  (fn [data] {:style {:text-align "left"}})
                          :key    :eth-price}
                         ;;NOTE a bit cryptic model, P&L is fetched later via (price+-strike(+-premium*price))

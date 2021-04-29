@@ -18,7 +18,12 @@
     [medley.core :as medley]
     [print.foo :refer [look] :include-macros true]
     [re-frame.core :as re-frame]
-    [taoensso.timbre :as log]))
+    [taoensso.timbre :as log]
+    [cljs-bean.core :refer [bean ->clj ->js]]
+    [oops.core :refer [oget oset! ocall oapply ocall! oapply!
+                       gget
+                       oget+ oset!+ ocall+ oapply+ ocall!+ oapply!+]]
+    ["@0x/contract-wrappers" :as contract-wrappers]))
 
 (def interceptors [re-frame/trim-v])
 
@@ -101,6 +106,15 @@
                             :on-error [::logging/error "Error loading user encrypted email"
                                        {:user {:id active-account}}
                                        ::load-email-settings]}]}}))))
+
+(re-frame/reg-event-fx
+  ::add-contract-wrappers
+  (fn [{:keys [db]}]
+    (let [ContractWrapper (oget contract-wrappers "ContractWrappers")
+          contract-wrapper (new ContractWrapper
+                                (gget  "web3" ".?currentProvider")
+                                (->js {:chainId 3}))]
+      {:db (assoc db :contract-wrapper-0x contract-wrapper)})))
 
 (re-frame/reg-event-fx
   ::load-my-hegic-options

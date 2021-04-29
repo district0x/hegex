@@ -289,51 +289,58 @@
 
 ;; request stuff
 
-(defn- parse-order! [order-obj]
+(defn- parse-order! [contract-wrapper order-obj]
   (let [order (->clj order-obj)
         order-hash (-> order :metaData :orderHash)
         asset-data (-> order :order :makerAssetData)
-        eth-price (-> order :order :takerAssetAmount)
-        ContractWrapper (oget contract-wrappers "ContractWrappers")
-        contract-wrapper (new ContractWrapper
-                              (gget  "web3" ".?currentProvider")
-                              (->js {:chainId 3}))]
+        eth-price (-> order :order :takerAssetAmount)]
     (go
       (dispatch [::get-order-nft
-                 order-hash
-                 (last
-                  (bean
-                   (<p! (ocall!
-                         (ocall! contract-wrapper
-                                 ".?devUtils.?decodeERC721AssetData" asset-data)
-                         "callAsync"))))
-                 (some-> eth-price web3-utils/wei->eth bn/number)
-                 eth-price
-                 order]))))
+                order-hash
+                (last
+                 (bean
+                  (<p! (ocall!
+                        (ocall! contract-wrapper
+                                ".?devUtils.?decodeERC721AssetData" asset-data)
+                        "callAsync"))))
+                (some-> eth-price web3-utils/wei->eth bn/number)
+                eth-price
+                 order]))
+    nil))
+
+(re-frame/reg-event-fx
+  ::parse-order
+  interceptors
+  (fn [{:keys [db]} [order-obj]]
+    (when-let [contract-wrapper (get db :contract-wrapper-0x)]
+      (parse-order! contract-wrapper order-obj))))
 
 ;; side-effectful, turn into doseq re-frame dispatch-n
 ;; double check here to prevent overloading web3 on polling
 ;; NOTE look into 0x ws as an alternative to book polling
-(defn- parse-orderbook [book]
-  (when book
-    (doseq [order book]
-      (parse-order! order))))
+(re-frame/reg-event-fx
+  ::parse-orderbook
+  interceptors
+  (fn [_ [book]]
+    (when book
+      {:dispatch-n (mapv (fn [o] [::parse-order o]) book)})))
 
 
-(defn load-orderbook [hegex-id]
+(defn load-orderbook []
   (go
     (try
-      (parse-orderbook
-       (oget
-        (<p!
-         (ocall relayer-client "getOrdersAsync")) ".?records"))
+      (let [r (oget (<p! (ocall relayer-client "getOrdersAsync")) ".?records")
+            _ (println "--------------- records in enclosing func received" )]
+        (dispatch [::parse-orderbook r]))
       (catch js/Error err (js/console.log (ex-cause err))))))
 
 (re-frame/reg-fx
   ::load-orderbook!
   (fn []
     ;;arg is irrelevant
-    (load-orderbook 7)))
+    (println "-------------------------------loading-orderbook")
+    (load-orderbook)
+    (println "-------------------------------loaded-orderbook")))
 
 (re-frame/reg-event-fx
   ::load-orderbook
