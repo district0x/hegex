@@ -180,6 +180,7 @@
 
 (defn fill! [{:keys [hegex-id sra-order taker-asset-amount]}]
   (println "filling in an order with params..."  hegex-id sra-order taker-asset-amount)
+  (println "dbgorderload" "start")
   (let [order-obj (->js sra-order)]
     (go
      (let [Wrapper (oget web3-wrapper "Web3Wrapper")
@@ -248,10 +249,11 @@
                                                  ".awaitTransactionSuccessAsync"
                                                  (->js  {:from taker-address
                                                          ;; :value "60000000000000000"
-                                                         :gas "5000000"
+                                                         ;; :gas "5000000"
                                                          :gasPrice "600000"})
                                                  (->js {:shouldValidate false}))))
          (clean-hegic)
+         (println "dbgorderload" "done")
          (catch js/Error err (js/console.log (ex-cause err))))))))
 
 (defn cancel! [{:keys [sra-order taker-asset-amount]}]
