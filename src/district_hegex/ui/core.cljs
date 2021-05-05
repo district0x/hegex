@@ -1,6 +1,7 @@
 (ns district-hegex.ui.core
   (:require
     [akiroz.re-frame.storage :as storage]
+    [district-hegex.ui.trading.events :as trading-events]
     [district-hegex.ui.contract.hegex-nft :as hegex-nft]
     [cljs.spec.alpha :as s]
     [cljsjs.filesaverjs]
@@ -61,6 +62,7 @@
                           {:when :seen-any-of?
                            :events [::web3-accounts-events/set-accounts]
                            :dispatch-n [[::events/add-contract-wrappers]
+                                        [::trading-events/restore-and-watch-txs]
                                         [::events/load-my-hegic-options]]}]}}))
 
 
