@@ -285,12 +285,13 @@
    "Approve WETH Staking" (when @tx-pending? [inputs/loader {:color :black :on? @tx-pending?}])])
 
 (defn- buy-nft-button [active-option weth-bal]
-  (let [enough-weth? (< (-> active-option :option :eth-price) weth-bal)]
+  (let [active? (-> active-option :option)
+        enough-weth? (< (-> active-option :option :eth-price) weth-bal)]
     [:div.hover-captioned
      [:button.yellow.line-btn
-      {:className (when-not active-option "disabled")
+      {:className (when-not active? "disabled")
        :on-click #(dispatch [::trading-events/fill-offer (:option active-option)])
-       :disabled  (or (not active-option) (not enough-weth?))}
+       :disabled  (or (not active?) (not enough-weth?))}
       "Buy"]
      (when-not enough-weth? [:div.hover-caption "Insufficient WETH balance"])]))
 
