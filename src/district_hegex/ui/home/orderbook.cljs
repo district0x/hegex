@@ -1,12 +1,14 @@
 (ns district-hegex.ui.home.orderbook
   (:require
    [re-frame.core :refer [subscribe dispatch]]
+   [district.ui.web3-tx.subs :as tx-subs]
    [district.ui.web3-tx-id.subs :as tx-id-subs]
    [clojure.string :as cs]
    [district.ui.web3-accounts.subs :as account-subs]
    [district.web3-utils :as web3-utils]
    [district.ui.web3-account-balances.subs :as account-balances-subs]
    [district-hegex.ui.weth.subs :as weth-subs]
+
    [oops.core :refer [oget]]
     [district-hegex.ui.trading.events :as trading-events]
    [district-hegex.ui.weth.events :as weth-events]
@@ -286,13 +288,24 @@
 
 (defn- buy-nft-button [active-option weth-bal]
   (let [active? (-> active-option :option)
+        pending-txs (subscribe [::tx-subs/txs {:status :tx.status/pending}])
+        my-tx (subscribe [::tx-subs/tx "0xb34586454f9301a56b86ca1eab961ddde1e5c8a7a9e1c731d06f68a4d92884f5"])
+        success-txs (subscribe [::tx-subs/txs {:status :tx.status/success}])
+        tx-pending? (subscribe [::tx-id-subs/tx-pending? :fill-0x-order])
         enough-weth? (< (-> active-option :option :eth-price) weth-bal)]
+    ;; (println "dbgtxpending in order-fill" @tx-pending?)
+    ;; (println "dbg alltxs PENDING" @pending-txs)
+    ;; (println "dbg alltxs SUCCESS" (map first @success-txs))
+    ;; (println "dbg alltxs MY SINGLE TX" @my-tx)
+    (println "dbgpend" @tx-pending?)
+
     [:div.hover-captioned
      [:button.yellow.line-btn
       {:className (when-not active? "disabled")
        :on-click #(dispatch [::trading-events/fill-offer (:option active-option)])
        :disabled  (or (not active?) (not enough-weth?))}
-      "Buy"]
+      "Buy"
+      (when @tx-pending? [inputs/loader {:color :black :on? @tx-pending?}])]
      (when-not enough-weth? [:div.hover-caption "Insufficient WETH balance"])]))
 
 (defn- cancel-nft-button [active-option]

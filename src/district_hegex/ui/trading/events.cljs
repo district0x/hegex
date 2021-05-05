@@ -1,7 +1,9 @@
 (ns district-hegex.ui.trading.events
   (:require
    [re-frame.core :as re-frame :refer [dispatch reg-event-fx]]
-    [district.ui.web3-accounts.queries :as account-queries]
+   [district.ui.web3-accounts.queries :as account-queries]
+   [district.ui.web3-tx.events :as tx-events]
+    [district.ui.web3-tx-id.events :as tx-id-events]
     [district.ui.logging.events :as logging]
     [district.ui.smart-contracts.queries :as contract-queries]
     [district.ui.web3.queries :as web3-queries]
@@ -241,20 +243,52 @@
        ;; (js/console.log (<p! (js/window.ethereum.enable)))
        ;; (js/console.log js/window.ethereum)
        (try
-         (println "filling order..." (<p! (ocall (ocall contract-wrapper
-                                                        ".exchange.fillOrder"
-                                                        (->js (oget order-obj ".?order"))
-                                                        (->js taker-asset-amount)
-                                                        (->js (oget order-obj ".?order.?signature")))
-                                                 ".awaitTransactionSuccessAsync"
-                                                 (->js  {:from taker-address
-                                                         ;; :value "60000000000000000"
-                                                         ;; :gas "5000000"
-                                                         :gasPrice "600000"})
-                                                 (->js {:shouldValidate false}))))
-         (clean-hegic)
-         (println "dbgorderload" "done")
+         (let [pre-tx (ocall contract-wrapper
+                             ".exchange.fillOrder"
+                             (->js (oget order-obj ".?order"))
+                             (->js taker-asset-amount)
+                             (->js (oget order-obj ".?order.?signature")))
+               _ (println "pre-tx is" pre-tx)
+               tx (<p! (ocall pre-tx
+                              ".sendTransactionAsync"
+                              (->js  {:from taker-address
+                                      :gasPrice "600000"})
+                              (->js {:shouldValidate false})))]
+           (println "dbgfillorder..." "obj" tx)
+           (dispatch [::watch-transaction tx])
+           #_(dispatch [::tx-events/add-tx tx])
+          #_ (dispatch [::tx-events/tx-hash tx])
+          #_(dispatch [::tx-id-events/add-tx-hash :fill-0x-order tx {:fn :fillOrder
+                                                                   :from "0x4E406a4B31b3C42D9c183eA1c5bACf355E055577"}])
+           (js/console.log tx)
+           (println "dbgfillorder added tx" tx (type tx) "string?" (string? tx))
+           )
+         #_(clean-hegic)
          (catch js/Error err (js/console.log (ex-cause err))))))))
+
+
+(reg-event-fx
+  ::tx-success
+  interceptors
+  (fn [{:keys [:db]} _]
+    (println "dbgtx mined")))
+
+(reg-event-fx
+  ::error
+  interceptors
+  (fn [{:keys [:db]} _]
+    (println "dbgtx error")))
+
+(reg-event-fx
+  ::watch-transaction
+  interceptors
+  (fn [{:keys [:db]} [tx-hash]]
+    {:web3/watch-transactions {:web3 (:web3 db)
+                               :transactions [{:id :my-watcher
+                                               :tx-hash tx-hash
+                                               :on-tx-success [::tx-success]
+                                               :on-tx-error [::error]
+                                               :on-tx-receipt [::tx-receipt]}]}}))
 
 (defn cancel! [{:keys [sra-order taker-asset-amount]}]
   (let [order-obj (->js sra-order)]
