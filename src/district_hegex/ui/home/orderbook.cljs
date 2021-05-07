@@ -91,12 +91,11 @@
   (let [current-price @(subscribe [::external-subs/eth-price])
         pl (if (= :call option-type)
              (- (* current-price amount) (* strike amount) paid)
-             (- (* strike amount) (* current-price amount) paid))]
-    ;;NOTE recheck P&L formula (esp. premium)
-    [:div (str "$"
-               (some->
-                pl
-                (format/format-number {:max-fraction-digits 5})))]))
+             (- (* strike amount) (* current-price amount) paid))
+        pl-round (some-> pl
+                         (format/format-number {:max-fraction-digits 5}))
+        pl-small? (= 0 (some-> pl-round js/Math.abs))]
+    [:div (str "$" (if-not pl-small? pl-round 0))]))
 
 (defn- cell-fn
 "Return the cell hiccup form for rendering.
