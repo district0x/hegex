@@ -288,14 +288,22 @@
 
 (defn- buy-nft-button [active-option weth-bal]
   (let [active? (-> active-option :option)
+        active-account (some-> @(subscribe [::account-subs/active-account])
+                               str
+                               cs/lower-case)
+        maker (some-> active-option :option :sra-order :order :makerAddress
+                      str
+                      cs/lower-case)
         tx-pending? (subscribe [::external-subs/external-tx-pending? :fill-order])
         enough-weth? (< (-> active-option :option :eth-price) weth-bal)]
-    (println "dbgpend" @tx-pending?)
     [:div.hover-captioned
      [:button.yellow.line-btn
       {:className (when-not active? "disabled")
        :on-click #(dispatch [::trading-events/fill-offer (:option active-option)])
-       :disabled  (or @tx-pending? (not active?) (not enough-weth?))}
+       :disabled  (or @tx-pending?
+                      (not active?)
+                      (not enough-weth?)
+                      (= maker active-account))}
       "Buy"
       (when @tx-pending? [inputs/loader {:color :black :on? @tx-pending?}])]
      (when-not enough-weth? [:div.hover-caption "Insufficient WETH balance"])]))
