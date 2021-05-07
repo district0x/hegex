@@ -2,6 +2,7 @@
   (:require
     [akiroz.re-frame.storage :as storage]
     [district-hegex.ui.trading.events :as trading-events]
+    [district-hegex.ui.home.events :as home-events]
     [district-hegex.ui.contract.hegex-nft :as hegex-nft]
     [cljs.spec.alpha :as s]
     [cljsjs.filesaverjs]
@@ -71,12 +72,17 @@
   [(re-frame/inject-cofx :store) interceptors]
   (fn [{:keys [:db :store]}]
     (println "dbg init")
-    {:db (-> db
+    {:db (cond-> db
+           :always
            (assoc :district-hegex.ui.my-account (:district-hegex.ui.my-account store))
-           (assoc :district-hegex.ui.core/votes (:district-hegex.ui.core/votes store)))
-     :dispatch [::my-account-route-active]
 
-     #_::my-account-route-active #_(:district-hegex.ui.my-account store)}))
+           :always
+           (assoc :district-hegex.ui.core/votes (:district-hegex.ui.core/votes store))
+
+           (:dark-mode? store)
+           (assoc-in [::home-events/dark-mode?] true))
+     :dispatch-n (cond-> [[::my-account-route-active]]
+                   (:dark-mode? store) (conj [::home-events/set-dark-mode]))}))
 
 (defn ^:export init []
   (dev-setup!)
