@@ -703,6 +703,7 @@
 
 (defn- orderbook-section []
   (let [book (subscribe [::trading-subs/hegic-book])]
+    (println "book is" @book)
     [:span
      [:div {:style {:display "flex"
                     :align-items "flex-start"

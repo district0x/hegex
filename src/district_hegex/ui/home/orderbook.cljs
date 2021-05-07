@@ -288,22 +288,14 @@
 
 (defn- buy-nft-button [active-option weth-bal]
   (let [active? (-> active-option :option)
-        pending-txs (subscribe [::tx-subs/txs {:status :tx.status/pending}])
-        my-tx (subscribe [::tx-subs/tx "0xb34586454f9301a56b86ca1eab961ddde1e5c8a7a9e1c731d06f68a4d92884f5"])
-        success-txs (subscribe [::tx-subs/txs {:status :tx.status/success}])
-        tx-pending? (subscribe [::tx-id-subs/tx-pending? :fill-0x-order])
+        tx-pending? (subscribe [::external-subs/external-tx-pending? :fill-order])
         enough-weth? (< (-> active-option :option :eth-price) weth-bal)]
-    ;; (println "dbgtxpending in order-fill" @tx-pending?)
-    ;; (println "dbg alltxs PENDING" @pending-txs)
-    ;; (println "dbg alltxs SUCCESS" (map first @success-txs))
-    ;; (println "dbg alltxs MY SINGLE TX" @my-tx)
     (println "dbgpend" @tx-pending?)
-
     [:div.hover-captioned
      [:button.yellow.line-btn
       {:className (when-not active? "disabled")
        :on-click #(dispatch [::trading-events/fill-offer (:option active-option)])
-       :disabled  (or (not active?) (not enough-weth?))}
+       :disabled  (or @tx-pending? (not active?) (not enough-weth?))}
       "Buy"
       (when @tx-pending? [inputs/loader {:color :black :on? @tx-pending?}])]
      (when-not enough-weth? [:div.hover-caption "Insufficient WETH balance"])]))

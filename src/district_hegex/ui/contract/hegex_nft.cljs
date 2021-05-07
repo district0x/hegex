@@ -500,9 +500,8 @@
 (re-frame/reg-event-fx
   ::clean-hegic
   interceptors
-  (fn [{:keys [db]} _]
-    {:db (dissoc db ::hegic-options)
-     :dispatch [:district-hegex.ui.events/load-my-hegic-options {:once? true}]}))
+  (fn [_ _]
+    {:dispatch [:district-hegex.ui.events/load-my-hegic-options {:once? true}]}))
 
 ;; get underlying info on traded hegex options,
 ;; unite with my-hegex-option fns

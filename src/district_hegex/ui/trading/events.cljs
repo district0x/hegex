@@ -176,10 +176,8 @@
          (println "submitted order..."
                   (<p! (ocall relayer-client "submitOrderAsync" signed-order)))
          (reset! form-open? false)
+         (dispatch [::load-orderbook])
          (catch js/Error err (js/console.log (ex-cause err))))))))
-
-(defn- clean-hegic []
-  (dispatch [::hegex-nft/clean-hegic]))
 
 (defn fill! [{:keys [hegex-id sra-order taker-asset-amount]}]
   (println "filling in an order with params..."  hegex-id sra-order taker-asset-amount)
@@ -256,25 +254,22 @@
                                       :gasPrice "600000"})
                               (->js {:shouldValidate false})))]
            (println "dbgfillorder..." "obj" tx)
-           (dispatch [::watch-tx tx])
-           #_(dispatch [::tx-events/add-tx tx])
-          #_ (dispatch [::tx-events/tx-hash tx])
-          #_(dispatch [::tx-id-events/add-tx-hash :fill-0x-order tx {:fn :fillOrder
-                                                                   :from "0x4E406a4B31b3C42D9c183eA1c5bACf355E055577"}])
-           (js/console.log tx)
-           (println "dbgfillorder added tx" tx (type tx) "string?" (string? tx))
-           )
-         #_(clean-hegic)
+           (dispatch [::watch-tx tx :fill-order hegex-id])
+           (println "dbgfillorder added tx" tx (type tx) "string?" (string? tx)))
          (catch js/Error err (js/console.log (ex-cause err))))))))
 
 
 (reg-event-fx
   ::tx-success
-  interceptors
-  (fn [{:keys [db]} args]
-    ;; !IMPORTATNT - remove watcher
-    #_{:web3/stop-watching {:ids [:my-watcher]}}
-    (println "dbgtx mined" args)))
+  [(re-frame/inject-cofx :store) interceptors]
+  (fn [{:keys [db store]} [tx-hash]]
+    (let [hegex-id (get-in db [:pending-external-txs :fill-order])]
+      {:db (-> db
+              (assoc-in [:pending-external-txs
+                         (get-in store [:external-txs-ids tx-hash])] nil)
+              (update-in [::hegex-nft/hegic-options :orderbook :full] dissoc hegex-id))
+       :dispatch [::hegex-nft/clean-hegic]
+       :web3/stop-watching {:ids [(keyword (subs (str tx-hash) 5))]}})))
 
 (reg-event-fx
   ::error
@@ -287,16 +282,19 @@
 (reg-event-fx
   ::watch-tx
   [(re-frame/inject-cofx :store) interceptors]
-  (fn [{:keys [db store]} [tx-hash]]
+  (fn [{:keys [db store]} [tx-hash tx-id hegex-id]]
+    (println "dbgpenddata not restored" (get-in store [:external-txs-ids tx-hash]))
     (when tx-hash
-      {:store (if (-> store :external-txs)
-               (update-in store [:external-txs] conj tx-hash)
-               (assoc-in store [:external-txs] #{tx-hash}))
-      :web3/watch-transactions {:web3 (web3-queries/web3 db)
-                                :transactions [{:id (keyword (subs tx-hash 5))
-                                                :tx-hash tx-hash
-                                                :on-tx-success [::tx-success]
-                                                :on-tx-error [::error]}]}})))
+      (let [with-tx-hash (if (-> store :external-txs)
+                           (update-in store [:external-txs] conj tx-hash)
+                           (assoc-in store [:external-txs] #{tx-hash}))]
+        {:db (assoc-in db [:pending-external-txs tx-id] hegex-id)
+         :store (assoc-in with-tx-hash [:external-txs-ids tx-hash] tx-id)
+         :web3/watch-transactions {:web3 (web3-queries/web3 db)
+                                   :transactions [{:id (keyword (subs (str tx-hash) 5))
+                                                  :tx-hash tx-hash
+                                                  :on-tx-success [::tx-success tx-hash]
+                                                  :on-tx-error [::tx-success tx-hash]}]}}))))
 
 (reg-event-fx
   ::restore-and-watch-txs
@@ -321,16 +319,23 @@
   ::watch-restored-tx
   [(re-frame/inject-cofx :store) interceptors]
   (fn [{:keys [db store]} [tx-hash tx-info]]
+    (println "dbgpenddata" (get-in store [:external-txs-ids tx-hash]))
+    (println "dbgpenddata tx-info is" tx-info)
+    (println "dbgpenddata pending?" (not (:block-number tx-info)))
     ;; pending is when block number is not yet there (not)
     (let [pending? (not (:block-number tx-info))]
       (if-not pending?
-        {:store (update-in store [:external-txs] disj tx-hash)}
+        {:web3/stop-watching {:ids [(keyword (subs (str tx-hash) 5))]}
+         :store (-> store
+                    (update-in [:external-txs] disj tx-hash)
+                    (update-in [:external-txs-ids] dissoc tx-hash))}
 
-        {:web3/watch-transactions {:web3 (web3-queries/web3 db)
-                                   :transactions [{:id (keyword (subs tx-hash 5))
+        {:db (assoc-in db [:pending-external-txs (get-in store [:external-txs-ids tx-hash])] true)
+         :web3/watch-transactions {:web3 (web3-queries/web3 db)
+                                   :transactions [{:id (keyword (subs (str tx-hash) 5))
                                                    :tx-hash tx-hash
-                                                   :on-tx-success [::tx-success]
-                                                   :on-tx-error [::error]}]}}))))
+                                                   :on-tx-success [::tx-success tx-hash]
+                                                   :on-tx-error [::tx-success tx-hash]}]}}))))
 
 (defn cancel! [{:keys [sra-order taker-asset-amount]}]
   (let [order-obj (->js sra-order)]
