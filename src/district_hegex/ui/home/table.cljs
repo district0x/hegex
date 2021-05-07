@@ -240,17 +240,22 @@
                      (when (and (:col-reordering state)
                                 (= view-col (:col-hover state)))
                        {:border-right "6px solid #3366CC"}))})
+     (println "state-atom is" )
      [:span {:style (cond-> {:padding-right 50} active-tab? (assoc :color "#00183C"))}  (:header render-info)]
      (when (and sort-fn sortable)
-       [:span {:style {:position "absolute"
-                       :text-align "center"
-                       :height "7px"
-                       :font-size "0.8em"
-                       :color "#00183C"
-                       :width "10px"
-                       :bottom "20px"
-                       :right "15px"
-                       :cursor "pointer"}}
+       [:span {:style (cond->
+                          {:position "absolute"
+                           :text-align "center"
+                           :height "7px"
+                           :font-size "0.8em"
+                           :color "#00183C"
+                           :width "10px"
+                           :bottom "20px"
+                           :right "15px"
+                           :cursor "pointer"}
+
+                        (= :one-row (:arrows config))
+                        (merge {:bottom "15px"}))}
         (condp = (is-sorting (:sorting state) render-info model-col)
           :asc " ▲"
           :desc " ▼"

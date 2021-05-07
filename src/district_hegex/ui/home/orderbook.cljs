@@ -62,7 +62,7 @@
                          :header "Expires On"
                          :attrs  (fn [data] {:style {:text-align "left"}})
                          :key    :expiration}
-                        {:path   [:sra-order :metaData :createdAt]
+                        #_{:path   [:sra-order :metaData :createdAt]
                          :header "Offered"
                          :attrs  (fn [data] {:style {:text-align "left"}})
                          :format (fn [v] (when v (to-simple-time v)))
@@ -216,6 +216,7 @@
                              :padding-top   "15px"}}
    :table-state     table-state
    :table           {:style {:margin "auto"}}
+   :arrows          :one-row
    :column-model    columns
    :row-key         row-key-fn
    :render-cell     cell-fn
