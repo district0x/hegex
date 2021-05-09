@@ -506,7 +506,11 @@
    :sort            sort-fn})
 
 (defn- offer-err [{:keys [s]}]
-  [:p.red.caption.bold s])
+  [:div {:style {:position "relative"}}
+   [:p.red.caption.bold {:style {:position "absolute"
+                                 :top "-10px"
+                                 :right "10px"
+                                 :font-size "0.8em"}} s]])
 
 (defn- my-hegic-option-controls []
   (let [offer (r/atom {:total 0
@@ -515,6 +519,7 @@
     (fn []
       (let [exercise-pending? @(subscribe [::tx-id-subs/tx-pending? :exercise-hegic])
             active-option (:option @(subscribe [::home-subs/my-active-option]))
+            pending-offer? (subscribe [::trading-subs/my-pending-offer?])
             approval-pending? (subscribe [::tx-id-subs/tx-pending?
                                           :approve-for-exchange!])
             hegic-asset (:asset active-option)]
@@ -559,7 +564,8 @@
              :disabled  (not active-option)
              :on-click #(dispatch [::trading-events/create-offer
                                    (assoc @offer :id (:hegex-id active-option)) false])}
-             "Offer"])]]
+             "Offer"
+             (when @pending-offer? [inputs/loader {:color :black :on? true}])])]]
         (doall (map (fn [s]
                       ^{:key s}
                       [offer-err {:s s}])

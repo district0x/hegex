@@ -173,10 +173,13 @@
                                                        signed-order
                                                        (.-signature signed-order)))))]
        (try
-         (println "submitted order..."
-                  (<p! (ocall relayer-client "submitOrderAsync" signed-order)))
-         (reset! form-open? false)
-         (dispatch [::load-orderbook])
+         (let [s-order (<p! (ocall relayer-client "submitOrderAsync" signed-order))]
+           (println "submitted order..." s-order)
+           (dispatch [::enable-pending-offer])
+           (println "dbgh 0")
+           (println "dbgh 1")
+           (dispatch [::load-orderbook true])
+           (println "dbgh 2"))
          (catch js/Error err (js/console.log (ex-cause err))))))))
 
 (defn fill! [{:keys [hegex-id sra-order taker-asset-amount]}]
@@ -404,31 +407,44 @@
 (re-frame/reg-event-fx
   ::parse-orderbook
   interceptors
-  (fn [_ [book]]
+  (fn [_ [book new-order?]]
     (when book
-      {:dispatch-n (mapv (fn [o] [::parse-order o]) book)})))
+      {:dispatch-n  (cond-> (mapv (fn [o] [::parse-order o]) book)
+                      new-order? (conj [::disable-pending-offer]))})))
 
+(re-frame/reg-event-fx
+  ::disable-pending-offer
+  interceptors
+  (fn [{:keys [db]}]
+    {:db (assoc-in db [::my-pending-offer?] false)}))
 
-(defn load-orderbook []
+(re-frame/reg-event-fx
+  ::enable-pending-offer
+  interceptors
+  (fn [{:keys [db]}]
+    {:db (assoc-in db [::my-pending-offer?] true)}))
+
+(defn load-orderbook [new-order?]
   (go
     (try
       (let [r (oget (<p! (ocall relayer-client "getOrdersAsync")) ".?records")
             _ (println "--------------- records in enclosing func received" )]
-        (dispatch [::parse-orderbook r]))
+        (dispatch [::parse-orderbook r new-order?]))
       (catch js/Error err (js/console.log (ex-cause err))))))
 
 (re-frame/reg-fx
   ::load-orderbook!
-  (fn []
+  (fn [track?]
     ;;arg is irrelevant
     (println "-------------------------------loading-orderbook")
-    (load-orderbook)
+    (load-orderbook track?)
     (println "-------------------------------loaded-orderbook")))
 
 (re-frame/reg-event-fx
   ::load-orderbook
-  (fn []
-    {::load-orderbook! true}))
+  interceptors
+  (fn [_ [new-order?]]
+    {::load-orderbook! new-order?}))
 
 
 ;; callasync res is #js
