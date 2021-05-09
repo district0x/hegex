@@ -71,7 +71,6 @@
   ::init
   [(re-frame/inject-cofx :store) interceptors]
   (fn [{:keys [:db :store]}]
-    (println "dbg init")
     {:db (cond-> db
            :always
            (assoc :district-hegex.ui.my-account (:district-hegex.ui.my-account store))
