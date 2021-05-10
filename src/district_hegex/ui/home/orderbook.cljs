@@ -1,12 +1,14 @@
 (ns district-hegex.ui.home.orderbook
   (:require
    [re-frame.core :refer [subscribe dispatch]]
+   [district.ui.web3-tx.subs :as tx-subs]
    [district.ui.web3-tx-id.subs :as tx-id-subs]
    [clojure.string :as cs]
    [district.ui.web3-accounts.subs :as account-subs]
    [district.web3-utils :as web3-utils]
    [district.ui.web3-account-balances.subs :as account-balances-subs]
    [district-hegex.ui.weth.subs :as weth-subs]
+
    [oops.core :refer [oget]]
     [district-hegex.ui.trading.events :as trading-events]
    [district-hegex.ui.weth.events :as weth-events]
@@ -60,7 +62,7 @@
                          :header "Expires On"
                          :attrs  (fn [data] {:style {:text-align "left"}})
                          :key    :expiration}
-                        {:path   [:sra-order :metaData :createdAt]
+                        #_{:path   [:sra-order :metaData :createdAt]
                          :header "Offered"
                          :attrs  (fn [data] {:style {:text-align "left"}})
                          :format (fn [v] (when v (to-simple-time v)))
@@ -89,12 +91,11 @@
   (let [current-price @(subscribe [::external-subs/eth-price])
         pl (if (= :call option-type)
              (- (* current-price amount) (* strike amount) paid)
-             (- (* strike amount) (* current-price amount) paid))]
-    ;;NOTE recheck P&L formula (esp. premium)
-    [:div (str "$"
-               (some->
-                pl
-                (format/format-number {:max-fraction-digits 5})))]))
+             (- (* strike amount) (* current-price amount) paid))
+        pl-round (some-> pl
+                         (format/format-number {:max-fraction-digits 5}))
+        pl-small? (= 0 (some-> pl-round js/Math.abs))]
+    [:div (str "$" (if-not pl-small? pl-round 0))]))
 
 (defn- cell-fn
 "Return the cell hiccup form for rendering.
@@ -214,6 +215,7 @@
                              :padding-top   "15px"}}
    :table-state     table-state
    :table           {:style {:margin "auto"}}
+   :arrows          :one-row
    :column-model    columns
    :row-key         row-key-fn
    :render-cell     cell-fn
@@ -284,12 +286,27 @@
     :disabled @tx-pending?}
    "Approve WETH Staking" (when @tx-pending? [inputs/loader {:color :black :on? @tx-pending?}])])
 
-(defn- buy-nft-button [active-option]
-  [:button.yellow.line-btn
-    {:className (when-not active-option "disabled")
-     :on-click #(dispatch [::trading-events/fill-offer (:option active-option)])
-     :disabled  (not active-option)}
-    "Buy"])
+(defn- buy-nft-button [active-option weth-bal]
+  (let [active? (-> active-option :option)
+        active-account (some-> @(subscribe [::account-subs/active-account])
+                               str
+                               cs/lower-case)
+        maker (some-> active-option :option :sra-order :order :makerAddress
+                      str
+                      cs/lower-case)
+        tx-pending? (subscribe [::external-subs/external-tx-pending? :fill-order])
+        enough-weth? (< (-> active-option :option :eth-price) weth-bal)]
+    [:div.hover-captioned
+     [:button.yellow.line-btn
+      {:className (when-not active? "disabled")
+       :on-click #(dispatch [::trading-events/fill-offer (:option active-option)])
+       :disabled  (or @tx-pending?
+                      (not active?)
+                      (not enough-weth?)
+                      (= maker active-account))}
+      "Buy"
+      (when @tx-pending? [inputs/loader {:color :black :on? @tx-pending?}])]
+     (when-not enough-weth? [:div.hover-caption "Insufficient WETH balance"])]))
 
 (defn- cancel-nft-button [active-option]
   [:button.yellow
@@ -306,12 +323,13 @@
         approving-exchange? (subscribe [::tx-id-subs/tx-pending? :approve-weth-exchange])
         my-offer? (= (some-> active-account cs/lower-case)
                      (some-> active-option :sra-order
-                             :order :makerAddress cs/lower-case))]
+                             :order :makerAddress cs/lower-case))
+        weth-bal @(subscribe [::weth-subs/balance])]
     (cond
         my-offer? [cancel-nft-button active-option]
         (not weth-approved?) [approve-weth-exchange approving-exchange?]
         (not staking-approved?) [approve-weth-staking approving-staking?]
-        :else [buy-nft-button active-option])))
+        :else [buy-nft-button active-option weth-bal])))
 
 (defn controls []
   (let [active-option @(subscribe [::home-subs/my-orderbook-option])
@@ -334,6 +352,8 @@
            :placeholder (str (-> active-option :option (:eth-price 0)) " WETH")}]]]
        [:div.box.e
         [buy-nft active-option]]]]
+
+     [:hr]
      [:div {:style {:max-width "500px"
                     :margin-left "auto"
                     :margin-right "auto"}}

@@ -11,3 +11,9 @@
  ::btc-price
   (fn [db _]
     (get-in db [:prices :bitcoin])))
+
+(re-frame/reg-sub
+ ::external-tx-pending?
+  (fn [db [_ id]]
+    ;; explicit hegex-id to bool
+    (some? (get-in db [:pending-external-txs id]))))

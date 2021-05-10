@@ -1,7 +1,10 @@
 (ns district-hegex.ui.trading.events
   (:require
    [re-frame.core :as re-frame :refer [dispatch reg-event-fx]]
-    [district.ui.web3-accounts.queries :as account-queries]
+   [cljs-web3.eth :as web3-eth]
+   [district.ui.web3-accounts.queries :as account-queries]
+   [district.ui.web3-tx.events :as tx-events]
+    [district.ui.web3-tx-id.events :as tx-id-events]
     [district.ui.logging.events :as logging]
     [district.ui.smart-contracts.queries :as contract-queries]
     [district.ui.web3.queries :as web3-queries]
@@ -170,16 +173,18 @@
                                                        signed-order
                                                        (.-signature signed-order)))))]
        (try
-         (println "submitted order..."
-                  (<p! (ocall relayer-client "submitOrderAsync" signed-order)))
-         (reset! form-open? false)
+         (let [s-order (<p! (ocall relayer-client "submitOrderAsync" signed-order))]
+           (println "submitted order..." s-order)
+           (dispatch [::enable-pending-offer])
+           (println "dbgh 0")
+           (println "dbgh 1")
+           (dispatch [::load-orderbook true])
+           (println "dbgh 2"))
          (catch js/Error err (js/console.log (ex-cause err))))))))
-
-(defn- clean-hegic []
-  (dispatch [::hegex-nft/clean-hegic]))
 
 (defn fill! [{:keys [hegex-id sra-order taker-asset-amount]}]
   (println "filling in an order with params..."  hegex-id sra-order taker-asset-amount)
+  (println "dbgorderload" "start")
   (let [order-obj (->js sra-order)]
     (go
      (let [Wrapper (oget web3-wrapper "Web3Wrapper")
@@ -240,19 +245,100 @@
        ;; (js/console.log (<p! (js/window.ethereum.enable)))
        ;; (js/console.log js/window.ethereum)
        (try
-         (println "filling order..." (<p! (ocall (ocall contract-wrapper
-                                                        ".exchange.fillOrder"
-                                                        (->js (oget order-obj ".?order"))
-                                                        (->js taker-asset-amount)
-                                                        (->js (oget order-obj ".?order.?signature")))
-                                                 ".awaitTransactionSuccessAsync"
-                                                 (->js  {:from taker-address
-                                                         ;; :value "60000000000000000"
-                                                         :gas "5000000"
-                                                         :gasPrice "600000"})
-                                                 (->js {:shouldValidate false}))))
-         (clean-hegic)
+         (let [pre-tx (ocall contract-wrapper
+                             ".exchange.fillOrder"
+                             (->js (oget order-obj ".?order"))
+                             (->js taker-asset-amount)
+                             (->js (oget order-obj ".?order.?signature")))
+               _ (println "pre-tx is" pre-tx)
+               tx (<p! (ocall pre-tx
+                              ".sendTransactionAsync"
+                              (->js  {:from taker-address
+                                      :gasPrice "600000"})
+                              (->js {:shouldValidate false})))]
+           (println "dbgfillorder..." "obj" tx)
+           (dispatch [::watch-tx tx :fill-order hegex-id])
+           (println "dbgfillorder added tx" tx (type tx) "string?" (string? tx)))
          (catch js/Error err (js/console.log (ex-cause err))))))))
+
+
+(reg-event-fx
+  ::tx-success
+  [(re-frame/inject-cofx :store) interceptors]
+  (fn [{:keys [db store]} [tx-hash]]
+    (let [hegex-id (get-in db [:pending-external-txs :fill-order])]
+      {:db (-> db
+              (assoc-in [:pending-external-txs
+                         (get-in store [:external-txs-ids tx-hash])] nil)
+              (update-in [::hegex-nft/hegic-options :orderbook :full] dissoc hegex-id))
+       :dispatch [::hegex-nft/clean-hegic]
+       :web3/stop-watching {:ids [(keyword (subs (str tx-hash) 5))]}})))
+
+(reg-event-fx
+  ::error
+  interceptors
+  (fn [{:keys [db]} args]
+    ;; !IMPORTATNT - remove watcher
+    #_{:web3/stop-watching {:ids [:my-watcher]}}
+    (println "dbgtx error" args)))
+
+(reg-event-fx
+  ::watch-tx
+  [(re-frame/inject-cofx :store) interceptors]
+  (fn [{:keys [db store]} [tx-hash tx-id hegex-id]]
+    (println "dbgpenddata not restored" (get-in store [:external-txs-ids tx-hash]))
+    (when tx-hash
+      (let [with-tx-hash (if (-> store :external-txs)
+                           (update-in store [:external-txs] conj tx-hash)
+                           (assoc-in store [:external-txs] #{tx-hash}))]
+        {:db (assoc-in db [:pending-external-txs tx-id] hegex-id)
+         :store (assoc-in with-tx-hash [:external-txs-ids tx-hash] tx-id)
+         :web3/watch-transactions {:web3 (web3-queries/web3 db)
+                                   :transactions [{:id (keyword (subs (str tx-hash) 5))
+                                                  :tx-hash tx-hash
+                                                  :on-tx-success [::tx-success tx-hash]
+                                                  :on-tx-error [::tx-success tx-hash]}]}}))))
+
+(reg-event-fx
+  ::restore-and-watch-txs
+  [(re-frame/inject-cofx :store) interceptors]
+  (fn [{:keys [store]}]
+    (println "txs are" (-> store :external-txs))
+    (let [txs (-> store :external-txs)]
+      {:dispatch-n (mapv (fn [hash] [::check-restored-tx hash]) txs)})))
+
+(reg-event-fx
+  ::check-restored-tx
+  interceptors
+  (fn [{:keys [db]} [tx-hash]]
+    (println "checking tx" tx-hash)
+    {:web3/call {:web3 (web3-queries/web3 db)
+                 :fns [{:fn web3-eth/get-transaction
+                        :args [tx-hash]
+                        :on-success [::watch-restored-tx tx-hash]
+                        :on-error [::restore-failed]}]}}))
+
+(reg-event-fx
+  ::watch-restored-tx
+  [(re-frame/inject-cofx :store) interceptors]
+  (fn [{:keys [db store]} [tx-hash tx-info]]
+    (println "dbgpenddata" (get-in store [:external-txs-ids tx-hash]))
+    (println "dbgpenddata tx-info is" tx-info)
+    (println "dbgpenddata pending?" (not (:block-number tx-info)))
+    ;; pending is when block number is not yet there (not)
+    (let [pending? (not (:block-number tx-info))]
+      (if-not pending?
+        {:web3/stop-watching {:ids [(keyword (subs (str tx-hash) 5))]}
+         :store (-> store
+                    (update-in [:external-txs] disj tx-hash)
+                    (update-in [:external-txs-ids] dissoc tx-hash))}
+
+        {:db (assoc-in db [:pending-external-txs (get-in store [:external-txs-ids tx-hash])] true)
+         :web3/watch-transactions {:web3 (web3-queries/web3 db)
+                                   :transactions [{:id (keyword (subs (str tx-hash) 5))
+                                                   :tx-hash tx-hash
+                                                   :on-tx-success [::tx-success tx-hash]
+                                                   :on-tx-error [::tx-success tx-hash]}]}}))))
 
 (defn cancel! [{:keys [sra-order taker-asset-amount]}]
   (let [order-obj (->js sra-order)]
@@ -321,31 +407,44 @@
 (re-frame/reg-event-fx
   ::parse-orderbook
   interceptors
-  (fn [_ [book]]
+  (fn [_ [book new-order?]]
     (when book
-      {:dispatch-n (mapv (fn [o] [::parse-order o]) book)})))
+      {:dispatch-n  (cond-> (mapv (fn [o] [::parse-order o]) book)
+                      new-order? (conj [::disable-pending-offer]))})))
 
+(re-frame/reg-event-fx
+  ::disable-pending-offer
+  interceptors
+  (fn [{:keys [db]}]
+    {:db (assoc-in db [::my-pending-offer?] false)}))
 
-(defn load-orderbook []
+(re-frame/reg-event-fx
+  ::enable-pending-offer
+  interceptors
+  (fn [{:keys [db]}]
+    {:db (assoc-in db [::my-pending-offer?] true)}))
+
+(defn load-orderbook [new-order?]
   (go
     (try
       (let [r (oget (<p! (ocall relayer-client "getOrdersAsync")) ".?records")
             _ (println "--------------- records in enclosing func received" )]
-        (dispatch [::parse-orderbook r]))
+        (dispatch [::parse-orderbook r new-order?]))
       (catch js/Error err (js/console.log (ex-cause err))))))
 
 (re-frame/reg-fx
   ::load-orderbook!
-  (fn []
+  (fn [track?]
     ;;arg is irrelevant
     (println "-------------------------------loading-orderbook")
-    (load-orderbook)
+    (load-orderbook track?)
     (println "-------------------------------loaded-orderbook")))
 
 (re-frame/reg-event-fx
   ::load-orderbook
-  (fn []
-    {::load-orderbook! true}))
+  interceptors
+  (fn [_ [new-order?]]
+    {::load-orderbook! new-order?}))
 
 
 ;; callasync res is #js
@@ -461,3 +560,6 @@
 ;;
 ;;account 2 is mintr
 ;;account 3 is buyer
+
+;; sample args content for watch-tx callback
+;;[{:contract-address nil, :transaction-index 3, :logs [{:address 0xfb2dd2a1366de37f7241c83d47da58fd503e2c64, :log-index 1, :transaction-index 3, :block-hash 0x5d7fd9698cc080ae94ca4467f3748e368de3baff46b2a357493851dc202a8e54, :block-number 10179258, :topics [0x6869791f0a34781b29882982cc39e882768cf2c96995c2a110c577c53bc932d5 0x0000000000000000000000004e406a4b31b3c42d9c183ea1c5bacf355e055577 0x0000000000000000000000000000000000000000000000000000000000000000 0xb8079794b9225a304e71fa1838a0f91cdae1835ac7dc38f819913eb8059ef943], :transaction-hash 0x9c82c7c880eb4a22307ee250feccbb5f61a6d32d1bc1674fd6232468d02456fc, :removed false, :data 0x000000000000000000000000000000000000000000000000000000000000016000000000000000000000000000000000000000000000000000000000000001e000000000000000000000000000000000000000000000000000000000000002400000000000000000000000000000000000000000000000000000000000000260000000000000000000000000efb71b807304efdb2d6f488793f6c7c11b9c9b75000000000000000000000000efb71b807304efdb2d6f488793f6c7c11b9c9b7500000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000005543df729c000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000005543df729c00000000000000000000000000000000000000000000000000000000000000000440257179200000000000000000000000042b49d4b14411c40243d02dee86abb7157b28e34000000000000000000000000000000000000000000000000000000000000000f000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000024f47261b0000000000000000000000000c778417e063141139fce010982780140aa0cd5ab0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000} {:address 0xc778417e063141139fce010982780140aa0cd5ab, :log-index 2, :transaction-index 3, :block-hash 0x5d7fd9698cc080ae94ca4467f3748e368de3baff46b2a357493851dc202a8e54, :block-number 10179258, :topics [0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef 0x000000000000000000000000efb71b807304efdb2d6f488793f6c7c11b9c9b75 0x0000000000000000000000004e406a4b31b3c42d9c183ea1c5bacf355e055577], :transaction-hash 0x9c82c7c880eb4a22307ee250feccbb5f61a6d32d1bc1674fd6232468d02456fc, :removed false, :data 0x0000000000000000000000000000000000000000000000000005543df729c000} {:address 0x42b49d4b14411c40243d02dee86abb7157b28e34, :log-index 3, :transaction-index 3, :block-hash 0x5d7fd9698cc080ae94ca4467f3748e368de3baff46b2a357493851dc202a8e54, :block-number 10179258, :topics [0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925 0x0000000000000000000000004e406a4b31b3c42d9c183ea1c5bacf355e055577 0x0000000000000000000000000000000000000000000000000000000000000000 0x000000000000000000000000000000000000000000000000000000000000000f], :transaction-hash 0x9c82c7c880eb4a22307ee250feccbb5f61a6d32d1bc1674fd6232468d02456fc, :removed false, :data 0x} {:address 0x42b49d4b14411c40243d02dee86abb7157b28e34, :log-index 4, :transaction-index 3, :block-hash 0x5d7fd9698cc080ae94ca4467f3748e368de3baff46b2a357493851dc202a8e54, :block-number 10179258, :topics [0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef 0x0000000000000000000000004e406a4b31b3c42d9c183ea1c5bacf355e055577 0x000000000000000000000000efb71b807304efdb2d6f488793f6c7c11b9c9b75 0x000000000000000000000000000000000000000000000000000000000000000f], :transaction-hash 0x9c82c7c880eb4a22307ee250feccbb5f61a6d32d1bc1674fd6232468d02456fc, :removed false, :data 0x} {:address 0xc778417e063141139fce010982780140aa0cd5ab, :log-index 5, :transaction-index 3, :block-hash 0x5d7fd9698cc080ae94ca4467f3748e368de3baff46b2a357493851dc202a8e54, :block-number 10179258, :topics [0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef 0x000000000000000000000000efb71b807304efdb2d6f488793f6c7c11b9c9b75 0x000000000000000000000000faabcee42ab6b9c649794ac6c133711071897ee9], :transaction-hash 0x9c82c7c880eb4a22307ee250feccbb5f61a6d32d1bc1674fd6232468d02456fc, :removed false, :data 0x0000000000000000000000000000000000000000000000000005543df729c000}], :logs-bloom 0x00000000101000000000000000000000000000004000000000000000000000400000000000000000000000000000000000000000010000000000000000200000042000000000000000000008000000000000000000000000000000000002000000000000020000000000000000000800000000000000000000000010008000000000000000000810000000000000002000000100080000200000000000000000020000400000002000000020000000000000000000000000000000000000010000000002000000000000000000000000001000000000000000000000000020000010000200000008000000000000000000002000100000000000000000000002, :block-hash 0x5d7fd9698cc080ae94ca4467f3748e368de3baff46b2a357493851dc202a8e54, :cumulative-gas-used 1168735, :type 0x0, :block-number 10179258, :transaction-hash 0x9c82c7c880eb4a22307ee250feccbb5f61a6d32d1bc1674fd6232468d02456fc, :gas-used 282241, :status 0x1, :from 0xefb71b807304efdb2d6f488793f6c7c11b9c9b75, :to 0xfb2dd2a1366de37f7241c83d47da58fd503e2c64}]

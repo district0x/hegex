@@ -4,11 +4,19 @@
 
 (def interceptors [re-frame/trim-v])
 
-(re-frame/reg-event-db
+(re-frame/reg-event-fx
   ::toggle-dark-mode
+  [(re-frame/inject-cofx :store) interceptors]
+  (fn [{:keys [db store]} _]
+    (let [dark-mode? (not (get db ::dark-mode?))]
+      {:db (assoc-in db [::dark-mode?] dark-mode?)
+       :store (assoc-in store [:dark-mode?] dark-mode?)})))
+
+(re-frame/reg-event-fx
+  ::set-dark-mode
   interceptors
-  (fn [db _]
-    (update-in db [::dark-mode?] not)))
+  (fn [{:keys [db]} _]
+    {:db (assoc-in db [::dark-mode?] true)}))
 
 (re-frame/reg-event-db
   ::toggle-open-about
