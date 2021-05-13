@@ -116,6 +116,7 @@
                                 (->js {:chainId 3}))]
       {:db (assoc db :contract-wrapper-0x contract-wrapper)})))
 
+
 (re-frame/reg-event-fx
   ::load-my-hegic-options
   (fn [{:keys [db]} [{:keys [once?]}]]

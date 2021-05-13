@@ -162,9 +162,7 @@
 (defn- ->hegic-info [[state holder strike amount
                       locked-amount premium expiration
                       option-type asset] id]
-  (let [amount-hr (some->> amount
-                           bn/number
-                           (*  0.001))]
+  (let [amount-hr (some->> amount bn/number)]
     {:state         (bn/number state)
     ;;data redundancy for ease of access by views
     :hegic-id      id
@@ -443,8 +441,9 @@
                     :call 2
                     2)
           period-secs (some-> period (* 86400))
+          amount-eth (some-> amount (* 1))
           strike-wei (some-> strike-price (* 100000000))
-          option-args [period-secs amount strike-wei opt-dir]]
+          option-args [period-secs amount-eth strike-wei opt-dir]]
       #_(println "mint-hegex dbg args are" [period amount strike-price opt-dir])
       {:web3/call
        {:web3 (web3-queries/web3 db)

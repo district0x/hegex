@@ -63,6 +63,7 @@
                           {:when :seen-any-of?
                            :events [::web3-accounts-events/set-accounts]
                            :dispatch-n [[::events/add-contract-wrappers]
+                                        [::listen-to-account-change]
                                         [::trading-events/restore-and-watch-txs]
                                         [::events/load-my-hegic-options]]}]}}))
 
@@ -105,3 +106,49 @@
     (-> (mount/with-args full-config)
       (mount/start))
     (re-frame/dispatch-sync [::init])))
+
+(defn  reinit []
+  (let [full-config (cljs-utils/merge-in
+                      config/config-map
+                      {:smart-contracts {:format :truffle-json}
+                       ;; :web3-account-balances {:for-contracts [:ETH :DNT]}
+                       :web3-tx-log {:tx-costs-currencies [:USD]
+                                     :default-settings {:from-active-address-only? true}}
+                       :reagent-render {:id "app"
+                                        :component-var #'router}
+                       :router {:routes routes
+                                :default-route :route/not-found
+                                :scroll-top? true}
+                       :notification {:default-show-duration 3000
+                                      :default-hide-duration 1000}})]
+
+    (println "dbg init0")
+
+    (js/console.log "config:" (clj->js full-config))
+    (-> (mount/with-args full-config)
+      (mount/start))
+    (re-frame/dispatch [::init])))
+
+
+(re-frame/reg-event-fx
+  ::listen-to-account-change
+  (fn []
+    (.on
+     (.-ethereum js/window)
+     "accountsChanged"
+     (fn [accounts]
+       (re-frame/dispatch [::account-changed])))
+    {}))
+
+(re-frame/reg-event-fx
+  ::account-changed
+  (fn [{:keys [db]}]
+    {:db (dissoc db
+                 ::hegex-nft/hegic-options
+                 ::trading-events/hegic-options)
+     ::reboot true}))
+
+(re-frame/reg-fx
+  ::reboot
+  (fn []
+    (reinit)))

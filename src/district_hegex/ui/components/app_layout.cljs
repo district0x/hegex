@@ -38,7 +38,7 @@
 
 ;;TODO clear up whether active account belong under "+"
 (defn- header [active-page-name about?]
-  (let [open-about #(dispatch [::home-events/toggle-open-about])]
+  (let [toggle-about #(dispatch [::home-events/toggle-open-about])]
     [:header
      {:style {:position "absolute"
               :top "0px"
@@ -46,14 +46,22 @@
               :width "100%"
               :max-width "980px"
               :z-index "99999"}}
-    [:div.header-space
-     [logo]
-     [night-mode]
-     [:h4.about {:on-click open-about
-                 :style {:cursor "pointer"
-                         :font-weight "100"}} "About"]
-     [:span.about-section {:on-click open-about}
-      [:a.bt-about [:span]]]]]))
+     [:div.header-space
+      [logo]
+      [night-mode]
+      [:h4.about {:on-click toggle-about
+                  :style {:cursor "pointer"
+                          :font-weight "100"}} "About"]
+      [:span.about-section {:on-click toggle-about}
+       [:a.bt-about [:span]]]]
+     [:div {:on-click toggle-about
+            :style {:position "fixed"
+                    :display (if about? "block" "none")
+                    :top "0px"
+                    :left "0px"
+                    :width "1000vw"
+                    :height "1000vh"
+                    :z-index "99998"}}]]))
 
 (defn- footer []
   [:footer#globalFooter
