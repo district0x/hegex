@@ -396,6 +396,7 @@
                             :new-hegex/amount
                             :new-hegex/strike-price
                             :new-hegex/option-type]}]]
+    (println "dbgfees period" period (some-> period (* 86400)))
     (let [opt-dir (case (keyword option-type)
                     :put 1
                     :call 2
@@ -418,14 +419,27 @@
                :on-success [::estimate-mint-hegex-success option-args]
                :on-error [::logging/error [::estimate-mint-hegex]]}]}})))
 
+(defn- hegic-errors [[total settlement-fee strike-fee] [period-secs amount]]
+  (println "dbg strike fee" (some-> strike-fee bn/number))
+  ;; revert logic from HegicETHOptions.sol/create
+  (cond-> []
+    (< period-secs 86400) (conj :period-too-short)
+    (> period-secs (* 4 604800)) (conj :period-too-long)
+    ;; this is where too-small-a-position err comes from
+    (<= amount strike-fee) (conj :price-diff-too-large)))
+
 (re-frame/reg-event-fx
   ::estimate-mint-hegex-success
   interceptors
   ;;NOTE first is total
-  (fn [{:keys [db]} [_ fees]]
-    (println "cdbg success" fees)
-    {:db (assoc-in db [::hegic-options :new :total-cost]
-                   (some-> fees first bn/number))}))
+  (fn [{:keys [db]} [option-params fees]]
+    (let [errors (hegic-errors fees option-params)
+          with-errors (assoc-in db [::hegic-options :new :errors] errors)]
+      (println "dbgfees args" fees option-params)
+      (println "dbgfees" (some-> fees first bn/number) errors)
+      {:db (assoc-in with-errors
+                     [::hegic-options :new :total-cost]
+                     (some-> fees first bn/number))})))
 
 (re-frame/reg-event-fx
   ::mint-hegex

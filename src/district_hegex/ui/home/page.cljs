@@ -600,13 +600,17 @@
          "You don't own any Hegic options or Hegex NFTs. Mint one now!"])
       [my-hegic-option-controls]]]))
 
-(defn- upd-new-hegex [form-data e key]
+(defn- upd-new-hegex [form-data e-raw key]
   ((debounce (fn []
-               (dispatch [::hegex-nft/estimate-mint-hegex @form-data])
-               (swap! form-data
-                      assoc
-                      key
-                      (oget e ".?target.?value")))
+               (let [e (if (= key :new-hegex/amount)
+                         (some-> (oget e-raw ".?target.?value") web3-utils/eth->wei-number)
+                         (oget e-raw ".?target.?value"))]
+                 (println "e is" e key)
+                 (swap! form-data
+                         assoc
+                         key
+                         e)
+                (dispatch [::hegex-nft/estimate-mint-hegex @form-data])))
              500)))
 
 
