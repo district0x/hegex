@@ -2,6 +2,8 @@
  (:import [goog.async Debouncer])
   (:require
    [clojure.string :as cs]
+   [goog.string :as gstring]
+   [goog.string.format]
    [district-hegex.ui.home.events :as home-events]
    [district-hegex.ui.events :as events]
    [district-hegex.ui.home.orderbook :as orderbook]
@@ -616,7 +618,7 @@
 
 (defn- new-hegex []
   (let [form-data (r/atom {:new-hegex/currency :eth
-                           :new-hegex/hegic-type 0
+                           :new-hegex/hegic-type "0"
                            :new-hegex/option-type :call})]
     (fn []
       (let [hegic-type (some-> form-data deref :new-hegex/hegic-type)
@@ -626,7 +628,12 @@
                             "0" @(subscribe [::external-subs/eth-price])
                             0)
             total-cost (or @(subscribe [::subs/new-hegic-cost]) 0)
-            break-even (+ total-cost current-price)
+            total-cost-s (gstring/format  "%.3f" total-cost)
+            _ (println "curr price is" current-price)
+            break-even (some->> total-cost
+                                (+ current-price)
+                                (gstring/format "%.3f"))
+            _ (println "be is" break-even total-cost current-price)
             sp (some-> form-data deref :new-hegex/strike-price)]
         (println "tx-pending" @tx-pending?)
         [:div
@@ -700,7 +707,7 @@
           [:h3.stats "$" (if (pos? (count sp)) sp 0)]]
          [:div.box.d
           [:div.hover-label "Total cost"]
-          [:h3.stats "$" total-cost]]
+          [:h3.stats "$" total-cost-s]]
          [:div.box.f
           [:div.hover-label "Break-even"]
           [:h3.stats "$" break-even]]

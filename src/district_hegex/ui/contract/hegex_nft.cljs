@@ -477,7 +477,8 @@
                 {:instance (contract-queries/instance db :optionchef)
                  :fn :createHegic
                  :args opt-args
-                 :tx-opts {:from (account-queries/active-account db)}
+                 :tx-opts {:value (nth opt-args 2)
+                           :from (account-queries/active-account db)}
                  :tx-id :mint-hegex!
                  :on-tx-success [::mint-hegex-success]
                  :on-tx-error [::logging/error [::mint-hegex!]]}]}))
