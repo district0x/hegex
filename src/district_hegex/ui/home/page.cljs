@@ -715,6 +715,8 @@
                   :period-too-long "Period too long"
                   :price-diff-too-large "Price difference is too large"
                   "")]
+          ;; TODO add available liquidity info label
+          ;; from 0xb08b80723e3669b380d1576af43eb1afb26203bd availableBalance function (wei)
           [:br] [:br] [:br]]]))))
 
 (defn- orderbook-section []

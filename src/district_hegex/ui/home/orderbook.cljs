@@ -107,22 +107,6 @@
         pl-round (some-> pl-total
                          (format/format-number {:max-fraction-digits 2}))
         pl-small? (= 0 (some-> pl-round js/Math.abs))]
-    (println "pldbg prem"
-             pl-total
-             strike-n
-             amount-n
-             "asset type"
-             (some-> asset bn/number)
-
-             "strike"
-             (some->> strike bn/number (* 0.00000001))
-
-             "amount"
-             (some-> amount bn/number)
-
-             "current price"
-             current-price)
-
     [:div (str "$" (if-not pl-small? pl-round 0))]))
 
 (defn- cell-fn
@@ -161,7 +145,7 @@
    #_(even? row-num) #_(assoc-in [:style :background-color] "#212c35")
 #_  [:div "xxxx"]
    (case key
-     :p&l [p&l data (:option-type row)]
+     :p&l  [p&l data (:option-type row)]
      :option-type [:div {:style {:margin-left "10px"}} content]
      content)
    #_(case col-num
