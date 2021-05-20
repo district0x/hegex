@@ -634,7 +634,7 @@
                        :margin-top "70px"
                        :align-items "flex-start"
                        :justify-content "flex-start"}}
-         [:h2 "Buy New Option Contract"]]
+         [:h2 "Mint New Option Contract"]]
          [:div.box-grid-new {:style {:margin-top "2em"}}
          [:div.box.a
           [:div.hover-label "Currency"]
@@ -708,7 +708,9 @@
           [:button.secondary.line-btn
            {:disabled (or @tx-pending? (pos? (count mint-errs)))
             :on-click #(dispatch [::hegex-nft/mint-hegex @form-data])}
-           (if @tx-pending? [:<> "Buy" [inputs/loader {:color :black :on? @tx-pending?}]] "Buy")]]]
+           (if @tx-pending?
+             [:<> "Mint" [inputs/loader {:color :black :on? @tx-pending?}]]
+             "Mint")]]]
          [:div [:p.errors ""
                 (case (first mint-errs)
                   :period-too-short "Period too short"
