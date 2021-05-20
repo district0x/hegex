@@ -424,7 +424,8 @@
   (println "dbg strike fee" (some-> strike-fee bn/number))
   ;; revert logic from HegicETHOptions.sol/create
   (cond-> []
-    (< period-secs 86400) (conj :period-too-short)
+    (or (not period-secs) (< period-secs 86400)) (conj :period-too-short)
+    (not (zero? (mod period-secs 86400))) (conj :period-invalid)
     (> period-secs (* 4 604800)) (conj :period-too-long)
     ;; this is where too-small-a-position err comes from
     (<= amount strike-fee) (conj :price-diff-too-large)))

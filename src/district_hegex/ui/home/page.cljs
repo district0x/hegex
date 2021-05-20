@@ -687,9 +687,11 @@
          [:div.box.b
           [:div.hover-label "Days of holding"]
           [inputs/text-input
-           {:type :number
+           {:type "number"
+            :step "1"
             :color :secondary
-            :min 0
+            :min "0"
+            :max "30"
             :placeholder 0
             :on-change (fn [e]
                          (js/e.persist)
@@ -714,6 +716,7 @@
          [:div [:p.errors ""
                 (case (first mint-errs)
                   :period-too-short "Period too short"
+                  :period-invalid "Enter number of days (non-fractional)"
                   :period-too-long "Period too long"
                   :price-diff-too-large "Price difference is too large"
                   "")]
