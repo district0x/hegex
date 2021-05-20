@@ -2,6 +2,7 @@
   (:require
    [re-frame.core :refer [subscribe dispatch]]
    [district.ui.web3-tx.subs :as tx-subs]
+   [bignumber.core :as bn]
    [district.ui.web3-tx-id.subs :as tx-id-subs]
    [clojure.string :as cs]
    [district.ui.web3-accounts.subs :as account-subs]
@@ -87,14 +88,41 @@
         (and expr
              (expr row)))))
 
-(defn p&l [[paid strike amount] option-type]
-  (let [current-price @(subscribe [::external-subs/eth-price])
-        pl (if (= :call option-type)
-             (- (* current-price amount) (* strike amount) paid)
-             (- (* strike amount) (* current-price amount) paid))
-        pl-round (some-> pl
-                         (format/format-number {:max-fraction-digits 5}))
+(defn p&l [[premium strike amount asset] option-type]
+  (let [current-price (or @(subscribe [(case (some-> asset bn/number)
+                                      0 ::external-subs/eth-price
+                                      1 ::external-subs/btc-price
+                                      ::external-subs/eth-price)])
+                          0)
+        amount-n (some-> amount web3-utils/wei->eth-number)
+        premium-n (some->> premium
+                         web3-utils/wei->eth-number
+                         (* current-price))
+        strike-n (some->> strike bn/number (* 0.00000001))
+        pl (case option-type
+             :call (- current-price (+ premium-n strike-n))
+             :put (- strike-n (+ premium-n current-price))
+             0)
+        pl-total (* amount-n pl)
+        pl-round (some-> pl-total
+                         (format/format-number {:max-fraction-digits 2}))
         pl-small? (= 0 (some-> pl-round js/Math.abs))]
+    (println "pldbg prem"
+             pl-total
+             strike-n
+             amount-n
+             "asset type"
+             (some-> asset bn/number)
+
+             "strike"
+             (some->> strike bn/number (* 0.00000001))
+
+             "amount"
+             (some-> amount bn/number)
+
+             "current price"
+             current-price)
+
     [:div (str "$" (if-not pl-small? pl-round 0))]))
 
 (defn- cell-fn

@@ -163,6 +163,7 @@
                       locked-amount premium expiration
                       option-type asset] id]
   (let [amount-hr (some->> amount bn/number)]
+    (println "asset is " asset)
     {:state         (bn/number state)
     ;;data redundancy for ease of access by views
     :hegic-id      id
@@ -171,18 +172,18 @@
                             bn/number
                             (*  0.00000001)
                             (gstring/format "%.2f"))
-    :amount        (gstring/format "%.3f" amount-hr)
+     :amount        (some->> amount-hr
+                            web3-utils/wei->eth-number
+                            (gstring/format "%.4f" ))
     :locked-amount (bn/number locked-amount)
     :premium       (some->> premium
-                            bn/number
-                            (*  0.00000001)
-                            (gstring/format "%.3f"))
+                            web3-utils/wei->eth-number
+                            (gstring/format "%.6f"))
     :expiration    (to-simple-time expiration)
     :asset         asset
     ;;NOTE a bit cryptic model, P&L is fetched later via (price+-strike(+-premium*price))
     ;;NOTE P&L with premium is inaccurate since we _can't_ fetch historical price for premium
-     :p&l           (mapv (fn [v] (some->> v bn/number (*  0.00000001)))
-                          [premium strike amount-hr])
+     :p&l           [premium strike amount-hr asset]
     :option-type   (case (bn/number option-type)
                      1 :put
                      2 :call
@@ -472,12 +473,12 @@
   ::mint-hegex!
   interceptors
   (fn [{:keys [db]} [opt-args fees]]
-    (println "opt args are" opt-args "fees are" fees)
+    (println "0dbgfees" fees)
     {:dispatch [::tx-events/send-tx
                 {:instance (contract-queries/instance db :optionchef)
                  :fn :createHegic
                  :args opt-args
-                 :tx-opts {:value (nth opt-args 2)
+                 :tx-opts {:value (some->> fees first bn/number)
                            :from (account-queries/active-account db)}
                  :tx-id :mint-hegex!
                  :on-tx-success [::mint-hegex-success]

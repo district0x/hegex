@@ -172,16 +172,6 @@
     :on-click #(dispatch [::hegex-nft/unwrap! id])}
    "Unwrap"])
 
-(defn- buy-hegex-offer [order]
-  [:span
-   {:outlined true
-    :small true
-    :style {:margin-top "17px"
-            :margin-bottom "0px"}
-    :intent :primary
-    :on-click #(dispatch [::trading-events/fill-offer order])}
-   "Buy"])
-
 (defn- cancel-hegex-offer [order]
   [:span
    {:outlined true
@@ -628,11 +618,13 @@
                             "0" @(subscribe [::external-subs/eth-price])
                             0)
             total-cost (or @(subscribe [::subs/new-hegic-cost]) 0)
-            total-cost-s (gstring/format  "%.3f" total-cost)
-            _ (println "curr price is" current-price)
-            break-even (some->> total-cost
-                                (+ current-price)
-                                (gstring/format "%.3f"))
+            total-cost-s (gstring/format  "%.2f" (* current-price total-cost))
+            _ (println "curr price is" current-price total-cost)
+            break-even (if-not (zero? total-cost)
+                         (some->> total-cost
+                                 (+ current-price)
+                                 (gstring/format "%.2f"))
+                         0)
             _ (println "be is" break-even total-cost current-price)
             sp (some-> form-data deref :new-hegex/strike-price)]
         (println "tx-pending" @tx-pending?)
