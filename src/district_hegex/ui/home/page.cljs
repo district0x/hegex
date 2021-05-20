@@ -2,6 +2,8 @@
  (:import [goog.async Debouncer])
   (:require
    [clojure.string :as cs]
+   [goog.string :as gstring]
+   [goog.string.format]
    [district-hegex.ui.home.events :as home-events]
    [district-hegex.ui.events :as events]
    [district-hegex.ui.home.orderbook :as orderbook]
@@ -169,16 +171,6 @@
     :intent :primary
     :on-click #(dispatch [::hegex-nft/unwrap! id])}
    "Unwrap"])
-
-(defn- buy-hegex-offer [order]
-  [:span
-   {:outlined true
-    :small true
-    :style {:margin-top "17px"
-            :margin-bottom "0px"}
-    :intent :primary
-    :on-click #(dispatch [::trading-events/fill-offer order])}
-   "Buy"])
 
 (defn- cancel-hegex-offer [order]
   [:span
@@ -600,19 +592,23 @@
          "You don't own any Hegic options or Hegex NFTs. Mint one now!"])
       [my-hegic-option-controls]]]))
 
-(defn- upd-new-hegex [form-data e key]
+(defn- upd-new-hegex [form-data e-raw key]
   ((debounce (fn []
-               (dispatch [::hegex-nft/estimate-mint-hegex @form-data])
-               (swap! form-data
-                      assoc
-                      key
-                      (oget e ".?target.?value")))
+               (let [e (if (= key :new-hegex/amount)
+                         (some-> (oget e-raw ".?target.?value") web3-utils/eth->wei-number)
+                         (oget e-raw ".?target.?value"))]
+                 (println "e is" e key)
+                 (swap! form-data
+                         assoc
+                         key
+                         e)
+                (dispatch [::hegex-nft/estimate-mint-hegex @form-data])))
              500)))
 
 
 (defn- new-hegex []
   (let [form-data (r/atom {:new-hegex/currency :eth
-                           :new-hegex/hegic-type 0
+                           :new-hegex/hegic-type "0"
                            :new-hegex/option-type :call})]
     (fn []
       (let [hegic-type (some-> form-data deref :new-hegex/hegic-type)
@@ -622,7 +618,15 @@
                             "0" @(subscribe [::external-subs/eth-price])
                             0)
             total-cost (or @(subscribe [::subs/new-hegic-cost]) 0)
-            break-even (+ total-cost current-price)
+            mint-errs  @(subscribe [::subs/new-hegic-errs])
+            total-cost-s (gstring/format  "%.2f" (* current-price total-cost))
+            _ (println "curr price is" current-price total-cost)
+            break-even (if-not (zero? total-cost)
+                         (some->> total-cost
+                                 (+ current-price)
+                                 (gstring/format "%.2f"))
+                         0)
+            _ (println "be is" break-even total-cost current-price)
             sp (some-> form-data deref :new-hegex/strike-price)]
         (println "tx-pending" @tx-pending?)
         [:div
@@ -630,7 +634,7 @@
                        :margin-top "70px"
                        :align-items "flex-start"
                        :justify-content "flex-start"}}
-         [:h2 "Buy New Option Contract"]]
+         [:h2 "Mint New Option Contract"]]
          [:div.box-grid-new {:style {:margin-top "2em"}}
          [:div.box.a
           [:div.hover-label "Currency"]
@@ -683,9 +687,11 @@
          [:div.box.b
           [:div.hover-label "Days of holding"]
           [inputs/text-input
-           {:type :number
+           {:type "number"
+            :step "1"
             :color :secondary
-            :min 0
+            :min "0"
+            :max "30"
             :placeholder 0
             :on-change (fn [e]
                          (js/e.persist)
@@ -696,16 +702,27 @@
           [:h3.stats "$" (if (pos? (count sp)) sp 0)]]
          [:div.box.d
           [:div.hover-label "Total cost"]
-          [:h3.stats "$" total-cost]]
+          [:h3.stats "$" total-cost-s]]
          [:div.box.f
           [:div.hover-label "Break-even"]
           [:h3.stats "$" break-even]]
          [:div.box.e
           [:button.secondary.line-btn
-           {:disabled @tx-pending?
+           {:disabled (or @tx-pending? (pos? (count mint-errs)))
             :on-click #(dispatch [::hegex-nft/mint-hegex @form-data])}
-           (if @tx-pending? [:span "Buy" [inputs/loader {:color :black :on? @tx-pending?}]] "Buy")]]]
-        [:div [:br] [:br] [:br]]]))))
+           (if @tx-pending?
+             [:<> "Mint" [inputs/loader {:color :black :on? @tx-pending?}]]
+             "Mint")]]]
+         [:div [:p.errors ""
+                (case (first mint-errs)
+                  :period-too-short "Period too short"
+                  :period-invalid "Enter number of days (non-fractional)"
+                  :period-too-long "Period too long"
+                  :price-diff-too-large "Price difference is too large"
+                  "")]
+          ;; TODO add available liquidity info label
+          ;; from 0xb08b80723e3669b380d1576af43eb1afb26203bd availableBalance function (wei)
+          [:br] [:br] [:br]]]))))
 
 (defn- orderbook-section []
   (let [book (subscribe [::trading-subs/hegic-book])]

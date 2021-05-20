@@ -1,10 +1,11 @@
 (ns district-hegex.ui.subs
   (:require
-    [district-hegex.ui.config :as config]
-    [district-hegex.ui.contract.hegex-nft :as hegex-nft]
-    [district.format :as format]
-    [district.ui.web3-accounts.queries :as account-queries]
-    [re-frame.core :as re-frame]))
+   [district-hegex.ui.config :as config]
+   [district.web3-utils :as web3-utils]
+   [district-hegex.ui.contract.hegex-nft :as hegex-nft]
+   [district.format :as format]
+   [district.ui.web3-accounts.queries :as account-queries]
+   [re-frame.core :as re-frame]))
 
 (re-frame/reg-sub
   ::hegex-nft-owner
@@ -36,7 +37,14 @@
 (re-frame/reg-sub
   ::new-hegic-cost
   (fn [db _]
-    (get-in db [::hegex-nft/hegic-options :new :total-cost])))
+    (println "nhc" (get-in db [::hegex-nft/hegic-options :new :total-cost]))
+    (some->> (get-in db [::hegex-nft/hegic-options :new :total-cost])
+             web3-utils/wei->eth-number)))
+
+(re-frame/reg-sub
+  ::new-hegic-errs
+  (fn [db _]
+    (or (get-in db [::hegex-nft/hegic-options :new :errors]) [])))
 
 
 (re-frame/reg-sub

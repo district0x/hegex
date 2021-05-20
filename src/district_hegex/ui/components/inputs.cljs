@@ -28,11 +28,13 @@
     [:div.select
      (into [c] children)]]))
 
-(defn text-input [{:keys [type min max on-change label color size] :as props}]
+(defn text-input [{:keys [type step min max on-change label color size] :as props}]
+  (println "stepis" step)
   (let [el :div.hinput-wrapper
         ->sized #(keyword (str (name %) "." (name size)))]
     [(if-not size el (->sized el))
     [:input.hegex-input (merge props {:type      type
+                                      :step      step
                                       :className (or color "primary")
                                       :on-change on-change
                                       :min       min

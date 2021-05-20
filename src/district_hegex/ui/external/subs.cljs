@@ -4,7 +4,8 @@
 
 (re-frame/reg-sub
  ::eth-price
-  (fn [db _]
+ (fn [db _]
+   (println "pricedbg is" (get-in db [:prices :ethereum]))
     (get-in db [:prices :ethereum])))
 
 (re-frame/reg-sub

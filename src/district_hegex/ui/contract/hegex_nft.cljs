@@ -163,6 +163,7 @@
                       locked-amount premium expiration
                       option-type asset] id]
   (let [amount-hr (some->> amount bn/number)]
+    (println "asset is " asset)
     {:state         (bn/number state)
     ;;data redundancy for ease of access by views
     :hegic-id      id
@@ -171,18 +172,18 @@
                             bn/number
                             (*  0.00000001)
                             (gstring/format "%.2f"))
-    :amount        (gstring/format "%.3f" amount-hr)
+     :amount        (some->> amount-hr
+                            web3-utils/wei->eth-number
+                            (gstring/format "%.4f" ))
     :locked-amount (bn/number locked-amount)
     :premium       (some->> premium
-                            bn/number
-                            (*  0.00000001)
-                            (gstring/format "%.3f"))
+                            web3-utils/wei->eth-number
+                            (gstring/format "%.6f"))
     :expiration    (to-simple-time expiration)
     :asset         asset
     ;;NOTE a bit cryptic model, P&L is fetched later via (price+-strike(+-premium*price))
     ;;NOTE P&L with premium is inaccurate since we _can't_ fetch historical price for premium
-     :p&l           (mapv (fn [v] (some->> v bn/number (*  0.00000001)))
-                          [premium strike amount-hr])
+     :p&l           [premium strike amount-hr asset]
     :option-type   (case (bn/number option-type)
                      1 :put
                      2 :call
@@ -396,6 +397,7 @@
                             :new-hegex/amount
                             :new-hegex/strike-price
                             :new-hegex/option-type]}]]
+    (println "dbgfees period" period (some-> period (* 86400)))
     (let [opt-dir (case (keyword option-type)
                     :put 1
                     :call 2
@@ -418,14 +420,28 @@
                :on-success [::estimate-mint-hegex-success option-args]
                :on-error [::logging/error [::estimate-mint-hegex]]}]}})))
 
+(defn- hegic-errors [[total settlement-fee strike-fee] [period-secs amount]]
+  (println "dbg strike fee" (some-> strike-fee bn/number))
+  ;; revert logic from HegicETHOptions.sol/create
+  (cond-> []
+    (or (not period-secs) (< period-secs 86400)) (conj :period-too-short)
+    (not (zero? (mod period-secs 86400))) (conj :period-invalid)
+    (> period-secs (* 4 604800)) (conj :period-too-long)
+    ;; this is where too-small-a-position err comes from
+    (<= amount strike-fee) (conj :price-diff-too-large)))
+
 (re-frame/reg-event-fx
   ::estimate-mint-hegex-success
   interceptors
   ;;NOTE first is total
-  (fn [{:keys [db]} [_ fees]]
-    (println "cdbg success" fees)
-    {:db (assoc-in db [::hegic-options :new :total-cost]
-                   (some-> fees first bn/number))}))
+  (fn [{:keys [db]} [option-params fees]]
+    (let [errors (hegic-errors fees option-params)
+          with-errors (assoc-in db [::hegic-options :new :errors] errors)]
+      (println "dbgfees args" fees option-params)
+      (println "dbgfees" (some-> fees first bn/number) errors)
+      {:db (assoc-in with-errors
+                     [::hegic-options :new :total-cost]
+                     (some-> fees first bn/number))})))
 
 (re-frame/reg-event-fx
   ::mint-hegex
@@ -458,12 +474,13 @@
   ::mint-hegex!
   interceptors
   (fn [{:keys [db]} [opt-args fees]]
-    (println "opt args are" opt-args "fees are" fees)
+    (println "0dbgfees" fees)
     {:dispatch [::tx-events/send-tx
                 {:instance (contract-queries/instance db :optionchef)
                  :fn :createHegic
                  :args opt-args
-                 :tx-opts {:from (account-queries/active-account db)}
+                 :tx-opts {:value (some->> fees first bn/number)
+                           :from (account-queries/active-account db)}
                  :tx-id :mint-hegex!
                  :on-tx-success [::mint-hegex-success]
                  :on-tx-error [::logging/error [::mint-hegex!]]}]}))
