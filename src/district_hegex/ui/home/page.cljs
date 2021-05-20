@@ -618,6 +618,7 @@
                             "0" @(subscribe [::external-subs/eth-price])
                             0)
             total-cost (or @(subscribe [::subs/new-hegic-cost]) 0)
+            mint-errs  @(subscribe [::subs/new-hegic-errs])
             total-cost-s (gstring/format  "%.2f" (* current-price total-cost))
             _ (println "curr price is" current-price total-cost)
             break-even (if-not (zero? total-cost)
@@ -705,10 +706,16 @@
           [:h3.stats "$" break-even]]
          [:div.box.e
           [:button.secondary.line-btn
-           {:disabled @tx-pending?
+           {:disabled (or @tx-pending? (pos? (count mint-errs)))
             :on-click #(dispatch [::hegex-nft/mint-hegex @form-data])}
-           (if @tx-pending? [:span "Buy" [inputs/loader {:color :black :on? @tx-pending?}]] "Buy")]]]
-        [:div [:br] [:br] [:br]]]))))
+           (if @tx-pending? [:<> "Buy" [inputs/loader {:color :black :on? @tx-pending?}]] "Buy")]]]
+         [:div [:p.errors ""
+                (case (first mint-errs)
+                  :period-too-short "Period too short"
+                  :period-too-long "Period too long"
+                  :price-diff-too-large "Price difference is too large"
+                  "")]
+          [:br] [:br] [:br]]]))))
 
 (defn- orderbook-section []
   (let [book (subscribe [::trading-subs/hegic-book])]

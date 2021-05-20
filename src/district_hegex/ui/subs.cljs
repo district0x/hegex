@@ -41,6 +41,11 @@
     (some->> (get-in db [::hegex-nft/hegic-options :new :total-cost])
              web3-utils/wei->eth-number)))
 
+(re-frame/reg-sub
+  ::new-hegic-errs
+  (fn [db _]
+    (or (get-in db [::hegex-nft/hegic-options :new :errors]) [])))
+
 
 (re-frame/reg-sub
   ::initial-state-loaded?
