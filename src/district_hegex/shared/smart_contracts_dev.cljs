@@ -10,4 +10,6 @@
    :wbtcoptions {:name "HegicWBTCOptions"
                  :address "0x3961245DB602eD7c03eECcda33eA3846bD8723BD"}
    :hegicethoptions {:name "HegicETHOptions"
-                     :address "0xEfC0eEAdC1132A12c9487d800112693bf49EcfA2"}})
+                     :address "0xEfC0eEAdC1132A12c9487d800112693bf49EcfA2"}
+   :hegicercpool {:name "HegicERCPool" :address "0x20DD9e22d22dd0a6ef74a520cb08303B5faD5dE7"}
+   :hegicethpool {:name "HegicETHPool" :address "0x878F15ffC8b894A1BA7647c7176E4C01f74e140b"}})
