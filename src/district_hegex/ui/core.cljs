@@ -51,20 +51,13 @@
   ::my-account-route-active
   interceptors
   (fn [{:keys [:db]} arg2]
-    ;;NOTE
-    ;;active-account-change d0x sub triggers infinite loop
-    {:async-flow {:rules [#_{:when :seen-any-of?
-                           :events [::web3-accounts-events/active-account-changed]
-                             :dispatch [::events/reboot]}
-                          #_{:when :seen-all-of?
-                           :events [::hegex-nft/my-hegex-options-count
-                                    ::hegex-nft/approved-for-exchange?]
-                           :dispatch [::hegex-nft/hide-loader]}
-                          {:when :seen-any-of?
+    {:async-flow {:rules [{:when :seen-any-of?
                            :events [::web3-accounts-events/set-accounts]
                            :dispatch-n [[::events/add-contract-wrappers]
                                         [::listen-to-account-change]
                                         [::trading-events/restore-and-watch-txs]
+                                        [::trading-events/load-pool-eth]
+                                        [::trading-events/load-pool-btc]
                                         [::events/load-my-hegic-options]]}]}}))
 
 

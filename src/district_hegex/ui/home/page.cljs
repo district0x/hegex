@@ -627,7 +627,12 @@
                                  (gstring/format "%.2f"))
                          0)
             _ (println "be is" break-even total-cost current-price)
-            sp (some-> form-data deref :new-hegex/strike-price)]
+            sp (some-> form-data deref :new-hegex/strike-price)
+            max-option-size (some->> (case hegic-type
+                                   "1" @(subscribe [::trading-subs/hegic-pool-liq-btc])
+                                   "0" @(subscribe [::trading-subs/hegic-pool-liq-eth])
+                                   nil)
+                                 (gstring/format "%.5f"))]
         (println "tx-pending" @tx-pending?)
         [:div
         [:div {:style {:display "flex"
@@ -663,8 +668,7 @@
          [:div.box.f
           [:div.hover-label "Option size"]
           [inputs/text-input
-           {:type :number
-            :color :secondary
+           {:color :secondary
             :placeholder 0
             :label (case hegic-type
                      "1" "BTC"
@@ -673,7 +677,8 @@
             :on-change (fn [e]
                          (js/e.persist)
                          (upd-new-hegex form-data e :new-hegex/amount))
-            :min 0}]]
+            :min 0}]
+          [:p.errors-size "max " max-option-size]]
          [:div.box.e
           [:div.hover-label "Strike price"]
           [inputs/text-input

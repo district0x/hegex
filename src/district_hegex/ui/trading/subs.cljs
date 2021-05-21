@@ -27,3 +27,13 @@
   ::my-pending-offer?
   (fn [db _]
     (get-in db [::trading-events/my-pending-offer?])))
+
+(re-frame/reg-sub
+  ::hegic-pool-liq-eth
+  (fn [db _]
+    (get-in db [::hegex-nft/hegic-options :new :max-liq :eth])))
+
+(re-frame/reg-sub
+  ::hegic-pool-liq-btc
+  (fn [db _]
+    (get-in db [::hegex-nft/hegic-options :new :max-liq :btc])))
