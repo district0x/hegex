@@ -12,7 +12,9 @@
    :hegexoption
    :weth
    :hegicethoptions
-   :wbtcoptions])
+   :wbtcoptions
+   :hegicercpool
+   :hegicethpool])
 
 (def contracts-to-load-qa
   [:optionchef
@@ -20,7 +22,9 @@
    :hegexoption
    :weth
    :wbtcoptions
-   :brokenethoptions])
+   :brokenethoptions
+   :hegicercpool
+   :hegicethpool])
 
 (def development-config
   {:debug? true

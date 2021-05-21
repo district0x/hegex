@@ -6,4 +6,8 @@
    :optionchefdata {:name "OptionChefData" :address "0x4b162F735b9f32892CF0730AFe1676da50DE50A8"}
    :weth {:name "WETH" :address "0xc778417E063141139Fce010982780140Aa0cD5Ab"}
    :wbtcoptions {:name "HegicWBTCOptions" :address "0x3aD466588F5f8f1Ce896645d5322db3F25810639"}
-   :brokenethoptions {:name "BrokenETHOptions" :address "0x77041D13e0B9587e0062239d083b51cB6d81404D"}})
+   :brokenethoptions {:name "BrokenETHOptions" :address "0x77041D13e0B9587e0062239d083b51cB6d81404D"}
+   :hegicethpool {:name "HegicETHPool"
+                  :address "0xB08b80723e3669B380D1576Af43EB1Afb26203bd"}
+   :hegicercpool {:name "HegicERCPool"
+                  :address "0xaffcab111a3c2aec93a34c029f1b0205fa44aaa0"}})

@@ -522,6 +522,75 @@
   (fn [_ [params]]
     {::cancel-offer! params}))
 
+
+(re-frame/reg-event-fx
+  ::load-pool-eth
+  interceptors
+  (fn [{:keys [db]} _]
+    (js/console.log "poolinstance-eth is" (contract-queries/instance db :hegicethpool))
+    {:web3/call
+     {:web3 (web3-queries/web3 db)
+      :fns [{:instance (contract-queries/instance db :hegicethpool)
+             :fn :lockedAmount
+             :args []
+             :on-success [::load-pool-eth-locked-amount]
+             :on-error [::logging/error [::load-pool-eth]]}]}}))
+
+(re-frame/reg-event-fx
+  ::load-pool-eth-locked-amount
+  interceptors
+  (fn [{:keys [db]} [locked-amount]]
+    {:web3/call
+     {:web3 (web3-queries/web3 db)
+      :fns [{:instance (contract-queries/instance db :hegicethpool)
+             :fn :totalBalance
+             :args []
+             :on-success [::load-pool-eth-success locked-amount]
+             :on-error [::logging/error [::load-pool-eth-locked-amount]]}]}}))
+
+(re-frame/reg-event-fx
+  ::load-pool-eth-success
+  interceptors
+  (fn [{:keys [db]} [locked-amount total-balance]]
+    (let [amount (some-> locked-amount bn/number (* 10))
+          bal (some-> total-balance bn/number (* 8))
+          r (web3-utils/wei->eth-number (/ (- bal amount) 10))]
+      {:db (assoc-in db [::hegex-nft/hegic-options :new :max-liq :eth] r)})))
+
+(re-frame/reg-event-fx
+  ::load-pool-btc
+  interceptors
+  (fn [{:keys [db]} _]
+    {:web3/call
+     {:web3 (web3-queries/web3 db)
+      :fns [{:instance (contract-queries/instance db :hegicercpool)
+             :fn :lockedAmount
+             :args []
+             :on-success [::load-pool-btc-locked-amount]
+             :on-error [::logging/error [::load-pool-btc]]}]}}))
+
+(re-frame/reg-event-fx
+  ::load-pool-btc-locked-amount
+  interceptors
+  (fn [{:keys [db]} [locked-amount]]
+    (println "dbgbtc locked amount is" locked-amount)
+    {:web3/call
+     {:web3 (web3-queries/web3 db)
+      :fns [{:instance (contract-queries/instance db :hegicercpool)
+             :fn :totalBalance
+             :args []
+             :on-success [::load-pool-btc-success locked-amount]
+             :on-error [::logging/error [::load-pool-btc-locked-amount]]}]}}))
+
+(re-frame/reg-event-fx
+  ::load-pool-btc-success
+  interceptors
+  (fn [{:keys [db]} [locked-amount total-balance]]
+    (let [amount (some-> locked-amount bn/number (* 10))
+          bal (some-> total-balance bn/number (* 8))
+          r (web3-utils/wei->eth-number (/ (- bal amount) 10))]
+      {:db (assoc-in db [::hegex-nft/hegic-options :new :max-liq :btc] r)})))
+
 ;;REPL functions
 
 ;; NOTE
