@@ -41,12 +41,22 @@
     [re-frame.core :as re-frame :refer [dispatch reg-event-fx]])
   (:require-macros [district-hegex.shared.macros :refer [get-environment]]))
 
-(defn- hegic-eth-options []
-  (case (get-environment)
-    "dev" :hegicethoptions
-    "prod" :hegicethoptions
-    "qa" :brokenethoptions
-    :hegicethoptions))
+(defn- hegic-eth-options
+  ([asset]
+   (case asset
+
+     "0"
+     (case (get-environment)
+      "dev" :hegicethoptions
+      "prod" :hegicethoptions
+      "qa" :brokenethoptions
+      :hegicethoptions)
+
+     "1"
+     :wbtcoptions
+
+     :hegicethoptions))
+  ([] (hegic-eth-options "0")))
 
 (def interceptors [re-frame/trim-v])
 
@@ -368,9 +378,6 @@
   ::delegate!
   interceptors
   (fn [{:keys [db]} [uid]]
-    (println "dbg delegating Hegic option with id.." uid
-             "for contract" (contract-queries/instance db (hegic-eth-options))
-             "with args" [uid (contract-queries/contract-address db :optionchef)])
     {:dispatch [::tx-events/send-tx
                 {:instance (contract-queries/instance db (hegic-eth-options))
                  :fn :transfer
@@ -396,8 +403,9 @@
   (fn [{:keys [db]} [{:keys [:new-hegex/period
                             :new-hegex/amount
                             :new-hegex/strike-price
+                            :new-hegex/hegic-type
                             :new-hegex/option-type]}]]
-    (println "dbgfees period" period (some-> period (* 86400)))
+    (println "dbgx hegic type is" hegic-type)
     (let [opt-dir (case (keyword option-type)
                     :put 1
                     :call 2
@@ -406,14 +414,9 @@
           strike-wei (some-> strike-price (* 100000000))
           option-args [period-secs amount strike-wei opt-dir]
           web3-instance (oset! (web3-queries/web3 db)  "eth.defaultAccount" "0xE74c326e7227730b1f4A1F4E164e6B3003Ca25B5")]
-;; web3.eth.defaultAccount = web3.eth.accounts[0];
-      (println "cdbg" (hegic-eth-options))
-      (println "cdbg2"(contract-queries/contract-address db (hegic-eth-options))  #_ :brokenethoptions)
-      (println "cdbg3" option-args)
-      (js/console.log "web3 is" (web3-queries/web3 db))
       {:web3/call
        {:web3 web3-instance
-        :fns [{:instance (contract-queries/instance db (hegic-eth-options))
+        :fns [{:instance (contract-queries/instance db (hegic-eth-options hegic-type))
                :fn :fees
                :args option-args
                ;; :tx-opts {:chainId "1337"}
@@ -452,6 +455,7 @@
                             :new-hegex/strike-price
                             :new-hegex/option-type]
                      :as form-data}]]
+    (println "hegic type during minting is" hegic-type (hegic-eth-options hegic-type))
     (let [opt-dir (case (keyword option-type)
                     :put 1
                     :call 2
@@ -460,10 +464,9 @@
           amount-eth (some-> amount (* 1))
           strike-wei (some-> strike-price (* 100000000))
           option-args [period-secs amount-eth strike-wei opt-dir]]
-      #_(println "mint-hegex dbg args are" [period amount strike-price opt-dir])
       {:web3/call
        {:web3 (web3-queries/web3 db)
-        :fns [{:instance (contract-queries/instance db (hegic-eth-options))
+        :fns [{:instance (contract-queries/instance db (hegic-eth-options hegic-type))
                :fn :fees
                :args option-args
                :on-success [::mint-hegex! (vec (cons hegic-type option-args))]
@@ -474,16 +477,16 @@
   ::mint-hegex!
   interceptors
   (fn [{:keys [db]} [opt-args fees]]
-    (println "0dbgfees" fees)
-    {:dispatch [::tx-events/send-tx
-                {:instance (contract-queries/instance db :optionchef)
-                 :fn :createHegic
-                 :args opt-args
-                 :tx-opts {:value (some->> fees first bn/number)
-                           :from (account-queries/active-account db)}
-                 :tx-id :mint-hegex!
-                 :on-tx-success [::mint-hegex-success]
-                 :on-tx-error [::logging/error [::mint-hegex!]]}]}))
+    (let [extract-fee (if (= "1" (first opt-args)) second first)]
+      {:dispatch [::tx-events/send-tx
+                 {:instance (contract-queries/instance db :optionchef)
+                  :fn :createHegic
+                  :args opt-args
+                  :tx-opts {:value (some->> fees extract-fee bn/number)
+                            :from (account-queries/active-account db)}
+                  :tx-id :mint-hegex!
+                  :on-tx-success [::mint-hegex-success]
+                  :on-tx-error [::logging/error [::mint-hegex!]]}]})))
 
 (re-frame/reg-event-fx
   ::mint-hegex-success
@@ -589,12 +592,13 @@
                  :args [option-type hegex-id]
                  :tx-opts {:from (account-queries/active-account db)}
                  :tx-id :exercise-hegic
-                 :on-tx-success [::exercise-success]
+                 :on-tx-success [::exercise-success hegex-id]
                  :on-tx-error [::logging/error [::exercise!]]}]}))
 
 (re-frame/reg-event-fx
   ::exercise-success
-  ;;actually assoc result (hegex-id) to db to update the UI
-  (fn [data]
-    (println "dbg wrapped option ::successfully")
-    {:dispatch [:district-hegex.ui.events/load-my-hegic-options {:once? true}]}))
+  interceptors
+  (fn [{:keys [db]} [hegex-id data]]
+    {:db (update-in db [:district-hegex.ui.contract.hegex-nft/hegic-options :full-ui]
+                    (fn [opts]
+                      (remove (fn [o] (= hegex-id (:hegex-id o))) opts)))}))
