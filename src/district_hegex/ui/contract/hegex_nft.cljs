@@ -477,17 +477,16 @@
   ::mint-hegex!
   interceptors
   (fn [{:keys [db]} [opt-args fees]]
-    (println "dbgmint args" opt-args)
-    (println "dbgmint fees" fees (bn/number (second fees)) (+ 1 (bn/number (second fees))))
-    {:dispatch [::tx-events/send-tx
-                {:instance (contract-queries/instance db :optionchef)
-                 :fn :createHegic
-                 :args opt-args
-                 :tx-opts {:value (some->> fees second bn/number)
-                           :from (account-queries/active-account db)}
-                 :tx-id :mint-hegex!
-                 :on-tx-success [::mint-hegex-success]
-                 :on-tx-error [::logging/error [::mint-hegex!]]}]}))
+    (let [extract-fee (if (= "1" (first opt-args)) second first)]
+      {:dispatch [::tx-events/send-tx
+                 {:instance (contract-queries/instance db :optionchef)
+                  :fn :createHegic
+                  :args opt-args
+                  :tx-opts {:value (some->> fees extract-fee bn/number)
+                            :from (account-queries/active-account db)}
+                  :tx-id :mint-hegex!
+                  :on-tx-success [::mint-hegex-success]
+                  :on-tx-error [::logging/error [::mint-hegex!]]}]})))
 
 (re-frame/reg-event-fx
   ::mint-hegex-success
