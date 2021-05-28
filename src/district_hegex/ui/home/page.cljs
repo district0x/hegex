@@ -594,8 +594,11 @@
 
 (defn- upd-new-hegex [form-data e-raw key]
   ((debounce (fn []
-               (let [e (if (= key :new-hegex/amount)
-                         (some-> (oget e-raw ".?target.?value") web3-utils/eth->wei-number)
+               (let [to-decimals (if (= "0" (:new-hegex/hegic-type @form-data))
+                                   web3-utils/eth->wei-number
+                                   #(* % (js/Math.pow 10 8)))
+                     e (if (= key :new-hegex/amount)
+                         (some-> (oget e-raw ".?target.?value") to-decimals)
                          (oget e-raw ".?target.?value"))]
                  (println "e is" e key)
                  (swap! form-data
@@ -633,6 +636,7 @@
                                    "0" @(subscribe [::trading-subs/hegic-pool-liq-eth])
                                    nil)
                                  (gstring/format "%.5f"))]
+        ;; BTC fake ropsten price is 11610
         (println "tx-pending" @tx-pending?)
         [:div
         [:div {:style {:display "flex"

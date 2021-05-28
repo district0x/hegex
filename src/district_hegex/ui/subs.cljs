@@ -20,7 +20,9 @@
 (re-frame/reg-sub
   ::hegic-full-options
   (fn [db _]
-    (get-in db [::hegex-nft/hegic-options :full-ui])))
+    (remove (fn [o]
+              (not= 1 (:state o)))
+            (get-in db [::hegex-nft/hegic-options :full-ui]))))
 
 (re-frame/reg-sub
   ::my-hegex-ids
