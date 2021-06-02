@@ -300,12 +300,6 @@
 
 (defn- buy-nft-button [active-option weth-bal]
   (let [active? (-> active-option :option)
-        active-account (some-> @(subscribe [::account-subs/active-account])
-                               str
-                               cs/lower-case)
-        maker (some-> active-option :option :sra-order :order :makerAddress
-                      str
-                      cs/lower-case)
         tx-pending? (subscribe [::external-subs/external-tx-pending? :fill-order])
         enough-weth? (< (-> active-option :option :eth-price) weth-bal)]
     [:div.hover-captioned
@@ -314,18 +308,23 @@
        :on-click #(dispatch [::trading-events/fill-offer (:option active-option)])
        :disabled  (or @tx-pending?
                       (not active?)
-                      (not enough-weth?)
-                      (= maker active-account))}
+                      (not enough-weth?))}
       "Buy"
       (when @tx-pending? [inputs/loader {:color :black :on? @tx-pending?}])]
      (when-not enough-weth? [:div.hover-caption "Insufficient WETH balance"])]))
 
 (defn- cancel-nft-button [active-option]
-  [:button.yellow
-    {:className (when-not active-option "disabled")
-     :on-click #(dispatch [::trading-events/cancel-offer active-option])
-     :disabled  (not active-option)}
-    "Cancel"])
+  (let [active? (-> active-option :option)
+        tx-pending? (subscribe [::external-subs/external-tx-pending? :cancel-order])]
+    (println "cancel tx pending?" @tx-pending?)
+    [:div.hover-captioned.padded
+     [:button.yellow.line-btn
+      {:className (when-not active? "disabled")
+       :on-click #(dispatch [::trading-events/cancel-offer (:option active-option)])
+       :disabled  (or @tx-pending?
+                      (not active?))}
+      "Cancel"
+      (when @tx-pending? [inputs/loader {:color :black :on? @tx-pending?}])]]))
 
 (defn- buy-nft [active-option]
   (let [weth-approved? @(subscribe [::weth-subs/exchange-approved?])
@@ -334,8 +333,9 @@
         approving-staking? (subscribe [::tx-id-subs/tx-pending? :approve-weth-staking])
         approving-exchange? (subscribe [::tx-id-subs/tx-pending? :approve-weth-exchange])
         my-offer? (= (some-> active-account cs/lower-case)
-                     (some-> active-option :sra-order
-                             :order :makerAddress cs/lower-case))
+                     (some-> active-option :option :sra-order :order :makerAddress
+                      str
+                      cs/lower-case))
         weth-bal @(subscribe [::weth-subs/balance])]
     (cond
         my-offer? [cancel-nft-button active-option]
