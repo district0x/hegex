@@ -478,6 +478,7 @@
   interceptors
   (fn [{:keys [db]} [opt-args fees]]
     (let [extract-fee (if (= "1" (first opt-args)) second first)]
+      (println "optargsmint" opt-args)
       {:dispatch [::tx-events/send-tx
                  {:instance (contract-queries/instance db :optionchef)
                   :fn :createHegic
