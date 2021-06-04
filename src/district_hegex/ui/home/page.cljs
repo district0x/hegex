@@ -622,6 +622,7 @@
                (let [to-decimals (if (= "0" (:new-hegex/hegic-type @form-data))
                                    web3-utils/eth->wei-number
                                    #(* % (js/Math.pow 10 8)))
+                     old-amount (:new-hegex/amount @form-data 0)
                      e (if (= key :new-hegex/amount)
                          (some-> (oget e-raw ".?target.?value") to-decimals)
                          (oget e-raw ".?target.?value"))]
@@ -630,6 +631,16 @@
                          assoc
                          key
                          e)
+                 (when (= key :new-hegex/hegic-type)
+                   (if (= "0" (:new-hegex/hegic-type @form-data))
+                     (swap! form-data
+                         assoc
+                         :new-hegex/amount
+                         (* old-amount (js/Math.pow 10 10)))
+                     (swap! form-data
+                         assoc
+                         :new-hegex/amount
+                         (/ old-amount (js/Math.pow 10 10)))))
                 (dispatch [::hegex-nft/estimate-mint-hegex @form-data])))
              500)))
 
