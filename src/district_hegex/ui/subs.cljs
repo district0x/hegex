@@ -21,7 +21,9 @@
   ::hegic-full-options
   (fn [db _]
     (remove (fn [o]
-              (not= 1 (:state o)))
+              (let [unixstamp (.floor js/Math (/ (.now js/Date) 1000))]
+                (or (not= 1 (:state o))
+                    (> unixstamp (:expiration-stamp o)))))
             (get-in db [::hegex-nft/hegic-options :full-ui]))))
 
 (re-frame/reg-sub
