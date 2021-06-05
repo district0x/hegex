@@ -504,6 +504,13 @@
                                  :right "10px"
                                  :font-size "0.8em"}} s]])
 
+(defn- exercise-err [{:keys [s]}]
+  [:div {:style {:position "relative"}}
+   [:p.red.caption.bold {:style {:position "absolute"
+                                 :top "15px"
+                                 :right "10px"
+                                 :font-size "0.5em"}} s]])
+
 (defn- my-hegic-option-controls []
   (let [offer (r/atom {:total 0
                        ;;NOTE reasonable default of 1 month
@@ -514,17 +521,35 @@
             pending-offer? (subscribe [::trading-subs/my-pending-offer?])
             approval-pending? (subscribe [::tx-id-subs/tx-pending?
                                           :approve-for-exchange!])
-            hegic-asset (:asset active-option)]
+            hegic-asset (:asset active-option)
+            current-price  (or @(subscribe [(case hegic-asset
+                                      0 ::external-subs/eth-price
+                                      1 ::external-subs/btc-price
+                                      ::external-subs/eth-price)])
+                               0)
+            ;; Aka OTM, using precise naming
+            not-itm? (if (= :call (:option-type active-option))
+                       (<= current-price (:strike active-option))
+                       (>= current-price (:strike active-option)))
+            exercise-error (first
+                            (cond-> []
+                              ;;TODO handle expiry error if expired
+                              ;;options are made visible
+                              (and active-option
+                                   not-itm?) (conj "Option not in the money")))]
+        (println "avinfo" active-option)
        [:div [:div.hloader]
         [:div.box-grid
          [:div.box.e
           [:button.primary
            {:className (when-not active-option "disabled")
-            :disabled  (or exercise-pending? (not active-option))
+            :disabled  (or exercise-pending? (not active-option) not-itm?)
             :on-click #(dispatch [::hegex-nft/exercise! hegic-asset (:hegex-id active-option)])}
            "Exercise"
            [inputs/loader {:color :black
-                           :on? exercise-pending?}]]]
+                           :on? exercise-pending?}]]
+          (when exercise-error
+            [exercise-err {:s exercise-error}])]
          [:div.box.e
           [inputs/text-input
            {:type :number
@@ -597,6 +622,7 @@
                (let [to-decimals (if (= "0" (:new-hegex/hegic-type @form-data))
                                    web3-utils/eth->wei-number
                                    #(* % (js/Math.pow 10 8)))
+                     old-amount (:new-hegex/amount @form-data 0)
                      e (if (= key :new-hegex/amount)
                          (some-> (oget e-raw ".?target.?value") to-decimals)
                          (oget e-raw ".?target.?value"))]
@@ -605,6 +631,16 @@
                          assoc
                          key
                          e)
+                 (when (= key :new-hegex/hegic-type)
+                   (if (= "0" (:new-hegex/hegic-type @form-data))
+                     (swap! form-data
+                         assoc
+                         :new-hegex/amount
+                         (* old-amount (js/Math.pow 10 10)))
+                     (swap! form-data
+                         assoc
+                         :new-hegex/amount
+                         (/ old-amount (js/Math.pow 10 10)))))
                 (dispatch [::hegex-nft/estimate-mint-hegex @form-data])))
              500)))
 

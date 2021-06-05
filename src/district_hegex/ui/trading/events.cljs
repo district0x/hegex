@@ -254,11 +254,13 @@
                tx (<p! (ocall pre-tx
                               ".sendTransactionAsync"
                               (->js  {:from taker-address
-                                      :gasPrice "600000"})
+                                      ;; :gasPrice "600000"
+                                      })
                               (->js {:shouldValidate false})))]
            (println "dbgfillorder..." "obj" tx)
            (dispatch [::watch-tx tx :fill-order hegex-id])
-           (println "dbgfillorder added tx" tx (type tx) "string?" (string? tx)))
+           (println "dbgfillorder added tx" tx (type tx) "string?" (string? tx))
+           )
          (catch js/Error err (js/console.log (ex-cause err))))))))
 
 
@@ -340,7 +342,7 @@
                                                    :on-tx-success [::tx-success tx-hash]
                                                    :on-tx-error [::tx-success tx-hash]}]}}))))
 
-(defn cancel! [{:keys [sra-order taker-asset-amount]}]
+(defn cancel! [{:keys [sra-order hegex-id taker-asset-amount]}]
   (let [order-obj (->js sra-order)]
     (go
      (let [Wrapper (oget web3-wrapper "Web3Wrapper")
@@ -353,22 +355,26 @@
                                         :from taker-address
                                         :contractAddresses (-> (get-0x-addresses 3)
                                                                bean
+                                                               ;;TODO remove last hardcoded address for mainnet
                                                                (assoc :exchange "0xFb2DD2A1366dE37f7241C83d47DA58fd503E2C64")
                                                                ->js)}))]
        #_(js/console.log (oget contract-wrapper ".cancelOrder"))
        (try
-         (println "filling order..." (<p! (ocall (ocall contract-wrapper
-                                                        ".exchange.cancelOrder"
-                                                        (->js (oget order-obj ".?order"))
-                                                        (->js taker-asset-amount)
-                                                        (->js (oget order-obj ".?order.?signature")))
-                                                 ".awaitTransactionSuccessAsync"
-                                                 (->js  {:from taker-address
+         (let [pre-tx (ocall contract-wrapper
+                             ".exchange.cancelOrder"
+                             (->js (oget order-obj ".?order"))
+                             (->js taker-asset-amount)
+                             (->js (oget order-obj ".?order.?signature")))
+               tx (<p! (ocall pre-tx
+                              ".sendTransactionAsync"
+                              (->js  {:from taker-address
                                                          ;; :value "60000000000000000"
-                                                         :gas "5000000"
-                                                         :gasPrice "600000"})
-                                                 (->js {:shouldValidate false}))))
-         (dispatch [::hegex-nft/clean-hegic])
+                                                         ;; :gas "5000000"
+                                                         ;; :gasPrice "600000"
+                                      })
+                              (->js {:shouldValidate false})))]
+           (dispatch [::watch-tx tx :cancel-order hegex-id])
+           (println "dbgcancelorder added tx" tx (type tx) "string?" (string? tx)))
          (catch js/Error err (js/console.log (ex-cause err))))))))
 
 

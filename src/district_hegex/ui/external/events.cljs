@@ -3,11 +3,20 @@
    [cljs.core.async :refer [go]]
    [cljs.core.async.interop :refer-macros [<p!]]
    [oops.core :refer [gcall ocall oget]]
-   [re-frame.core :as re-frame :refer [dispatch]]))
+   [re-frame.core :as re-frame :refer [dispatch]])
+  (:require-macros [district-hegex.shared.macros :refer [get-environment]]))
 
 (def interceptors [re-frame/trim-v])
 
 (def ^:private base-uri "https://api.coingecko.com/api/v3/coins/")
+
+(def ^:private ropsten-prices {:bitcoin 11610
+                               :ethereum 380})
+
+(defn- price-by-env [db asset price]
+  (case (get-environment)
+    "prod" (assoc-in db [:prices asset] price)
+    (assoc-in db [:prices asset] (get ropsten-prices asset))))
 
 (re-frame/reg-event-fx
   ::fetch-asset-prices
@@ -19,8 +28,7 @@
   ::fetch-asset-prices-success
   interceptors
   (fn [db [asset price]]
-    (println "assetprice" asset price)
-    (assoc-in db [:prices asset] price)))
+    (price-by-env db asset price)))
 
 (defn fetch-asset-prices [asset]
   (go

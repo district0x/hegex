@@ -173,7 +173,6 @@
                       locked-amount premium expiration
                       option-type asset] id]
   (let [amount-hr (some->> amount bn/number)]
-    (println "asset is " asset)
     {:state         (bn/number state)
     ;;data redundancy for ease of access by views
     :hegic-id      id
@@ -190,6 +189,7 @@
                             web3-utils/wei->eth-number
                             (gstring/format "%.6f"))
     :expiration    (to-simple-time expiration)
+    :expiration-stamp (some-> expiration bn/number)
     :asset         asset
     ;;NOTE a bit cryptic model, P&L is fetched later via (price+-strike(+-premium*price))
     ;;NOTE P&L with premium is inaccurate since we _can't_ fetch historical price for premium
@@ -478,6 +478,7 @@
   interceptors
   (fn [{:keys [db]} [opt-args fees]]
     (let [extract-fee (if (= "1" (first opt-args)) second first)]
+      (println "optargsmint" opt-args)
       {:dispatch [::tx-events/send-tx
                  {:instance (contract-queries/instance db :optionchef)
                   :fn :createHegic
