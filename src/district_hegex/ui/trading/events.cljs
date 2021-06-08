@@ -268,12 +268,16 @@
   ::tx-success
   [(re-frame/inject-cofx :store) interceptors]
   (fn [{:keys [db store]} [tx-hash]]
-    (let [hegex-id (get-in db [:pending-external-txs :fill-order])]
+    (let [tx-id (get-in store [:external-txs-ids tx-hash])
+          hegex-id (get-in db [:pending-external-txs tx-id])
+          _ (println "dbgtxsuccess tx-id" tx-id "hegex-id" hegex-id)
+          ]
       {:db (-> db
               (assoc-in [:pending-external-txs
                          (get-in store [:external-txs-ids tx-hash])] nil)
               (update-in [::hegex-nft/hegic-options :orderbook :full] dissoc hegex-id))
        :dispatch [::hegex-nft/clean-hegic]
+       ;;TODO remove from store?
        :web3/stop-watching {:ids [(keyword (subs (str tx-hash) 5))]}})))
 
 (reg-event-fx
