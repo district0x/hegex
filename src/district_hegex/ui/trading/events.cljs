@@ -251,9 +251,17 @@
                              (->js taker-asset-amount)
                              (->js (oget order-obj ".?order.?signature")))
                _ (println "pre-tx is" pre-tx)
+               gas (<p! (ocall pre-tx
+                              ".estimateGasAsync"
+                              (->js  {:from taker-address
+                                      })))
+               _ (println "pre-tx gas is" gas)
                tx (<p! (ocall pre-tx
                               ".sendTransactionAsync"
                               (->js  {:from taker-address
+                                      ;;NOTE unoptimized workaround, issue fixed
+                                      ;;in 0x/contract-wrappers lib update
+                                      :gas (* 4 gas)
                                       ;; :gasPrice "600000"
                                       })
                               (->js {:shouldValidate false})))]
