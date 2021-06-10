@@ -251,9 +251,17 @@
                              (->js taker-asset-amount)
                              (->js (oget order-obj ".?order.?signature")))
                _ (println "pre-tx is" pre-tx)
+               gas (<p! (ocall pre-tx
+                              ".estimateGasAsync"
+                              (->js  {:from taker-address
+                                      })))
+               _ (println "pre-tx gas is" gas)
                tx (<p! (ocall pre-tx
                               ".sendTransactionAsync"
                               (->js  {:from taker-address
+                                      ;;NOTE unoptimized workaround, issue fixed
+                                      ;;in 0x/contract-wrappers lib update
+                                      :gas (* 4 gas)
                                       ;; :gasPrice "600000"
                                       })
                               (->js {:shouldValidate false})))]
@@ -267,13 +275,18 @@
 (reg-event-fx
   ::tx-success
   [(re-frame/inject-cofx :store) interceptors]
-  (fn [{:keys [db store]} [tx-hash]]
-    (let [hegex-id (get-in db [:pending-external-txs :fill-order])]
-      {:db (-> db
-              (assoc-in [:pending-external-txs
+  (fn [{:keys [db store]} [tx-hash ok? data]]
+    (let [tx-id (get-in store [:external-txs-ids tx-hash])
+          hegex-id (get-in db [:pending-external-txs tx-id])
+          _ (println "dbgtxsuccess ok?" ok?)
+          _ (println "dbgtxsuccess tx-id" tx-id "hegex-id" hegex-id)
+          ]
+      {:db (cond-> db
+              :always (assoc-in [:pending-external-txs
                          (get-in store [:external-txs-ids tx-hash])] nil)
-              (update-in [::hegex-nft/hegic-options :orderbook :full] dissoc hegex-id))
+              ok? (update-in [::hegex-nft/hegic-options :orderbook :full] dissoc hegex-id))
        :dispatch [::hegex-nft/clean-hegic]
+       ;;TODO remove from store?
        :web3/stop-watching {:ids [(keyword (subs (str tx-hash) 5))]}})))
 
 (reg-event-fx
@@ -298,8 +311,8 @@
          :web3/watch-transactions {:web3 (web3-queries/web3 db)
                                    :transactions [{:id (keyword (subs (str tx-hash) 5))
                                                   :tx-hash tx-hash
-                                                  :on-tx-success [::tx-success tx-hash]
-                                                  :on-tx-error [::tx-success tx-hash]}]}}))))
+                                                  :on-tx-success [::tx-success tx-hash true]
+                                                  :on-tx-error [::tx-success tx-hash false]}]}}))))
 
 (reg-event-fx
   ::restore-and-watch-txs
@@ -339,8 +352,8 @@
          :web3/watch-transactions {:web3 (web3-queries/web3 db)
                                    :transactions [{:id (keyword (subs (str tx-hash) 5))
                                                    :tx-hash tx-hash
-                                                   :on-tx-success [::tx-success tx-hash]
-                                                   :on-tx-error [::tx-success tx-hash]}]}}))))
+                                                   :on-tx-success [::tx-success tx-hash true]
+                                                   :on-tx-error [::tx-success tx-hash false]}]}}))))
 
 (defn cancel! [{:keys [sra-order hegex-id taker-asset-amount]}]
   (let [order-obj (->js sra-order)]
