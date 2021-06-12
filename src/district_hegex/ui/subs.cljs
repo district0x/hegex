@@ -41,9 +41,7 @@
 (re-frame/reg-sub
   ::new-hegic-cost
   (fn [db _]
-    (println "nhc" (get-in db [::hegex-nft/hegic-options :new :total-cost]))
-    (some->> (get-in db [::hegex-nft/hegic-options :new :total-cost])
-             web3-utils/wei->eth-number)))
+    (get-in db [::hegex-nft/hegic-options :new :total-cost])))
 
 (re-frame/reg-sub
   ::new-hegic-errs
