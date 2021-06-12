@@ -552,7 +552,7 @@
             [exercise-err {:s exercise-error}])]
          [:div.box.e
           [inputs/text-input
-           {:type :number
+           {:type :text
             :min 0
             :placeholder 0
             :on-change  (fn [e]
