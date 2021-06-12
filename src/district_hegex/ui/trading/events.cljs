@@ -571,9 +571,11 @@
   ::load-pool-eth-success
   interceptors
   (fn [{:keys [db]} [locked-amount total-balance]]
+    (println "liqdbgeth" [locked-amount total-balance])
     (let [amount (some-> locked-amount bn/number (* 10))
           bal (some-> total-balance bn/number (* 8))
           r (web3-utils/wei->eth-number (/ (- bal amount) 10))]
+           (println "liqdbgeth2" bal amount r)
       {:db (assoc-in db [::hegex-nft/hegic-options :new :max-liq :eth] r)})))
 
 (re-frame/reg-event-fx
@@ -605,9 +607,11 @@
   ::load-pool-btc-success
   interceptors
   (fn [{:keys [db]} [locked-amount total-balance]]
+    (println "liqdbgbtc" [locked-amount total-balance])
     (let [amount (some-> locked-amount bn/number (* 10))
           bal (some-> total-balance bn/number (* 8))
-          r (web3-utils/wei->eth-number (/ (- bal amount) 10))]
+          r (/ (/ (- bal amount) 10) (js/Math.pow 10 8))]
+           (println "liqdbgbtc2" bal amount r)
       {:db (assoc-in db [::hegex-nft/hegic-options :new :max-liq :btc] r)})))
 
 ;;REPL functions
