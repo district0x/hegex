@@ -30,7 +30,8 @@
                          :key    :option-type}
                         {:path   [:asset]
                          :header "Currency"
-                         :format (fn [v] (case v 1 "WBTC" 0 "ETH" "ETH"))
+                         :format (fn [v]
+                                   (case (some-> v bn/number) 1 "WBTC" 0 "ETH" "ETH"))
                          :attrs  (fn [data] {:style {:text-align     "left"
                                                     :text-transform "uppercase"}})
                          :key    :asset}
