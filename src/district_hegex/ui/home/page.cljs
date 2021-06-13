@@ -552,7 +552,7 @@
             [exercise-err {:s exercise-error}])]
          [:div.box.e
           [inputs/text-input
-           {:type :number
+           {:type :text
             :min 0
             :placeholder 0
             :on-change  (fn [e]
@@ -656,7 +656,11 @@
                             "1" @(subscribe [::external-subs/btc-price])
                             "0" @(subscribe [::external-subs/eth-price])
                             0)
-            total-cost (or @(subscribe [::subs/new-hegic-cost]) 0)
+            total-cost-raw (or @(subscribe [::subs/new-hegic-cost]) 0)
+            total-cost     (case hegic-type
+                             "1" (/ total-cost-raw (js/Math.pow 10 8))
+                             "0" (web3-utils/wei->eth-number total-cost-raw)
+                             0)
             mint-errs  @(subscribe [::subs/new-hegic-errs])
             total-cost-s (gstring/format  "%.2f" (* current-price total-cost))
             _ (println "curr price is" current-price total-cost)

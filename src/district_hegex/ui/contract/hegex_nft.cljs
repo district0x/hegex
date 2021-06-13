@@ -169,10 +169,18 @@
              :on-success [::hegic-option-success id]
              :on-error [::logging/error [::hegic-option]]}]}}))
 
+(defn- from-decimals-fn [asset]
+  (case asset
+    1 #(/ % (js/Math.pow 10 8))
+    0 web3-utils/wei->eth-number
+    web3-utils/wei->eth-number))
+
 (defn- ->hegic-info [[state holder strike amount
                       locked-amount premium expiration
                       option-type asset] id]
-  (let [amount-hr (some->> amount bn/number)]
+  (println "assetbtc" )
+  (let [amount-hr (some->> amount bn/number)
+        from-decimals (from-decimals-fn (bn/number asset))]
     {:state         (bn/number state)
     ;;data redundancy for ease of access by views
     :hegic-id      id
@@ -182,11 +190,11 @@
                             (*  0.00000001)
                             (gstring/format "%.2f"))
      :amount        (some->> amount-hr
-                            web3-utils/wei->eth-number
+                            from-decimals
                             (gstring/format "%.4f" ))
     :locked-amount (bn/number locked-amount)
     :premium       (some->> premium
-                            web3-utils/wei->eth-number
+                            from-decimals
                             (gstring/format "%.6f"))
     :expiration    (to-simple-time expiration)
     :expiration-stamp (some-> expiration bn/number)
@@ -368,7 +376,8 @@
   ::my-uhegex-option-full-success
   interceptors
   (fn [{:keys [db]} [hg-id uid option-type hegic-info-raw]]
-    (println "dbg____________" ::my-uhegex-option-full-success hg-id uid hegic-info-raw)
+    (println "dbgbtctype____________" ::my-uhegex-option-full-success hg-id uid
+             hegic-info-raw)
     {:db (ui-options-model
           (update-in db [::hegic-options :full uid] merge
                      (->hegic-info  (conj hegic-info-raw option-type) uid)))}))
