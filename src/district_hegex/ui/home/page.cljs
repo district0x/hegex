@@ -644,6 +644,17 @@
                 (dispatch [::hegex-nft/estimate-mint-hegex @form-data])))
              500)))
 
+(defn- calc-break-even [option-type total-cost current-price]
+  (let [fiat-cost (* current-price total-cost)]
+    (if (= option-type :put)
+      (some->> fiat-cost
+               (- current-price)
+               (gstring/format "%.2f"))
+
+      (some->> fiat-cost
+               (+ current-price)
+               (gstring/format "%.2f")))))
+
 
 (defn- new-hegex []
   (let [form-data (r/atom {:new-hegex/currency :eth
@@ -651,6 +662,7 @@
                            :new-hegex/option-type :call})]
     (fn []
       (let [hegic-type (some-> form-data deref :new-hegex/hegic-type)
+            option-type (some-> form-data deref :new-hegex/option-type keyword)
             tx-pending? (subscribe [::tx-id-subs/tx-pending? :mint-hegex!])
             current-price (case  hegic-type
                             "1" @(subscribe [::external-subs/btc-price])
@@ -664,10 +676,8 @@
             mint-errs  @(subscribe [::subs/new-hegic-errs])
             total-cost-s (gstring/format  "%.2f" (* current-price total-cost))
             _ (println "curr price is" current-price total-cost)
-            break-even (if-not (zero? total-cost)
-                         (some->> total-cost
-                                 (+ current-price)
-                                 (gstring/format "%.2f"))
+            break-even (if total-cost
+                         (calc-break-even option-type total-cost current-price)
                          0)
             _ (println "be is" break-even total-cost current-price)
             sp (some-> form-data deref :new-hegex/strike-price)
