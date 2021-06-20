@@ -617,6 +617,11 @@
          "You don't own any Hegic options or Hegex NFTs. Mint one now!"])
       [my-hegic-option-controls]]]))
 
+(defn- to-decimals [amount hegic-type]
+  (if (= "0" hegic-type)
+    (web3-utils/eth->wei-number amount)
+    (* amount (js/Math.pow 10 8))))
+
 (defn- upd-new-hegex [form-data e-raw key]
   ((debounce (fn []
                (let [to-decimals (if (= "0" (:new-hegex/hegic-type @form-data))
@@ -673,7 +678,7 @@
                              "1" (/ total-cost-raw (js/Math.pow 10 8))
                              "0" (web3-utils/wei->eth-number total-cost-raw)
                              0)
-            mint-errs  @(subscribe [::subs/new-hegic-errs])
+            mint-errs-raw  @(subscribe [::subs/new-hegic-errs])
             total-cost-s (gstring/format  "%.2f" (* current-price total-cost))
             _ (println "curr price is" current-price total-cost)
             break-even (if total-cost
@@ -681,11 +686,18 @@
                          0)
             _ (println "be is" break-even total-cost current-price)
             sp (some-> form-data deref :new-hegex/strike-price)
-            max-option-size (some->> (case hegic-type
+            max-option-size-raw (case hegic-type
                                    "1" @(subscribe [::trading-subs/hegic-pool-liq-btc])
                                    "0" @(subscribe [::trading-subs/hegic-pool-liq-eth])
                                    nil)
-                                 (gstring/format "%.5f"))]
+            max-option-size (some->> max-option-size-raw (gstring/format "%.5f"))
+            _ (println "optsize" (:new-hegex/amount @form-data)
+
+                       (> (:new-hegex/amount @form-data) max-option-size))
+            mint-errs (if (> (:new-hegex/amount @form-data)
+                             (to-decimals max-option-size-raw hegic-type))
+                        (cons :option-size-exceeded mint-errs-raw)
+                        mint-errs-raw)]
         ;; BTC fake ropsten price is 11610
         (println "tx-pending" @tx-pending?)
         [:div
@@ -778,6 +790,7 @@
                   :period-invalid "Enter number of days (non-fractional)"
                   :period-too-long "Period too long"
                   :price-diff-too-large "Price difference is too large"
+                  :option-size-exceeded "Option size exceeded"
                   "")]
           ;; TODO add available liquidity info label
           ;; from 0xb08b80723e3669b380d1576af43eb1afb26203bd availableBalance function (wei)
