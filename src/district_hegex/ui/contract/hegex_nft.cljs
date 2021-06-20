@@ -2,6 +2,7 @@
   (:require
    [bignumber.core :as bn]
    [goog.string :as gstring]
+   [district-hegex.ui.trading.events :as trading-events]
    [district-hegex.ui.external.events :as external-events]
    [district-hegex.ui.weth.events :as weth-events]
    [cljs-time.format :as tf]
@@ -502,7 +503,9 @@
   ::mint-hegex-success
   interceptors
   (fn [{:keys [db]} _]
-    {:dispatch [:district-hegex.ui.events/load-my-hegic-options {:once? true}]}))
+    {:dispatch-n [[::trading-events/load-pool-eth]
+                  [::trading-events/load-pool-btc]
+                  [:district-hegex.ui.events/load-my-hegic-options {:once? true}]]}))
 
 
 
