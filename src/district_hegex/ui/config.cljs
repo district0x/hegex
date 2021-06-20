@@ -91,6 +91,6 @@
 (def config-map
   (condp = (get-environment)
     "prod" production-config
-    "qa" qa-config
+    "qa"  qa-config
     "qa-dev" qa-dev-config
     "dev" development-config))

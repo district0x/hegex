@@ -117,11 +117,11 @@ module.exports = {
       network_id: 3,
       skipDryRun: true
     },
-    "infura-mainnet": {
-      provider: () => new HDWalletProvider(process.env.MNENOMIC || process.env.MAINNET_PRIV_KEY, "https://mainnet.infura.io/v3/" + process.env.INFURA_API_KEY),
+    "mainnet": {
+      provider: function() {
+        return new HDWalletProvider(`${process.env.MNEMONIC}`, `https://mainnet.infura.io/v3/${process.env.INFURA_API_KEY}`)
+      },
       network_id: 1,
-      gas: 6e6,
-      gasPrice: 4e9,
       skipDryRun: true
     }
   },
