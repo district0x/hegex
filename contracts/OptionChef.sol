@@ -163,6 +163,27 @@ contract OptionChef is Ownable {
     }
 
     /**
+     * @notice gas-greedier getUnderlyingOptionParams when optionType is unknown
+     */
+    function tokenMetadata(uint _tokenId)
+        public
+        view
+        returns (
+        IHegicOptions.State state,
+        address payable holder,
+        uint256 strike,
+        uint256 amount,
+        uint256 lockedAmount,
+        uint256 premium,
+        uint256 expiration,
+        IHegicOptions.OptionType optionType)
+    {
+        uint8 hegexOptionType = chefData.optionType(chefData.uIds(_tokenId));
+        return getUnderlyingOptionParams(hegexOptionType, _tokenId);
+    }
+
+
+    /**
      * @notice check whether Chef has underlying option locked
      */
     function isDelegated(uint _tokenId) public view returns (bool) {
