@@ -46,7 +46,26 @@ contract Hegexoption is ERC721, Ownable  {
     }
 
     /**
+     * @notice just a front for immutable nft fn from optionchef
+     * @param _tokenId Hegex NFT ID
+     */
+    function tokenMetadata(uint _tokenId)
+        public
+        view
+        returns (
+        IHegicOptions.State state,
+        address payable holder,
+        uint256 strike,
+        uint256 amount,
+        uint256 lockedAmount,
+        uint256 premium,
+        uint256 expiration,
+        IHegicOptions.OptionType optionType)
+    {
+        return IOptionChef(optionChef).tokenMetadata(_tokenId);
+    }
 
+    /**
      * @notice Burn option shell, Chef only
      * @notice Might be removed in favour of off-chain metadata-based deprecation
      * @param _id Token ID
