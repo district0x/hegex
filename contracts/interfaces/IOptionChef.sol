@@ -6,7 +6,7 @@ import "./IOptions.sol";
 
 interface IOptionChef {
     function isDelegated(uint _tokenId) external view returns (bool);
-    function getUnderlyingOptionParams(uint8 _optionType, uint _tokenId)
+    function tokenMetadata(uint _tokenId)
         external
         view
         returns (
