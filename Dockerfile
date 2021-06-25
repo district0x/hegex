@@ -5,7 +5,9 @@ ENV DISTRICT_HEGEX_ENV=${BUILD_ENV}
 ENV PORT=80
 
 COPY . /build
-RUN apt-get update && apt-get install clojure=1.* -yqq --no-install-recommends \
+RUN apt-get update \
+        && apt-get upgrade -y \
+        && apt-get install clojure=1.* -yqq --no-install-recommends \
         && apt-get clean \
         && rm -rf /var/lib/apt/lists/*
 ADD  https://github.com/ethereum/solidity/releases/download/v0.4.24/solc-static-linux /bin

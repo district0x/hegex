@@ -44,7 +44,7 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
 
-      - name: Build hegex-qa Docker image
+      - name: Build hegex docker image
         run: |
           echo "Building on ${GITHUB_REF} branch"
           if [[ ${GITHUB_REF} == "refs/heads/production" ]]; then
