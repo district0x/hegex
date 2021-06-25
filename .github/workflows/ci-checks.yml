@@ -76,7 +76,7 @@ jobs:
             docker tag hegex:${{ github.sha }} ${ECR_REGISTRY}/${ECR_REPOSITORY}:latest-qa
             docker push ${ECR_REGISTRY}/${ECR_REPOSITORY}:${{ github.sha }}-qa
             docker push ${ECR_REGISTRY}/${ECR_REPOSITORY}:latest-qa
-          if [[ ${GITHUB_REF} == "refs/heads/production" ]]; then
+          elif [[ ${GITHUB_REF} == "refs/heads/production" ]]; then
             echo "On the default branch will push to the registry with latest-prod and ${{ github.sha }}-prod tags"
             docker tag hegex:${{ github.sha }} ${ECR_REGISTRY}/${ECR_REPOSITORY}:${{ github.sha }}-prod
             docker tag hegex:${{ github.sha }} ${ECR_REGISTRY}/${ECR_REPOSITORY}:latest-prod
