@@ -47,10 +47,10 @@ jobs:
       - name: Build hegex-qa Docker image
         run: |
           echo "Building on ${GITHUB_REF} branch"
-          if [[ ${GITHUB_REF} == "refs/heads/master" ]]; then
-            DOCKER_BUILDKIT=1 docker build -t hegex:${{ github.sha }} -f Dockerfile .
           if [[ ${GITHUB_REF} == "refs/heads/production" ]]; then
             DOCKER_BUILDKIT=1 docker build --build-arg=BUILD_ENV=prod -t hegex:${{ github.sha }} -f Dockerfile .
+          else
+            DOCKER_BUILDKIT=1 docker build -t hegex:${{ github.sha }} -f Dockerfile .
           fi
           echo "Successfully built docker image"
 
@@ -69,7 +69,7 @@ jobs:
           ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
           ECR_REPOSITORY: "hegex"
         run: |
-          echo "Pushing docker images"
+          echo "Checking of images need to be pushed to docker registry"
           if [[ ${GITHUB_REF} == "refs/heads/master" ]]; then
             echo "On the default branch will push to the registry with latest-qa and ${{ github.sha }}-qa tags"
             docker tag hegex:${{ github.sha }} ${ECR_REGISTRY}/${ECR_REPOSITORY}:${{ github.sha }}-qa
@@ -82,4 +82,6 @@ jobs:
             docker tag hegex:${{ github.sha }} ${ECR_REGISTRY}/${ECR_REPOSITORY}:latest-prod
             docker push ${ECR_REGISTRY}/${ECR_REPOSITORY}:${{ github.sha }}-prod
             docker push ${ECR_REGISTRY}/${ECR_REPOSITORY}:latest-prod
+          else
+            "No images will be pushed"
           fi
