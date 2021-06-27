@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - master
+      - production
   pull_request:
 
 name: Standard CI checks
