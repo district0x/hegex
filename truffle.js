@@ -111,7 +111,7 @@ module.exports = {
     },
     ropsten: {
       provider: function() {
-        return new HDWalletProvider(`${process.env.MNEMONIC}`, `https://ropsten.infura.io/v3/${process.env.INFURA_API_KEY}`)
+        return new HDWalletProvider(`${process.env.MNEMONIC || process.env.PK}`, `https://ropsten.infura.io/v3/${process.env.INFURA_API_KEY}`)
       },
       confirmations: 2,
       network_id: 3,
@@ -119,7 +119,7 @@ module.exports = {
     },
     "mainnet": {
       provider: function() {
-        return new HDWalletProvider(`${process.env.MNEMONIC}`, `https://mainnet.infura.io/v3/${process.env.INFURA_API_KEY}`)
+        return new HDWalletProvider(`${process.env.MNEMONIC || process.env.PK}`, `https://mainnet.infura.io/v3/${process.env.INFURA_API_KEY}`)
       },
       network_id: 1,
       skipDryRun: true
