@@ -115,14 +115,14 @@ module.exports = {
       },
       confirmations: 2,
       network_id: 3,
-      skipDryRun: true
+      // skipDryRun: true
     },
     "mainnet": {
       provider: function() {
         return new HDWalletProvider(`${process.env.MNEMONIC || process.env.PK}`, `https://mainnet.infura.io/v3/${process.env.INFURA_API_KEY}`)
       },
       network_id: 1,
-      skipDryRun: true
+      // skipDryRun: true
     }
   },
   plugins: [
