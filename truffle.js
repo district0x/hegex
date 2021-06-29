@@ -115,7 +115,7 @@ module.exports = {
       },
       confirmations: 2,
       network_id: 3,
-      // skipDryRun: true
+      skipDryRun: true
     },
     "mainnet": {
       provider: function() {

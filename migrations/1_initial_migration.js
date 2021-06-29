@@ -26,8 +26,9 @@ const chef = artifacts.require('OptionChef');
 const token = artifacts.require('Hegexoption.sol');
 const METADATA_BASE = "https://nft.hegex.io/meta/"
 
-module.exports = async (deployer, network) => {
+module.exports = async (deployer, network, accounts) => {
   console.log("Migrating Hegex to " + network);
+  console.log("Migrating Hegex from  " + accounts[0]);
   await deployer.deploy(Migrations);
   const migrations = await Migrations.deployed();
   //important - will throw on localnet as hegic contracts are deployed separately
