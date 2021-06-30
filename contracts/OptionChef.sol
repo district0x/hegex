@@ -173,13 +173,14 @@ contract OptionChef is Ownable {
         address payable holder,
         uint256 strike,
         uint256 amount,
-        uint256 lockedAmount,
         uint256 premium,
         uint256 expiration,
-        IHegicOptions.OptionType optionType)
+        IHegicOptions.OptionType optionType,
+        uint8 hegexOptionType)
     {
         uint8 hegexOptionType = chefData.optionType(chefData.uIds(_tokenId));
-        return getUnderlyingOptionParams(hegexOptionType, _tokenId);
+        (state, holder, strike, amount, , premium, expiration, optionType) =
+            getUnderlyingOptionParams(hegexOptionType, _tokenId);
     }
 
 

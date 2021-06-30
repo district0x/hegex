@@ -14,8 +14,8 @@ interface IOptionChef {
         address payable holder,
         uint256 strike,
         uint256 amount,
-        uint256 lockedAmount,
         uint256 premium,
         uint256 expiration,
-        IHegicOptions.OptionType optionType);
+        IHegicOptions.OptionType optionType,
+        uint8 hegexType);
 }
