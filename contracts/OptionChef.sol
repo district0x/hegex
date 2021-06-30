@@ -213,6 +213,10 @@ contract OptionChef is Ownable {
         return hegexId;
     }
 
+    function migrateBaseURI(string memory _base) public onlyOwner {
+        hegexoption.migrateBaseURI(_base);
+    }
+
     modifier onlyTokenOwner(uint _itemId) {
         require(msg.sender == hegexoption.ownerOf(_itemId), "UOPT:ownership/exchange");
         _;
