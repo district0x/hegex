@@ -32,6 +32,15 @@ contract Hegexoption is ERC721, Ownable  {
     }
 
     /**
+     * @notice  Change base URI for all NFTs
+     * @param _base new URI prefix for all tokens
+     */
+    function migrateBaseURI(string memory _base) public onlyOwner {
+        _setBaseURI(_base);
+    }
+
+
+    /**
      * @notice Mint shiny Hegexoption, Chef only
      * @param _to Beneficiary
      */
