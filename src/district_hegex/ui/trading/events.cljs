@@ -456,7 +456,7 @@
   (fn [track?]
     ;;arg is irrelevant
     (println "-------------------------------loading-orderbook")
-    (load-orderbook track?)
+    #_(load-orderbook track?)
     (println "-------------------------------loaded-orderbook")))
 
 (re-frame/reg-event-fx

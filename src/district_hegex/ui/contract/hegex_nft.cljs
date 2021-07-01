@@ -48,9 +48,9 @@
      "0"
      (case (get-environment)
       "dev" :hegicethoptions
-      "prod" :hegicethoptions
+      "prod" :brokenethoptions
       "qa" :brokenethoptions
-      :hegicethoptions)
+      :brokenethoptions)
 
      "1"
      :wbtcoptions
@@ -71,6 +71,7 @@
   ::owner
   interceptors
   (fn [{:keys [db]} _]
+    (println "dbg calling" "owner is")
     {:web3/call
      {:web3 (web3-queries/web3 db)
       :fns [{:instance (contract-queries/instance db :hegexoption)
@@ -421,10 +422,11 @@
                     2)
           period-secs (some-> period (* 86400))
           strike-wei (some-> strike-price (* 100000000))
-          option-args [period-secs amount strike-wei opt-dir]
-          web3-instance (oset! (web3-queries/web3 db)  "eth.defaultAccount" "0xE74c326e7227730b1f4A1F4E164e6B3003Ca25B5")]
+          option-args [period-secs amount strike-wei opt-dir]]
+      (println "dbgest instance is" (contract-queries/instance db (hegic-eth-options hegic-type)))
+      (println "dbgest 0")
       {:web3/call
-       {:web3 web3-instance
+       {:web3 (web3-queries/web3 db)
         :fns [{:instance (contract-queries/instance db (hegic-eth-options hegic-type))
                :fn :fees
                :args option-args
@@ -449,6 +451,7 @@
   (fn [{:keys [db]} [option-params fees]]
     (let [errors (hegic-errors fees option-params)
           with-errors (assoc-in db [::hegic-options :new :errors] errors)]
+      (println "dbgest1" )
       (println "dbgfees args" fees option-params)
       (println "dbgfees" (some-> fees first bn/number) errors)
       {:db (assoc-in with-errors
@@ -473,6 +476,8 @@
           amount-eth (some-> amount (* 1))
           strike-wei (some-> strike-price (* 100000000))
           option-args [period-secs amount-eth strike-wei opt-dir]]
+      (println "dbgmint0" option-args (hegic-eth-options hegic-type))
+      (js/console.log "dbgmint01" (contract-queries/instance db (hegic-eth-options hegic-type)))
       {:web3/call
        {:web3 (web3-queries/web3 db)
         :fns [{:instance (contract-queries/instance db (hegic-eth-options hegic-type))
@@ -487,6 +492,7 @@
   interceptors
   (fn [{:keys [db]} [opt-args fees]]
     (let [extract-fee (if (= "1" (first opt-args)) second first)]
+      (println "dbgmint1")
       (println "optargsmint" opt-args)
       {:dispatch [::tx-events/send-tx
                  {:instance (contract-queries/instance db :optionchef)
