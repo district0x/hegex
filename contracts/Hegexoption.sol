@@ -66,10 +66,11 @@ contract Hegexoption is ERC721, Ownable  {
         address payable holder,
         uint256 strike,
         uint256 amount,
-        uint256 lockedAmount,
         uint256 premium,
         uint256 expiration,
-        IHegicOptions.OptionType optionType)
+        IHegicOptions.OptionType optionType,
+        uint8 hegexType
+        )
     {
         return IOptionChef(optionChef).tokenMetadata(_tokenId);
     }

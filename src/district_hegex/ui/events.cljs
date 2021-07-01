@@ -116,6 +116,9 @@
                                 (->js {:chainId 3}))]
       {:db (assoc db :contract-wrapper-0x contract-wrapper)})))
 
+(defn- prepare-web3! [db active-account]
+  (oset! (web3-queries/web3 db) "eth.defaultAccount"
+         active-account))
 
 (re-frame/reg-event-fx
   ::load-my-hegic-options
@@ -123,6 +126,7 @@
     (println "dbg init4target")
     (let [active-account (account-queries/active-account db)
           db-upd (if once? (dissoc db :hegic-options) db)]
+      (prepare-web3! db active-account)
       (println "dbg active account is..." active-account (true? active-account))
       (when active-account
         (cond-> {:dispatch  [::trading-events/load-orderbook]
