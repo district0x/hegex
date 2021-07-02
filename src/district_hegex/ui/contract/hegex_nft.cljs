@@ -60,10 +60,16 @@
 
 (def interceptors [re-frame/trim-v])
 
-;;should be moved away, determined based on netID at compile time
-(def ^:private erc721-0x-proxy "0xe654aac058bfbf9f83fcaee7793311dd82f6ddb4")
+(def ^:private erc721-0x-proxy
+  (case (get-environment)
+      "dev" "0xeFc70A1B18C432bdc64b596838B4D138f6bC6cad"
+      "prod"  "0xeFc70A1B18C432bdc64b596838B4D138f6bC6cad"
+      "qa" "0xe654aac058bfbf9f83fcaee7793311dd82f6ddb4"
+      "0xeFc70A1B18C432bdc64b596838B4D138f6bC6cad"))
+
 
 (defn- ui-options-model [db]
+(println "erc721 proxy is" erc721-0x-proxy)
   (assoc-in db [::hegic-options :full-ui]
             (vals (get-in db [::hegic-options :full]))))
 
