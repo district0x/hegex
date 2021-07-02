@@ -44,6 +44,14 @@
       "qa" "0xFb2DD2A1366dE37f7241C83d47DA58fd503E2C64"
        "0x61935cbdd02287b511119ddb11aeb42f1593b7ef"))
 
+;;TODO use more robust subscription from d0x/web3 lib
+(def ^:private chain-id
+  (case (get-environment)
+      "dev" 1
+      "prod" 1
+      "qa" 3
+       1))
+
 
 ;; biggest relay, no ropsten
 #_(def ^:private apiclient
@@ -116,7 +124,7 @@
                            (gget  "web3" ".?currentProvider"))
            contract-wrapper (new ContractWrapper
                                  (gget  "web3" ".?currentProvider")
-                                 (->js {:chainId 3}))
+                                 (->js {:chainId chain-id}))
            weth-address (oget contract-wrapper ".?contractAddresses.?etherToken")
            _ (println "weth is " weth-address)
            ;; produces the wrong value on ropsten, swap for literal for the time being
@@ -160,7 +168,7 @@
                                     order-config-request))
            order (->js (merge
                         {:salt (ocall order-utils0x "generatePseudoRandomSalt")
-                         :chainId 3}
+                         :chainId chain-id}
                         (->clj order-config-request)
                         (->clj order-config)))
            _ (println "signing order"  order "nft id is" nft-id)
@@ -211,7 +219,7 @@
            ;;  _ (js/console.log web3js)
            contract-wrapper (new ContractWrapper
                                  (gget  "web3" ".?currentProvider")
-                                 (->js {:chainId 3
+                                 (->js {:chainId chain-id
                                         :from taker-address
                                         :contractAddresses (-> (get-0x-addresses 3)
                                                                bean
@@ -371,7 +379,7 @@
            taker-address (first (<p! (ocall wrapper "getAvailableAddressesAsync")))
            contract-wrapper (new ContractWrapper
                                  (gget  "web3" ".?currentProvider")
-                                 (->js {:chainId 3
+                                 (->js {:chainId chain-id
                                         :from taker-address
                                         :contractAddresses (-> (get-0x-addresses 3)
                                                                bean
