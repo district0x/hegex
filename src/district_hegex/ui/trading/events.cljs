@@ -45,7 +45,7 @@
        "0x61935cbdd02287b511119ddb11aeb42f1593b7ef"))
 
 ;;TODO use more robust subscription from d0x/web3 lib
-(def ^:private chain-id
+(def chain-id
   (case (get-environment)
       "dev" 1
       "prod" 1
