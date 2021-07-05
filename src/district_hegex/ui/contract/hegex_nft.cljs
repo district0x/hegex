@@ -214,36 +214,44 @@
                      2 :call
                      :invalid)}))
 
+;;NOTE - only for eth
 (re-frame/reg-event-fx
   ::hegic-option-success
   interceptors
   (fn [{:keys [db]} [id hegic-info-raw]]
     ;; NOTE move formatting to view, store raw data in re-frame db
     (let [upd-db (assoc-in db [::hegic-options :full id]
-                        (->hegic-info hegic-info-raw id))]
+                           ;;NOTE - only for eth (conj 0) = conj asset type eth
+                           (->hegic-info (conj hegic-info-raw 0) id))]
       {:db (ui-options-model upd-db)})))
 
 (re-frame/reg-event-fx
   ::wrap!
   interceptors
-  (fn [{:keys [db]} [id]]
+  (fn [{:keys [db]} [id asset]]
 (println "dbg wrapping option with id.." id)
     {:dispatch [::tx-events/send-tx
                 {:instance (contract-queries/instance db :optionchef)
                  :fn :wrapHegic
-                 :args [id]
+                 :args [id asset]
                  :tx-opts {:from (account-queries/active-account db)}
                  ;; :tx-log {:name tx-log-name :related-href {:name :route/detail :params {:address address}}}
-                 :tx-id {:wrap {:hegic id}}
-                 :on-tx-success [::wrap-success]
+                 :tx-id :wrap-hegex
+                 :on-tx-success [::wrap-success id]
                  :on-tx-error [::logging/error [::wrap!]]}]}))
 
 (re-frame/reg-event-fx
   ::wrap-success
   ;;actually assoc result (hegex-id) to db to update the UI
-  (fn [data]
+  (fn [{:keys [db]} [hegic-id data]]
     (println "dbg wrapped option ::successfully")
-    {:dispatch [:district-hegex.ui.events/load-my-hegic-options {:once? true}]}))
+    {:db (update-in db [:district-hegex.ui.contract.hegex-nft/hegic-options :full-ui]
+                    (fn [opts]
+                      (remove (fn [o] (= hegic-id (:hegic-id o))) opts)))
+     :dispatch-n [[:district-hegex.ui.trading.events/load-pool-eth]
+                  [:district-hegex.ui.trading.events/load-pool-btc]
+                  [:district-hegex.ui.events/load-my-hegic-options {:once? true}]]}))
+
 
 (re-frame/reg-event-fx
   ::unwrap!

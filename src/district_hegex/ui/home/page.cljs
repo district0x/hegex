@@ -95,7 +95,9 @@
                          :key    :option-type}
                         {:path   [:asset]
                          :header "Currency"
-                         :format (fn [v] (case v 1 "WBTC" 0 "ETH" "ETH"))
+                         :format (fn [v]
+                                   (println "vasset is" v)
+                                   (case v 1 "WBTC" 0 "ETH" "ETH"))
                          :attrs  (fn [data] {:style {:text-align     "left"
                                                     :text-transform "uppercase"}})
                          :key    :asset}
@@ -517,6 +519,7 @@
                        :expires 730})]
     (fn []
       (let [exercise-pending? @(subscribe [::tx-id-subs/tx-pending? :exercise-hegic])
+            wrap-pending? @(subscribe [::tx-id-subs/tx-pending? :wrap-hegex])
             active-option (:option @(subscribe [::home-subs/my-active-option]))
             pending-offer? (subscribe [::trading-subs/my-pending-offer?])
             approval-pending? (subscribe [::tx-id-subs/tx-pending?
@@ -541,13 +544,24 @@
        [:div [:div.hloader]
         [:div.box-grid
          [:div.box.e
-          [:button.primary
-           {:className (when-not active-option "disabled")
-            :disabled  (or exercise-pending? (not active-option) not-itm?)
-            :on-click #(dispatch [::hegex-nft/exercise! hegic-asset (:hegex-id active-option)])}
-           "Exercise"
-           [inputs/loader {:color :black
-                           :on? exercise-pending?}]]
+          (if (:hegex-id active-option)
+            [:button.primary
+            {:className (when-not active-option "disabled")
+             :disabled  (or exercise-pending? (not active-option) not-itm?)
+             :on-click #(dispatch [::hegex-nft/exercise! hegic-asset (:hegex-id active-option)])}
+            "Exercise"
+            [inputs/loader {:color :black
+                            :on? exercise-pending?}]]
+
+            [:button.primary
+            {:className (when-not active-option "disabled")
+             :disabled  (or wrap-pending? (not active-option) not-itm?)
+             :on-click #(dispatch [::hegex-nft/wrap!
+                                   (:hegic-id active-option)
+                                   (:asset active-option)])}
+            "To NFT"
+            [inputs/loader {:color :black
+                            :on? exercise-pending?}]])
           (when exercise-error
             [exercise-err {:s exercise-error}])]
          [:div.box.e
