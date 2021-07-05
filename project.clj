@@ -166,7 +166,7 @@
                                        "src/district_hegex/shared"]
                         :compiler     {:main          "district-hegex.ui.core"
                                        :output-to     "resources/public/js/compiled/app.js"
-                                       :optimizations :whitespace
+                                       :optimizations :advanced
                                        :pretty-print  false
                                        :pseudo-names  false
                                        :npm-deps      false
