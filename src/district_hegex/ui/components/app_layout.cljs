@@ -51,7 +51,7 @@
       [night-mode]
       [:h4.about {:on-click toggle-about
                   :style {:cursor "pointer"
-                          :font-weight "100"}} "UPDATED"]
+                          :font-weight "100"}} "About"]
       [:span.about-section {:on-click toggle-about}
        [:a.bt-about [:span]]]]
      [:div {:on-click toggle-about
