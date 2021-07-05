@@ -148,7 +148,7 @@
                          :fromBlock 0
                          :toBlock "latest"})
                "then"
-           (fn [evs]
+           (fn [errs evs]
              (let [ids-raw (map (fn [e] (-> e bean :topics second)) evs)]
                (println "ids-raw" ids-raw)
                #_(when (zero? (count ids-raw))
