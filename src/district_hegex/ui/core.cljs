@@ -81,7 +81,7 @@
   (dev-setup!)
   (let [full-config (cljs-utils/merge-in
                       config/config-map
-                      {:smart-contracts {:request-timeout 60000
+                      {:smart-contracts {:request-timeout 120000
                                          :format :truffle-json}
                        ;; :web3-account-balances {:for-contracts [:ETH :DNT]}
                        :web3-tx-log {:tx-costs-currencies [:USD]
