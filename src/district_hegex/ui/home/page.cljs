@@ -561,7 +561,7 @@
                                    (:asset active-option)])}
             "To NFT"
             [inputs/loader {:color :black
-                            :on? exercise-pending?}]])
+                            :on? wrap-pending?}]])
           (when exercise-error
             [exercise-err {:s exercise-error}])]
          [:div.box.e
@@ -591,8 +591,8 @@
                                                       :on? @approval-pending?}])]
 
             [:button.primary.line-btn
-            {:className (when-not active-option "disabled")
-             :disabled  (not active-option)
+             {:className (when-not (or active-option (not (:hegex-id active-option))) "disabled")
+              :disabled  (or (not (:hegex-id active-option))  (not active-option))
              :on-click #(dispatch [::trading-events/create-offer
                                    (assoc @offer :id (:hegex-id active-option)) false])}
              "Offer"
