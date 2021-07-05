@@ -108,6 +108,14 @@
                        [::weth-events/staking-approved?])
      :db (assoc-in db [::hegic-options :my :ids] opt-ids)}))
 
+(re-frame/reg-event-fx
+  ::hegic-options-wbtc
+  interceptors
+  (fn [{:keys [db]} [opt-ids]]
+    (println "wbtcopts" opt-ids)
+    {:dispatch-n (mapv (fn [id] [::hegic-option-wbtc id]) opt-ids)
+     :db (update-in db [::hegic-options :my :ids] concat opt-ids)}))
+
 (def deb-owner
   (debounce
    (fn []
@@ -133,27 +141,32 @@
   (let [Web3 (gget ".?Web3x")
         by-chef (contract-queries/contract-address db :optionchef)
         web3js (Web3. (gget ".?web3.?currentProvider"))]
-    (println "mho"  (oget web3js ".?version"))
     (js-invoke (oget web3js ".?eth")
                "getPastLogs"
                (clj->js {:address  (contract-queries/contract-address db (hegic-eth-options))
                          :topics [creation-topic,
                                   nil,
-                                  ;;NOTE now includes options minted directly +
-                                  ;;options minted by optionchef contract (autowrapped ones)
-                                  ;;NOTE by-chef will grow too much, switch to querying
-                                  ;;optionchef instead
                                   [#_(->topic-pad web3js by-chef)
                                    (->topic-pad web3js addr)]]
                          :fromBlock 0
                          :toBlock "latest"})
                "then"
-           (fn [evs]
+           (fn [errs evs]
              (let [ids-raw (map (fn [e] (-> e bean :topics second)) evs)]
-               (println "ids-raw" ids-raw)
-               #_(when (zero? (count ids-raw))
-                 (dispatch [::hide-loader]))
                (dispatch [::hegic-options (map (partial ->from-topic-pad web3js)
+                                               ids-raw)]))))
+    (js-invoke (oget web3js ".?eth")
+               "getPastLogs"
+               (clj->js {:address  (contract-queries/contract-address db :wbtcoptions)
+                         :topics [creation-topic,
+                                  nil,
+                                  [(->topic-pad web3js addr)]]
+                         :fromBlock 0
+                         :toBlock "latest"})
+               "then"
+           (fn [errs evs]
+             (let [ids-raw (map (fn [e] (-> e bean :topics second)) evs)]
+               (dispatch [::hegic-options-wbtc (map (partial ->from-topic-pad web3js)
                                                ids-raw)]))))))
 
 (re-frame/reg-event-fx
@@ -175,6 +188,19 @@
              :args [id]
              :on-success [::hegic-option-success id]
              :on-error [::logging/error [::hegic-option]]}]}}))
+
+(re-frame/reg-event-fx
+  ::hegic-option-wbtc
+  interceptors
+  (fn [{:keys [db]} [id]]
+    (println "dbg wbtc fetching full data for option id " id "..." )
+    {:web3/call
+     {:web3 (web3-queries/web3 db)
+      :fns [{:instance (contract-queries/instance db :wbtcoptions)
+             :fn :options
+             :args [id]
+             :on-success [::hegic-option-wbtc-success id]
+             :on-error [::logging/error [::hegic-option-wbtc]]}]}}))
 
 (defn- from-decimals-fn [asset]
   (case asset
@@ -214,36 +240,55 @@
                      2 :call
                      :invalid)}))
 
+;;NOTE - only for eth
 (re-frame/reg-event-fx
   ::hegic-option-success
   interceptors
   (fn [{:keys [db]} [id hegic-info-raw]]
     ;; NOTE move formatting to view, store raw data in re-frame db
     (let [upd-db (assoc-in db [::hegic-options :full id]
-                        (->hegic-info hegic-info-raw id))]
+                           ;;NOTE - only for eth (conj 0) = conj asset type eth
+                           (->hegic-info (conj hegic-info-raw 0) id))]
       {:db (ui-options-model upd-db)})))
+
+(re-frame/reg-event-fx
+  ::hegic-option-wbtc-success
+  interceptors
+  (fn [{:keys [db]} [id hegic-info-raw]]
+    ;; NOTE move formatting to view, store raw data in re-frame db
+    (let [upd-db (assoc-in db [::hegic-options :full id]
+                           ;;NOTE - only for eth (conj 0) = conj asset type eth
+                           (->hegic-info (conj hegic-info-raw 1) id))]
+      {:db (ui-options-model upd-db)})))
+
 
 (re-frame/reg-event-fx
   ::wrap!
   interceptors
-  (fn [{:keys [db]} [id]]
+  (fn [{:keys [db]} [id asset]]
 (println "dbg wrapping option with id.." id)
     {:dispatch [::tx-events/send-tx
                 {:instance (contract-queries/instance db :optionchef)
                  :fn :wrapHegic
-                 :args [id]
+                 :args [id asset]
                  :tx-opts {:from (account-queries/active-account db)}
                  ;; :tx-log {:name tx-log-name :related-href {:name :route/detail :params {:address address}}}
-                 :tx-id {:wrap {:hegic id}}
-                 :on-tx-success [::wrap-success]
+                 :tx-id :wrap-hegex
+                 :on-tx-success [::wrap-success id]
                  :on-tx-error [::logging/error [::wrap!]]}]}))
 
 (re-frame/reg-event-fx
   ::wrap-success
   ;;actually assoc result (hegex-id) to db to update the UI
-  (fn [data]
+  (fn [{:keys [db]} [hegic-id data]]
     (println "dbg wrapped option ::successfully")
-    {:dispatch [:district-hegex.ui.events/load-my-hegic-options {:once? true}]}))
+    {:db (update-in db [:district-hegex.ui.contract.hegex-nft/hegic-options :full-ui]
+                    (fn [opts]
+                      (remove (fn [o] (= hegic-id (:hegic-id o))) opts)))
+     :dispatch-n [[:district-hegex.ui.trading.events/load-pool-eth]
+                  [:district-hegex.ui.trading.events/load-pool-btc]
+                  [:district-hegex.ui.events/load-my-hegic-options {:once? true}]]}))
+
 
 (re-frame/reg-event-fx
   ::unwrap!

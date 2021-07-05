@@ -131,7 +131,8 @@
      (.-ethereum js/window)
      "accountsChanged"
      (fn [accounts]
-       (re-frame/dispatch [::account-changed])))
+       (js/location.reload)
+       #_(re-frame/dispatch [::account-changed])))
     {}))
 
 (re-frame/reg-event-fx

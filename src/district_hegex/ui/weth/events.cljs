@@ -7,7 +7,7 @@
     [district.ui.logging.events :as logging]
     [district.ui.smart-contracts.queries :as contract-queries]
     [district.ui.web3.queries :as web3-queries]
-   [web3 :as web3webpack]
+    [web3 :as web3webpack]
     [district.web3-utils :as web3-utils]
     [oops.core :refer [oget oset! ocall oapply ocall! oapply!
                        gget
@@ -17,22 +17,25 @@
    [web3 :as web3+]
    [cljs.core.async.interop :refer-macros [<p!]]
    [cljs-bean.core :refer [bean ->clj ->js]]
-   [cljs-0x-connect.http-client :as http-client]))
+   [cljs-0x-connect.http-client :as http-client])
+  (:require-macros [district-hegex.shared.macros :refer [get-environment]]))
 
 (def interceptors [re-frame/trim-v])
 
-;;NOTE
-;;workaround for outdated ropsten contracts on 0x-api
-;;backend
-;;will be dynamic for mainnet
-(def ^:private erc20-proxy "0xb1408f4c245a23c31b98d2c626777d4c0d766caa")
+(def ^:private erc20-proxy-ropsten "0xb1408f4c245a23c31b98d2c626777d4c0d766caa")
+(def ^:private staking-0x-ropsten "0xfaabcee42ab6b9c649794ac6c133711071897ee9")
 
 
-;;NOTE
-;;workaround for outdated ropsten contracts on 0x-api
-;;backend
-;;will be dynamic for mainnet
-(def ^:private staking-0x "0xfaabcee42ab6b9c649794ac6c133711071897ee9")
+(def ^:private infra-0x-contracts
+  (case (get-environment)
+    "dev" {:proxy "0x95e6f48254609a6ee006f7d493c8e5fb97094cef"
+           :staking "0xa26e80e7dea86279c6d778d702cc413e6cffa777"}
+    "prod" {:proxy "0x95e6f48254609a6ee006f7d493c8e5fb97094cef"
+            :staking "0xa26e80e7dea86279c6d778d702cc413e6cffa777"}
+    "qa" {:proxy erc20-proxy-ropsten
+          :staking staking-0x-ropsten}
+    {:proxy "0x95e6f48254609a6ee006f7d493c8e5fb97094cef"
+     :staking "0xa26e80e7dea86279c6d778d702cc413e6cffa777"}))
 
 ;;just a fun var for weth allowance
 (def ^:private most-expensive-purchase 9999999999)
@@ -69,7 +72,7 @@
      {:web3 (web3-queries/web3 db)
       :fns [{:instance (contract-queries/instance db :weth)
              :fn :allowance
-             :args [(account-queries/active-account db) erc20-proxy]
+             :args [(account-queries/active-account db) (:proxy infra-0x-contracts)]
              :on-success [::exchange-approved-success]
              :on-error [::logging/error [::exchange-approved]]}]}}))
 
@@ -93,7 +96,7 @@
      {:web3 (web3-queries/web3 db)
       :fns [{:instance (contract-queries/instance db :weth)
              :fn :allowance
-             :args [(account-queries/active-account db) staking-0x]
+             :args [(account-queries/active-account db) (:staking infra-0x-contracts)]
              :on-success [::staking-approved-success]
              :on-error [::logging/error [::staking-approved]]}]}}))
 
@@ -158,7 +161,7 @@
     {:dispatch [::tx-events/send-tx
                 {:instance (contract-queries/instance db :weth)
                  :fn :approve
-                 :args [erc20-proxy (web3-utils/eth->wei-number
+                 :args [(:proxy infra-0x-contracts) (web3-utils/eth->wei-number
                                      (+ most-expensive-purchase 1))]
                  :tx-opts {:from (account-queries/active-account db)}
                  :tx-id :approve-weth-exchange
@@ -178,7 +181,7 @@
     {:dispatch [::tx-events/send-tx
                 {:instance (contract-queries/instance db :weth)
                  :fn :approve
-                 :args [staking-0x (web3-utils/eth->wei-number
+                 :args [(:staking infra-0x-contracts) (web3-utils/eth->wei-number
                                      (+ most-expensive-purchase 1))]
                  :tx-opts {:from (account-queries/active-account db)}
                  :tx-id :approve-weth-staking

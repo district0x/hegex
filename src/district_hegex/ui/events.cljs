@@ -113,7 +113,7 @@
     (let [ContractWrapper (oget contract-wrappers "ContractWrappers")
           contract-wrapper (new ContractWrapper
                                 (gget  "web3" ".?currentProvider")
-                                (->js {:chainId 3}))]
+                                (->js {:chainId trading-events/chain-id}))]
       {:db (assoc db :contract-wrapper-0x contract-wrapper)})))
 
 (defn- prepare-web3! [db active-account]
