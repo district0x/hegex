@@ -561,7 +561,6 @@
   ::load-pool-eth
   interceptors
   (fn [{:keys [db]} _]
-    (js/console.log "poolinstance-eth is" (contract-queries/instance db :hegicethpool))
     {:web3/call
      {:web3 (web3-queries/web3 db)
       :fns [{:instance (contract-queries/instance db :hegicethpool)
