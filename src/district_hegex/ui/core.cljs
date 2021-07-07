@@ -51,8 +51,9 @@
   ::my-account-route-active
   interceptors
   (fn [{:keys [:db]} arg2]
-    {:async-flow {:rules [{:when :seen-any-of?
-                           :events [::web3-accounts-events/set-accounts]
+    {:async-flow {:rules [{:when :seen-all-of?
+                           :events [::web3-accounts-events/set-accounts
+                                    ::contracts-events/contracts-loaded]
                            :dispatch-n [[::events/add-contract-wrappers]
                                         [::listen-to-account-change]
                                         [::trading-events/restore-and-watch-txs]
