@@ -785,10 +785,10 @@
          [:div.box.a
           [:div.hover-label "Strike price"]
           [:h3.stats "$" (if (pos? (count sp)) sp 0)]]
-         [:div.box.d
+         [:div.box.d {:style {:padding-left "5px"}}
           [:div.hover-label "Total cost"]
           [:h3.stats "$" total-cost-s]]
-         [:div.box.f
+         [:div.box.f {:style {:padding-left "5px"}}
           [:div.hover-label "Break-even"]
           [:h3.stats "$" break-even]]
          [:div.box.e
