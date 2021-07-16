@@ -2,6 +2,7 @@
  (:import [goog.async Debouncer])
   (:require
    [clojure.string :as cs]
+   [cljs-time.core :as ct]
    [goog.string :as gstring]
    [goog.string.format]
    [district-hegex.ui.home.events :as home-events]
@@ -19,6 +20,7 @@
    [district-hegex.ui.trading.subs :as trading-subs]
    [district.ui.component.tx-button :refer [tx-button]]
    [district.web3-utils :as web3-utils]
+   [district-hegex.shared.utils :as utils]
    [reagent.ratom :as ratom]
    [district-hegex.ui.spec :as spec]
    [oops.core :refer [oget]]
@@ -674,6 +676,10 @@
                (+ current-price)
                (gstring/format "%.2f")))))
 
+(defn- calc-expiration
+  "accounting for minting time, hence 1 minute"
+  [days-to-hold]
+  (utils/to-full-time (ct/plus (ct/now) (ct/days days-to-hold) (ct/minutes 1))))
 
 (defn- new-hegex []
   (let [form-data (r/atom {:new-hegex/currency :eth
@@ -683,6 +689,9 @@
       (let [hegic-type (some-> form-data deref :new-hegex/hegic-type)
             option-type (some-> form-data deref :new-hegex/option-type keyword)
             tx-pending? (subscribe [::tx-id-subs/tx-pending? :mint-hegex!])
+            expires-on  (some-> form-data deref :new-hegex/period calc-expiration)
+
+            _ (println "expireson" expires-on)
             current-price (case  hegic-type
                             "1" @(subscribe [::external-subs/btc-price])
                             "0" @(subscribe [::external-subs/eth-price])
@@ -797,7 +806,15 @@
             :on-click #(dispatch [::hegex-nft/mint-hegex @form-data])}
            (if @tx-pending?
              [:<> "Mint" [inputs/loader {:color :black :on? @tx-pending?}]]
-             "Mint")]]]
+             "Mint")]
+          (when expires-on
+            [:div [:div.box {:style {:padding-left "5px"
+                                    :font-size "0.9em"}}
+                  [:div.hover-label "Expires On"]
+                  [:h3.stats expires-on]]])
+          ]]
+
+
          [:div [:p.errors ""
                 (case (first mint-errs)
                   :period-too-short "Period too short"

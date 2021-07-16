@@ -6,9 +6,14 @@
 
 (def ^:private simple-date-format (tf/formatter "MM/dd/YY"))
 
+(def ^:private full-format (tf/formatter "MM/dd/YY HH:mm"))
+
 (defn to-simple-time [s]
   (tf/unparse simple-date-format
               (web3-utils/web3-time->local-date-time s)))
+
+(defn to-full-time [s]
+  (tf/unparse full-format s))
 
 (def vote-option->kw
   {0 :vote-option/neither
