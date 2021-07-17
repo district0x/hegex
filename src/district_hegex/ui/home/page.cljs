@@ -811,10 +811,7 @@
             [:div [:div.box {:style {:padding-left "5px"
                                     :font-size "0.9em"}}
                   [:div.hover-label "Expires On"]
-                  [:h3.stats expires-on]]])
-          ]]
-
-
+                  [:h3.stats expires-on]]])]]
          [:div [:p.errors ""
                 (case (first mint-errs)
                   :period-too-short "Period too short"
@@ -823,8 +820,6 @@
                   :price-diff-too-large "Price difference is too large"
                   :option-size-exceeded "Option size exceeded"
                   "")]
-          ;; TODO add available liquidity info label
-          ;; from 0xb08b80723e3669b380d1576af43eb1afb26203bd availableBalance function (wei)
           [:br] [:br] [:br]]]))))
 
 (defn- orderbook-section []
