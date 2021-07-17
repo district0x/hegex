@@ -604,13 +604,23 @@
                       [offer-err {:s s}])
                     @(subscribe [::trading-subs/hegic-ui-errors])))]))))
 
+
+(defn- current-prices [btc-price eth-price]
+  [:div.current-prices
+   [:p.small "Bitcoin: " [:b (str "$" btc-price)]]
+   [:p.small "Ethereum: " [:b (str "$" eth-price) ]]])
+
 (defn- my-hegic-options []
   (let [opts (subscribe [::subs/hegic-full-options])
+        btc-price @(subscribe [::external-subs/btc-price])
+        eth-price @(subscribe [::external-subs/eth-price])
         resetter (fn [v]
                    (println "sorted options are" v)
                    (dispatch [::events/set-hegic-ui-options v]))
         #_init-loaded? #_(subscribe [::tx-id-subs/tx-pending? :get-balance])]
     [:div
+     (when (and btc-price eth-price)
+       [current-prices btc-price eth-price])
      [:div {:style {:display "flex"
                     :align-items "flex-start"
                     :justify-content "flex-start"}}
