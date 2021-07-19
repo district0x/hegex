@@ -2,6 +2,7 @@
  (:import [goog.async Debouncer])
   (:require
    [clojure.string :as cs]
+   [cljs-time.core :as ct]
    [goog.string :as gstring]
    [goog.string.format]
    [district-hegex.ui.home.events :as home-events]
@@ -19,6 +20,7 @@
    [district-hegex.ui.trading.subs :as trading-subs]
    [district.ui.component.tx-button :refer [tx-button]]
    [district.web3-utils :as web3-utils]
+   [district-hegex.shared.utils :as utils]
    [reagent.ratom :as ratom]
    [district-hegex.ui.spec :as spec]
    [oops.core :refer [oget]]
@@ -602,13 +604,23 @@
                       [offer-err {:s s}])
                     @(subscribe [::trading-subs/hegic-ui-errors])))]))))
 
+
+(defn- current-prices [btc-price eth-price]
+  [:div.current-prices
+   [:p.small "Bitcoin: " [:b (str "$" btc-price)]]
+   [:p.small "Ethereum: " [:b (str "$" eth-price) ]]])
+
 (defn- my-hegic-options []
   (let [opts (subscribe [::subs/hegic-full-options])
+        btc-price @(subscribe [::external-subs/btc-price])
+        eth-price @(subscribe [::external-subs/eth-price])
         resetter (fn [v]
                    (println "sorted options are" v)
                    (dispatch [::events/set-hegic-ui-options v]))
         #_init-loaded? #_(subscribe [::tx-id-subs/tx-pending? :get-balance])]
     [:div
+     (when (and btc-price eth-price)
+       [current-prices btc-price eth-price])
      [:div {:style {:display "flex"
                     :align-items "flex-start"
                     :justify-content "flex-start"}}
@@ -674,6 +686,10 @@
                (+ current-price)
                (gstring/format "%.2f")))))
 
+(defn- calc-expiration
+  "accounting for minting time, hence 1 minute"
+  [days-to-hold]
+  (utils/to-full-time (ct/plus (ct/now) (ct/days days-to-hold) (ct/minutes 1))))
 
 (defn- new-hegex []
   (let [form-data (r/atom {:new-hegex/currency :eth
@@ -683,6 +699,9 @@
       (let [hegic-type (some-> form-data deref :new-hegex/hegic-type)
             option-type (some-> form-data deref :new-hegex/option-type keyword)
             tx-pending? (subscribe [::tx-id-subs/tx-pending? :mint-hegex!])
+            expires-on  (some-> form-data deref :new-hegex/period calc-expiration)
+
+            _ (println "expireson" expires-on)
             current-price (case  hegic-type
                             "1" @(subscribe [::external-subs/btc-price])
                             "0" @(subscribe [::external-subs/eth-price])
@@ -785,10 +804,10 @@
          [:div.box.a
           [:div.hover-label "Strike price"]
           [:h3.stats "$" (if (pos? (count sp)) sp 0)]]
-         [:div.box.d
+         [:div.box.d {:style {:padding-left "5px"}}
           [:div.hover-label "Total cost"]
           [:h3.stats "$" total-cost-s]]
-         [:div.box.f
+         [:div.box.f {:style {:padding-left "5px"}}
           [:div.hover-label "Break-even"]
           [:h3.stats "$" break-even]]
          [:div.box.e
@@ -797,7 +816,12 @@
             :on-click #(dispatch [::hegex-nft/mint-hegex @form-data])}
            (if @tx-pending?
              [:<> "Mint" [inputs/loader {:color :black :on? @tx-pending?}]]
-             "Mint")]]]
+             "Mint")]
+          (when expires-on
+            [:div [:div.box {:style {:padding-left "5px"
+                                    :font-size "0.9em"}}
+                  [:div.hover-label "Expires On"]
+                  [:h3.stats expires-on]]])]]
          [:div [:p.errors ""
                 (case (first mint-errs)
                   :period-too-short "Period too short"
@@ -806,8 +830,6 @@
                   :price-diff-too-large "Price difference is too large"
                   :option-size-exceeded "Option size exceeded"
                   "")]
-          ;; TODO add available liquidity info label
-          ;; from 0xb08b80723e3669b380d1576af43eb1afb26203bd availableBalance function (wei)
           [:br] [:br] [:br]]]))))
 
 (defn- orderbook-section []
