@@ -9,6 +9,8 @@
    ;; NOTE external contracts down below
    :weth {:name "WETH"
           :address "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"}
+   :wbtc {:name "FakeWBTC"
+          :address "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599"}
    :wbtcoptions {:name "HegicWBTCOptions"
                  :address "0x3961245DB602eD7c03eECcda33eA3846bD8723BD"}
    :brokenethoptions {:name "BrokenETHOptions"

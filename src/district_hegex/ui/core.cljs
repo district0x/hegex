@@ -84,7 +84,8 @@
                       config/config-map
                       {:smart-contracts {:request-timeout 120000
                                          :format :truffle-json}
-                       ;; :web3-account-balances {:for-contracts [:ETH :DNT]}
+                       :web3-balances {:contracts {:WBTC {:address "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599"}}}
+                       :web3-account-balances {:for-contracts [:ETH :WBTC]}
                        :web3-tx-log {:tx-costs-currencies [:USD]
                                      :default-settings {:from-active-address-only? true}}
                        :reagent-render {:id "app"
