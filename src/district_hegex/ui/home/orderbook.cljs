@@ -347,6 +347,11 @@
 (defn controls []
   (let [active-option @(subscribe [::home-subs/my-orderbook-option])
         weth-bal @(subscribe [::weth-subs/balance])
+        wbtc-bal (some-> (subscribe
+                          [::account-balances-subs/active-account-balance :WBTC])
+                         deref
+                         (/ (js/Math.pow 10 8))
+                         (format/format-number {:max-fraction-digits 5}))
         eth-bal (some-> (subscribe
                           [::account-balances-subs/active-account-balance :ETH])
                          deref

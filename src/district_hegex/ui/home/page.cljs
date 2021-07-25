@@ -607,8 +607,13 @@
 
 (defn- current-prices [btc-price eth-price]
   [:div.current-prices
-   [:p.small "Bitcoin: " [:b (str "$" btc-price)]]
-   [:p.small "Ethereum: " [:b (str "$" eth-price) ]]])
+   [:p.small "Ethereum: " [:b (str "$" eth-price) ]]
+   [:p.small "Bitcoin: " [:b (str "$" btc-price)]]])
+
+(defn- current-balances [wbtc-bal eth-bal]
+  [:div.current-prices {:style {:text-align "left"}}
+   [:p.small "ETH Balance: " [:b eth-bal ]]
+   [:p.small "WBTC Balance: " [:b wbtc-bal]]])
 
 (defn- my-hegic-options []
   (let [opts (subscribe [::subs/hegic-full-options])
@@ -617,10 +622,23 @@
         resetter (fn [v]
                    (println "sorted options are" v)
                    (dispatch [::events/set-hegic-ui-options v]))
+        wbtc-bal (some-> (subscribe
+                          [::account-balances-subs/active-account-balance :WBTC])
+                         deref
+                         (/ (js/Math.pow 10 8))
+                         (format/format-number {:max-fraction-digits 5}))
+        eth-bal (some-> (subscribe
+                          [::account-balances-subs/active-account-balance :ETH])
+                         deref
+                         web3-utils/wei->eth-number
+                         (format/format-number {:max-fraction-digits 5}))
         #_init-loaded? #_(subscribe [::tx-id-subs/tx-pending? :get-balance])]
     [:div
      (when (and btc-price eth-price)
-       [current-prices btc-price eth-price])
+       [:div {:style {:display "flex"
+                      :justify-content "space-between"}}
+        [current-balances wbtc-bal eth-bal]
+        [current-prices btc-price eth-price]])
      [:div {:style {:display "flex"
                     :align-items "flex-start"
                     :justify-content "flex-start"}}

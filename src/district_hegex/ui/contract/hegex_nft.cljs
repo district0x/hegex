@@ -549,7 +549,7 @@
                  {:instance (contract-queries/instance db :optionchef)
                   :fn :createHegic
                   :args opt-args
-                  :tx-opts {:value (some->> fees extract-fee bn/number)
+                  :tx-opts {:value (some->> fees extract-fee)
                             :from (account-queries/active-account db)}
                   :tx-id :mint-hegex!
                   :on-tx-success [::mint-hegex-success]
