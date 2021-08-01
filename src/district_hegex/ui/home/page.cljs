@@ -829,7 +829,8 @@
           [:div.hover-label "Break-even"]
           [:h3.stats "$" break-even]]
          [:div.box.e
-          [:button.secondary.line-btn
+          [inputs/fancy-select]
+          #_[:button.secondary.line-btn
            {:disabled (or @tx-pending? (pos? (count mint-errs)))
             :on-click #(dispatch [::hegex-nft/mint-hegex @form-data])}
            (if @tx-pending?
