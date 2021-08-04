@@ -125,16 +125,19 @@ select {
 .select {
   border-radius: 5px !important;
   display:flex;
+  font-size: 0.6em;
   flex-direction: column;
   position:relative;
-  width:250px;
-  height:40px;
+  height:45px;
+}
+.select.disabled {
+  pointer-events: none;
 }
 
 .option {
-  padding:0 30px 0 10px;
+  padding:5px 30px 0 10px;
   // border-radius: 5px;
-  min-height:36px;
+  min-height:41px;
   display:flex;
   align-items:center;
   background:white;
@@ -205,7 +208,7 @@ input:checked + label {
   line-height: 1.2;
   border-radius: 50%;
   position: absolute;
-  top: 0.4em;
+  top: 0.7em;
   z-index: 89;
   right: 10px;
   width: 22px;

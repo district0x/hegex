@@ -7,9 +7,8 @@
    [district-hegex.ui.home.subs :as home-subs]
    [re-frame.core :refer [subscribe]]))
 
-(defn- little-arrow [color]
-  [:span.little-arrow {:className (or color "primary")}
-   ])
+(defn little-arrow [color]
+  [:span.little-arrow {:className (or color "primary")}])
 
 (defn text-input [{:keys [type step min max on-change label color size] :as props}]
   (println "stepis" step)

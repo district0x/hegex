@@ -575,6 +575,23 @@
                           (js/e.persist)
                           (swap! offer assoc :total (oget e ".?target.?value")))}]]
          [:div.box.d
+          [:div.fancy-input.primary
+           [:div {:class "select primary disabled"
+                  :tabindex "1"}
+            [inputs/little-arrow :primary]
+            [:input {:class "fancy"
+                     :type "radio"
+                     :id "opt1"
+                     :checked true
+                     :value :eth}]
+            [:label {:for "opt1" :class "option"} "ETH"]
+            [:input {:class "fancy"
+                     :value :wbtc
+                     :disabled true
+                     :type "radio"
+                     :id "opt2"}]
+            [:label {:for "opt2" :class "option"} "WBTC"]]]
+
           [inputs/select
            {:disabled true}
            [:option {:selected true
@@ -716,6 +733,9 @@
     (fn []
       (let [hegic-type (some-> form-data deref :new-hegex/hegic-type)
             option-type (some-> form-data deref :new-hegex/option-type keyword)
+            on-currency-change (fn [e]
+                                 (js/e.persist)
+                                 (upd-new-hegex form-data e :new-hegex/hegic-type))
             tx-pending? (subscribe [::tx-id-subs/tx-pending? :mint-hegex!])
             expires-on  (some-> form-data deref :new-hegex/period calc-expiration)
 
@@ -760,11 +780,30 @@
          [:div.box-grid-new {:style {:margin-top "2em"}}
          [:div.box.a
           [:div.hover-label "Currency"]
+          (println "currencyis" (:new-hegex/hegic-type @form-data))
+
+          [:div.fancy-input.primary
+           [:div {:class "select secondary"
+                  :tabindex "1"}
+            [inputs/little-arrow :secondary]
+            [:input {:class "fancy"
+                     :type "radio"
+                     :id "opt1"
+                     :on-change on-currency-change
+                     :checked (= "0" (:new-hegex/hegic-type @form-data))
+                     :value "0"}]
+            [:label {:for "opt1" :class "option"} "ETH"]
+            [:input {:class "fancy"
+                     :value "1"
+                     :on-change on-currency-change
+                     :checked (= "1" (:new-hegex/hegic-type @form-data))
+                     :type "radio"
+                     :id "opt2"}]
+            [:label {:for "opt2" :class "option"} "BTC"]]]
+
           [inputs/select
            {:color :secondary
-            :on-change (fn [e]
-                         (js/e.persist)
-                         (upd-new-hegex form-data e :new-hegex/hegic-type))}
+            :on-change on-currency-change}
            [:option {:selected true
                      :value 0}
             "ETH"]
@@ -829,8 +868,7 @@
           [:div.hover-label "Break-even"]
           [:h3.stats "$" break-even]]
          [:div.box.e
-          [inputs/fancy-select]
-          #_[:button.secondary.line-btn
+          [:button.secondary.line-btn
            {:disabled (or @tx-pending? (pos? (count mint-errs)))
             :on-click #(dispatch [::hegex-nft/mint-hegex @form-data])}
            (if @tx-pending?
