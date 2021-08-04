@@ -23,22 +23,24 @@
         s (case size
             :small :div.hegex-select.small
             :div.hegex-select)]
-    [s
-    [little-arrow color]
-    [:div.select
-     (into [c] children)]]))
+    [:span.stock-input
+     [s
+      [little-arrow color]
+      [:div.select
+       (into [c] children)]]]))
 
 (defn text-input [{:keys [type step min max on-change label color size] :as props}]
   (println "stepis" step)
   (let [el :div.hinput-wrapper
         ->sized #(keyword (str (name %) "." (name size)))]
     [(if-not size el (->sized el))
-    [:input.hegex-input (merge props {:type      type
-                                      :step      step
-                                      :className (or color "primary")
-                                      :on-change on-change
-                                      :min       min
-                                      :max       max})]
+     [:span.stock-input
+      [:input.hegex-input (merge props {:type      type
+                                        :step      step
+                                        :className (or color "primary")
+                                        :on-change on-change
+                                        :min       min
+                                        :max       max})]]
     (when label
       ;;NOTE ideally  should be set via less inheritance
       [:div.hinput-label
@@ -53,32 +55,19 @@
      [:div]
      [:div]]]))
 
-;; <div class="select" tabindex="1">
-;;   <input class="selectopt" name="test" type="radio" id="opt1" checked>
-;;   <label for="opt1" class="option">Oranges</label>
-;;   <input class="selectopt" name="test" type="radio" id="opt2">
-;;   <label for="opt2" class="option">Apples</label>
-;;   <input class="selectopt" name="test" type="radio" id="opt3">
-;;   <label for="opt3" class="option">Grapefruit</label>
-;;   <input class="selectopt" name="test" type="radio" id="opt4">
-;;   <label for="opt4" class="option">Bananas</label>
-;;   <input class="selectopt" name="test" type="radio" id="opt5">
-;;   <label for="opt5" class="option">Watermelon</label>
-;; </div>
-
 (defn fancy-select []
-  [:div {:class "select"
-         :tabindex "1"
-         }
-   [:input {:class "fancy"
-            :name "test"
-            :type "radio"
-            :id "opt1"
-            :checked true}]
-   [:label {:for "opt1" :class "option"} "Oranges"]
-   [:input {:class "fancy"
-            :name "test"
-            :type "radio"
-            :id "opt2"
-            :checked true}]
-   [:label {:for "opt2" :class "option"} "Apples"]])
+  [:div.fancy-input
+   [:div {:class "select"
+          :tabindex "1"}
+    [:input {:class "fancy"
+             :name "test"
+             :type "radio"
+             :id "opt1"
+             :checked true}]
+    [:label {:for "opt1" :class "option"} "Oranges"]
+    [:input {:class "fancy"
+             :name "test"
+             :type "radio"
+             :id "opt2"
+             :checked true}]
+    [:label {:for "opt2" :class "option"} "Apples"]]])
