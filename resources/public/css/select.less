@@ -123,6 +123,7 @@ select {
 
 .fancy-input {
 .select {
+  border-radius: 5px !important;
   display:flex;
   flex-direction: column;
   position:relative;
@@ -132,7 +133,8 @@ select {
 
 .option {
   padding:0 30px 0 10px;
-  min-height:40px;
+  // border-radius: 5px;
+  min-height:36px;
   display:flex;
   align-items:center;
   background:white;
@@ -144,16 +146,26 @@ select {
   pointer-events:none;
   order:2;
   z-index:1;
-  transition:background .4s ease-in-out;
-  box-sizing:border-box;
-  overflow:hidden;
+  transition:all .4s ease-in-out;
   white-space:nowrap;
+  border-radius: 5px;
 
 }
 
 .option:hover {
-  background:#18D7FF;
+  background:#18D7FF !important;
 }
+
+.select:focus > .option {
+  border-radius: 1px 1px 0px 0px;
+  background: #afecf9;
+}
+
+.select:focus > .option ~ .option {
+    border-radius: 0px;
+  background: white;
+}
+
 
 .select:focus .option {
   position:relative;
@@ -170,8 +182,55 @@ input:checked + label {
   order: 1;
   z-index:2;
   background:white;
-  border-top:none;
   position:relative;
+}
+
+.select.primary {
+  border: 2px solid @hegexgreen;
+}
+
+.select.yellow {
+  border: 2px solid @hegexorange;
+}
+
+.select.secondary {
+  border: 2px solid @hegexseablue;
+}
+
+.little-arrow {
+  color: black;
+  display: flex;
+  justify-content: center;
+  align-items: top;
+  line-height: 1.2;
+  border-radius: 50%;
+  position: absolute;
+  top: 0.4em;
+  z-index: 89;
+  right: 10px;
+  width: 22px;
+  height: 22px;
+  font-size: 15px;
+  cursor: pointer;
+  pointer-events: none;
+  -webkit-transition: .25s all ease;
+  -o-transition: .25s all ease;
+  transition: .25s all ease;
+}
+
+.little-arrow.primary {
+	background: transparent url('/images/select-green.png') no-repeat left top;
+	background-size: 100% auto;
+}
+
+.little-arrow.secondary {
+	background: transparent url('/images/select-blue.png') no-repeat left top;
+	background-size: 100% auto;
+}
+
+.little-arrow.yellow {
+	background: transparent url('/images/select-yellow.png') no-repeat left top;
+	background-size: 100% auto;
 }
 
 
