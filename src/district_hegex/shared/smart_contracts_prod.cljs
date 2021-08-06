@@ -7,6 +7,10 @@
 
 
    ;; NOTE external contracts down below
+   :ethpriceprovider {:name "EACAggregatorProxy"
+                      :address "0x5f4ec3df9cbd43714fe2740f5e3616155c5b8419"}
+   :wbtcpriceprovider {:name "EACAggregatorProxy"
+                      :address "0xF4030086522a5bEEa4988F8cA5B36dbC97BeE88c"}
    :weth {:name "WETH"
           :address "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"}
    :wbtc {:name "FakeWBTC"
