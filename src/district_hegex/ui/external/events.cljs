@@ -25,7 +25,7 @@
   ::fetch-asset-prices
   interceptors
   (fn [_ _]
-    {:dispatch-n [::eth-price]}))
+    {:dispatch-n [[::eth-price]]}))
 
 (re-frame/reg-event-fx
   ::eth-price
@@ -48,22 +48,22 @@
     (println "dbgprice from provider" asset price)
 #_    (price-by-env db asset price)))
 
-(defn fetch-asset-prices [asset]
-  (go
-    (try
-      (dispatch [::fetch-asset-prices-success
-                 (keyword asset)
-                 (oget (<p! (ocall (<p! (gcall "fetch"
-                                           (str base-uri asset))) "json"))
-            ".?market_data.?current_price.?usd")])
-      (catch js/Error err (js/console.log (ex-cause err))))))
+;; (defn fetch-asset-prices [asset]
+;;   (go
+;;     (try
+;;       (dispatch [::fetch-asset-prices-success
+;;                  (keyword asset)
+;;                  (oget (<p! (ocall (<p! (gcall "fetch"
+;;                                            (str base-uri asset))) "json"))
+;;             ".?market_data.?current_price.?usd")])
+;;       (catch js/Error err (js/console.log (ex-cause err))))))
 
-(re-frame/reg-fx
-  ::fetch-asset-prices!
-  (fn []
-    (fetch-asset-prices "bitcoin")
-    (fetch-asset-prices "ethereum")))
+;; (re-frame/reg-fx
+;;   ::fetch-asset-prices!
+;;   (fn []
+;;     (fetch-asset-prices "bitcoin")
+;;     (fetch-asset-prices "ethereum")))
 
 
-;; fetch for P&L
-;; (await(await fetch("https://api.coingecko.com/api/v3/coins/ethereum")).json()).market_data.current_price.usd
+;; ;; fetch for P&L
+;; ;; (await(await fetch("https://api.coingecko.com/api/v3/coins/ethereum")).json()).market_data.current_price.usd
