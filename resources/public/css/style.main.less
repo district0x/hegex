@@ -2810,3 +2810,28 @@ p.errors-size {
 p.small {
   font-size: 1.1em !important;
 }
+
+  .stock-input select, .stock-input .hegex-select  {
+    display: inherit;
+  }
+
+  .stock-input  .little-arrow {
+    display: none !important;
+  }
+  .fancy-input, .fancy-input .little-arrow  {
+    display: none;
+  }
+
+@media (min-width: 720px) {
+
+  .stock-input select, .stock-input .hegex-select, .stock-input .little-arrow {
+    display: none;
+  }
+  .fancy-input  {
+    display: initial;
+  }
+
+  .fancy-input  .little-arrow {
+    display: inherit;
+  }
+}
